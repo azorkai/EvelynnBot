@@ -54,6 +54,7 @@ namespace Evelynn_Bot.ProcessManager
                 accountProcess.StartLeague(license);
                 accountProcess.LoginAccount(license);
                 accountProcess.Initialize();
+                accountProcess.DoMission();
                 accountProcess.GetSetWallet();
                 ClientKiller.SuspendLeagueClient();
 
@@ -122,16 +123,12 @@ namespace Evelynn_Bot.ProcessManager
             {
                 while (gameAi.ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
                 {
-                    gameAi.SkillUp("q");
-                    gameAi.SkillUp("w");
-                    gameAi.SkillUp("e");
-                    gameAi.SkillUp("r");
 
                     if (randomController)
                     {
                         gameAi.RandomLaner();
 
-                        Thread.Sleep(15000);
+                        Thread.Sleep(9000);
                         randomController = false;
                     }
                     else
@@ -141,6 +138,11 @@ namespace Evelynn_Bot.ProcessManager
 
                     while (gameAi.ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
                     {
+                        gameAi.SkillUp("q", "j");
+                        gameAi.SkillUp("w", "k");
+                        gameAi.SkillUp("e", "m");
+                        gameAi.SkillUp("r", "l");
+
                         gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
 
@@ -186,31 +188,40 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
-            Thread.Sleep(60000);
+
+            Thread.Sleep(70000);
+
             CHECKACTIONS:
             if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
             {
+                Console.WriteLine("Panelden Stop Geldi!");
                 goto CHECKACTIONS;
             } 
+
             if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
             {
+                Console.WriteLine("Panelde Restart Geldi!");
                 ClientKiller.KillLeagueClient();
                 Start(license);
             }
+
             else
             {
                 PlayAgain(license);
             }
+
         }
         public void PlayAgain(License license)
         {
             using (AccountProcess accountProcess = new AccountProcess())
             {
+                Console.WriteLine("Yeni oyun başlatılıyor!");
                 accountProcess.Initialize();
                 accountProcess.DoMission();
                 accountProcess.GetSetWallet();
                 accountProcess.PatchCheck();
                 ClientKiller.SuspendLeagueClient();
+
                 if (license.Lol_maxLevel != 0 && AccountProcess.summoner.summonerLevel >= license.Lol_maxLevel)
                 {
                     Logger.Log(true, Messages.AccountDoneXP);

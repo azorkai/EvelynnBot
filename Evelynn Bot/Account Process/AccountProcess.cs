@@ -926,14 +926,14 @@ namespace Evelynn_Bot.Account_Process
                         }
                         catch
                         {
-
+                            Console.WriteLine("MISSION FIX HATA 1");
                         }
                     }
                 }
             }
             catch
             {
-
+                Console.WriteLine("MISSION FIX HATA 2");
             }
         }
         public void SelectChampion()

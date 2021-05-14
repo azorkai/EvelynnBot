@@ -94,11 +94,12 @@ namespace Evelynn_Bot.GameAI
             }
         }
 
-        public void SkillUp(string skill)
+        public void SkillUp(string skill, string skill2)
         {
             AutoItX.Send("{CTRLDOWN}");
             AutoItX.Send(skill);
             AutoItX.Send("{CTRLUP}");
+            AutoItX.Send(skill2);
         }
 
         public void HitMove(int x, int y)
@@ -107,7 +108,8 @@ namespace Evelynn_Bot.GameAI
             AutoItX.Send("a");
             Thread.Sleep(700);
             AutoItX.MouseClick("LEFT", x - 20, y + 40, 1, 1);
-            Console.WriteLine("HITMOVE!");
+            AutoItX.Send("a");
+            AutoItX.Send("a");
         }
 
         public void Combo(int x, int y)
@@ -119,6 +121,8 @@ namespace Evelynn_Bot.GameAI
             AutoItX.Send("e");
             Thread.Sleep(200);
             AutoItX.Send("r");
+            Thread.Sleep(500);
+            AutoItX.Send("a");
         }
 
         public void GoMid()
