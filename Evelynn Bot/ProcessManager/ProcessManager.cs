@@ -120,72 +120,69 @@ namespace Evelynn_Bot.ProcessManager
 
             using (GameAi gameAi = new GameAi())
             {
-                while (gameAi.ImageSearch(ImagePaths.game_started, "2", Messages.GameStarted).Success)
+                while (gameAi.ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
                 {
+                    gameAi.SkillUp("q");
+                    gameAi.SkillUp("w");
+                    gameAi.SkillUp("e");
+                    gameAi.SkillUp("r");
+
                     if (randomController)
                     {
                         gameAi.RandomLaner();
 
-                        //TEST
-                        AutoItX.Send("{CTRLDOWN}");
-                        AutoItX.Send("q");
-                        AutoItX.Send("{CTRLUP}");
-                        //TEST
-
                         Thread.Sleep(15000);
                         randomController = false;
                     }
-
-                    gameAi.GoMid();
+                    else
+                    {
+                        gameAi.GoMid();
+                    }
 
                     while (gameAi.ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
                     {
-                        AutoItX.MouseClick("RIGHT", gameAi.X - 20, gameAi.Y + 40, 1, 1);
-                        AutoItX.Send("a");
+                        gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
-                        AutoItX.Send("a");
-                        AutoItX.MouseClick("LEFT", gameAi.X - 23, gameAi.Y + 40, 1, 1);
-                        Thread.Sleep(2000);
 
                         if (gameAi.ImageSearch(ImagePaths.enemy_minions, "2", Messages.SuccessEnemyMinion).Success)
                         {
-                            AutoItX.MouseClick("LEFT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
+                            AutoItX.MouseClick("RIGHT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
                             AutoItX.Send("q");
                         }
 
                         if (gameAi.ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
                         {
-                            AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
                             AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
-                            AutoItX.Send("w");
-                            AutoItX.Send("a");
-                            Thread.Sleep(550);
-                            AutoItX.Send("r");
-                            AutoItX.Send("a");
-                            Thread.Sleep(550);
-                            AutoItX.Send("q");
-                            AutoItX.Send("a");
-                            AutoItX.Send("e");
-                            AutoItX.Send("f");
-                            AutoItX.Send("t");
-                            Thread.Sleep(550);
-                            AutoItX.Send("a");
-                            gameAi.GoMid();
-                            Thread.Sleep(4000);
+                            gameAi.HitMove(gameAi.X, gameAi.Y);
+                            gameAi.Combo(gameAi.X, gameAi.Y);
+                            Thread.Sleep(1500);
                         }
-                        
+
                         gameAi.CurrentPlayerStats(player);
                         Console.WriteLine("Can: " + player.CurrentHealth);
                         Console.WriteLine("Altın: " + player.CurrentGold);
 
-                        gameAi.GoMid();
-                        Thread.Sleep(2000);
+                        if (player.CurrentGold > 3000)
+                        {
+                            gameAi.GoBase();
+                        }
 
+                        var maxHealth = player.MaxHealth;
+                        var baseHealth = maxHealth / 2.7f;
+                        var currentHealth = player.CurrentHealth;
+
+                        if (currentHealth <= baseHealth)
+                        {
+                            gameAi.GoBase();
+                        }
+
+                        Thread.Sleep(1000);
                     }
 
                     gameAi.GoMid();
-                    Thread.Sleep(15000);
+                    Thread.Sleep(1500);
                 }
+
             }
 
             Console.WriteLine("Oyun bitti!");

@@ -71,7 +71,6 @@ namespace Evelynn_Bot.GameAI
                 return new Result(false, "ERROR!");
             }
         }
-
         public IResult ImageSearch(string path, string tolerance, string message)
         {
             int x;
@@ -94,34 +93,62 @@ namespace Evelynn_Bot.GameAI
                 return new Result(false, "ERROR!");
             }
         }
+
+        public void SkillUp(string skill)
+        {
+            AutoItX.Send("{CTRLDOWN}");
+            AutoItX.Send(skill);
+            AutoItX.Send("{CTRLUP}");
+        }
+
+        public void HitMove(int x, int y)
+        {
+            AutoItX.MouseClick("RIGHT", x - 20, y + 40, 1, 1);
+            AutoItX.Send("a");
+            Thread.Sleep(700);
+            AutoItX.MouseClick("LEFT", x - 20, y + 40, 1, 1);
+            Console.WriteLine("HITMOVE!");
+        }
+
+        public void Combo(int x, int y)
+        {
+            AutoItX.MouseClick("LEFT", x + 65, y + 75, 1, 0);
+            Thread.Sleep(200);
+            AutoItX.Send("q");
+            AutoItX.Send("w");
+            AutoItX.Send("e");
+            Thread.Sleep(200);
+            AutoItX.Send("r");
+        }
+
         public void GoMid()
         {
-            AutoItX.MouseClick("RIGHT", X + 43, Y - 33, 1, 0);
-            AutoItX.MouseClick("RIGHT", X + 43, Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
         }
 
         public void GoTop()
         {
-            AutoItX.MouseClick("RIGHT", X + 25, Y - 55, 1, 0);
-            AutoItX.MouseClick("RIGHT", X + 25, Y - 55, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 25, game_Y - 55, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 25, game_Y - 55, 1, 0);
         }
 
         public void GoBot()
         {
-            AutoItX.MouseClick("RIGHT", X + 73, Y, 1, 0);
-            AutoItX.MouseClick("RIGHT", X + 73, Y, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 73, game_Y, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 73, game_Y, 1, 0);
         }
 
         public void GoBase()
         {
             Thread.Sleep(1500);
-            AutoItX.MouseClick("RIGHT", X + 43, Y - 33, 1, 0);
-            AutoItX.MouseClick("RIGHT", X + 43, Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
             Thread.Sleep(6000);
             AutoItX.Send("b");
             Thread.Sleep(19000);
-            AutoItX.MouseClick("RIGHT", X + 43, Y - 33, 1, 0);
-            AutoItX.MouseClick("RIGHT", X + 43, Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
         }
         public void RandomLaner()
         {
