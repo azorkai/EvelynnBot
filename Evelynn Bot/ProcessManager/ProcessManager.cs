@@ -78,7 +78,7 @@ namespace Evelynn_Bot.ProcessManager
 
                 else
                 {
-                    if (license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner.
+                    if (license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
                     {
                         accountProcess.CheckNewAccount(license);
                     }
@@ -138,10 +138,7 @@ namespace Evelynn_Bot.ProcessManager
 
                     while (gameAi.ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
                     {
-                        gameAi.SkillUp("q", "j");
-                        gameAi.SkillUp("w", "k");
-                        gameAi.SkillUp("e", "m");
-                        gameAi.SkillUp("r", "l");
+
 
                         gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
@@ -163,6 +160,35 @@ namespace Evelynn_Bot.ProcessManager
                         gameAi.CurrentPlayerStats(player);
                         Console.WriteLine("Can: " + player.CurrentHealth);
                         Console.WriteLine("Altın: " + player.CurrentGold);
+                        Console.WriteLine("Level: " + player.Level);
+
+                        switch (player.Level)
+                        {
+                            case 1:
+                                gameAi.SkillUp("q", "j");
+                                break;
+                            case 2:
+                                gameAi.SkillUp("w", "k");
+                                break;
+                            case 3:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 4:
+                                gameAi.SkillUp("q", "j");
+                                break;
+                            case 5:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 6:
+                                gameAi.SkillUp("r", "l");
+                                break;
+                            default:
+                                gameAi.SkillUp("q", "j");
+                                gameAi.SkillUp("w", "k");
+                                gameAi.SkillUp("e", "m");
+                                gameAi.SkillUp("r", "l");
+                                break;
+                        }
 
                         if (player.CurrentGold > 3000)
                         {
@@ -205,22 +231,28 @@ namespace Evelynn_Bot.ProcessManager
                 /* Else kaldırdık çünkü restarta geldiği zaman altına play again runlanmaması lazım
                  * Stoptan sonra start gelirse zaten oynamaya devam etmesini isteyeceğiz.
                  */
-                PlayAgain(license);
+                
             }
 
-            if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
+            else if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
             {
                 Console.WriteLine("Panelden Stop Geldi!");
                 goto CHECKACTIONS;
             } 
 
-            if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
+            else if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
             {
                 DashboardHelper.req.dashboardActions.IsRestart = false;
                 Console.WriteLine("Panelde Restart Geldi!");
                 ClientKiller.KillLeagueClient();
                 Start(license);
             }
+
+            else
+            {
+                PlayAgain(license);
+            }
+            
 
         }
         public void PlayAgain(License license)
