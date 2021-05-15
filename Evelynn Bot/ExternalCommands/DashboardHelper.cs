@@ -238,7 +238,7 @@ namespace Evelynn_Bot.ExternalCommands
                 new string[] { DashboardHelper.sec.EncryptString(
                     string.Format("{0}|{1}|{2}|{3}|{4}|{5}",
                         DashboardHelper.help.GetRandomString(new Random().Next(100,128)),
-                        "ACTIONS",
+                        "ACTION",
                         DashboardHelper.license.Username,
                         DashboardHelper.license.Password,
                         DashboardHelper.license.ID,
