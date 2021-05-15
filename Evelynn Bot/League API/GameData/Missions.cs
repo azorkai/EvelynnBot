@@ -20,26 +20,5 @@ namespace Evelynn_Bot.League_API.GameData
 
         public string status { get; set; }
 
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        [CompilerGenerated]
-        private string string_0;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        [CompilerGenerated]
-        private string string_1;
-
-        [CompilerGenerated]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string[] string_2;
-
-        [CompilerGenerated]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private MissionRewards[] pkOaDabVhk;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        [CompilerGenerated]
-        private string string_3;
-
     }
 }

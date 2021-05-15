@@ -33,13 +33,21 @@ namespace Evelynn_Bot.ExternalCommands
 
         public static void SuspendLeagueClient()
         {
-            IntPtr HWND = FindWindow(null, "League of Legends");
-            ShowWindow(HWND, 0);
-            EnableWindow(HWND, true);
-            Process[] pcs = Process.GetProcessesByName("LeagueClientUxRender");
-            foreach (var process in pcs)
+            try
             {
-                SuspendProcess(process.Id);
+                IntPtr HWND = FindWindow(null, "League of Legends");
+                ShowWindow(HWND, 0);
+                EnableWindow(HWND, true);
+                Process[] pcs = Process.GetProcessesByName("LeagueClientUxRender");
+                foreach (var process in pcs)
+                {
+                    process.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    SuspendProcess(process.Id);
+                }
+            }
+            catch
+            {
+
             }
         }
 
