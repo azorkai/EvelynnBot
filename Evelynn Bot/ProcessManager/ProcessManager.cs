@@ -231,22 +231,28 @@ namespace Evelynn_Bot.ProcessManager
                 /* Else kaldırdık çünkü restarta geldiği zaman altına play again runlanmaması lazım
                  * Stoptan sonra start gelirse zaten oynamaya devam etmesini isteyeceğiz.
                  */
-                PlayAgain(license);
+                
             }
 
-            if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
+            else if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
             {
                 Console.WriteLine("Panelden Stop Geldi!");
                 goto CHECKACTIONS;
             } 
 
-            if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
+            else if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
             {
                 DashboardHelper.req.dashboardActions.IsRestart = false;
                 Console.WriteLine("Panelde Restart Geldi!");
                 ClientKiller.KillLeagueClient();
                 Start(license);
             }
+
+            else
+            {
+                PlayAgain(license);
+            }
+            
 
         }
         public void PlayAgain(License license)
