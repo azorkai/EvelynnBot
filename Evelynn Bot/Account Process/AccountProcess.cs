@@ -159,11 +159,7 @@ namespace Evelynn_Bot.Account_Process
             }
             catch (Exception e)
             {
-                using (var helper = new Helper())
-                {
-                    helper.KillLeagueProcess();
-                }
-
+                ClientKiller.KillLeagueClient();
                 return new Result(false, Messages.ErrorLogin);
             }
         }
@@ -198,9 +194,27 @@ namespace Evelynn_Bot.Account_Process
             {
                 summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", apiVariables.IAuth, apiVariables.IPort);
                 wallet = apiCalls.GetObject<Wallet>("/lol-store/v1/wallet", apiVariables.IAuth, apiVariables.IPort);
+                Console.WriteLine(wallet.ip);
                 DashboardHelper.UpdateLolWallet(summoner.summonerLevel.ToString(), wallet.ip.ToString());
             }
         }
+
+        public void KillUxRender()
+        {
+            using (ApiCalls apiCalls = new ApiCalls())
+            {
+                apiCalls.PostObject<string>("", "/riotclient/kill-ux", apiVariables.IAuth, apiVariables.IPort);
+            }
+        }
+
+        public void ShowUxRender()
+        {
+            using (ApiCalls apiCalls = new ApiCalls())
+            {
+                apiCalls.PostObject<string>("", "/riotclient/ux-show", apiVariables.IAuth, apiVariables.IPort);
+            }
+        }
+
         public void CheckNewAccount(License license)
         {
             if (string.IsNullOrEmpty(summoner.displayName))
@@ -500,9 +514,11 @@ namespace Evelynn_Bot.Account_Process
             }
         }
         public IResult CreateGame(License license)
-        {
+        { 
+            ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
             try
             {
+               
                 using (var apiCalls = new ApiCalls())
                 {
                     Lobby lobby = new Lobby();
@@ -515,30 +531,29 @@ namespace Evelynn_Bot.Account_Process
                         DashboardHelper.UpdateLolStatus("In Lobby", license);
                         return new Result(success, Messages.SuccessCreateGame);
                     }
-                    return new Result(success, Messages.ErrorCreateGame);
+                    ClientKiller.KillLeagueClient();
+                    Thread.Sleep(7000);
+                    processManager.Start(license);
+                    return new Result(true, Messages.ErrorCreateGame);
                 }
             }
             catch (Exception e)
             {
+                ClientKiller.KillLeagueClient();
+                Thread.Sleep(7000);
+                processManager.Start(license);
                 return new Result(true, Messages.ErrorCreateGame);
             }
         }
         public IResult StartQueue(License license)
         {
+            ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
             using (var apiCalls = new ApiCalls())
             {
                 DashboardHelper.UpdateLolStatus("In Queue", license);
                 try
                 {
 
-                    errorCount++;
-                    if (errorCount >= 15)
-                    {
-                        errorCount = 0;
-                        Thread.Sleep(1000);
-                        return new Result(false, Messages.ErrorCreateGameTooManyRequest);
-                        //RestartBot();
-                    }
                     try
                     {
                         /*
@@ -566,17 +581,14 @@ namespace Evelynn_Bot.Account_Process
                     {
                         if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
                         {
-                            using (var helper = new Helper())
-                            {
-                                helper.KillLeagueProcess();
-                            }
-
-                            //LoginAccount(new LeagueAccount()); //TODO Fix with new login system.
+                            ClientKiller.KillLeagueClient();
+                            Thread.Sleep(7000);
+                            processManager.Start(license);
                         }
                         else
                         {
                             DateTime now = DateTime.Now;
-                            for (; ; )
+                            for (;;)
                             {
                                 DateTime now2 = DateTime.Now;
                                 TimeSpan timeSpan = now - now2;
@@ -598,7 +610,8 @@ namespace Evelynn_Bot.Account_Process
                                 MACBULUNDUSTATE:
                                 if (matchmaking.searchState.ToUpper() == "FOUND")
                                 {
-                                    ClientKiller.SuspendLeagueClient(); // Maç bulunduğu anda suspendd ve hide eder.
+                                    //ClientKiller.SuspendLeagueClient(); // Maç bulunduğu anda suspendd ve hide eder.
+                                    KillUxRender();
                                     try
                                     {
                                         Thread.Sleep(50);
@@ -632,11 +645,9 @@ namespace Evelynn_Bot.Account_Process
                             }
                             goto IL_28C;
                             ARAMAHATASIUZUNSURE:
-                            using (var helper = new Helper())
-                            {
-                                helper.KillLeagueProcess();
-                            }
-                            //LoginAccount(new LeagueAccount()); //TODO Fix with new login system.
+                            ClientKiller.KillLeagueClient();
+                            Thread.Sleep(7000);
+                            processManager.Start(license);
                             IL_28C:
                             Thread.Sleep(50);
                             gameflowSession = new GameflowSession();
@@ -656,7 +667,8 @@ namespace Evelynn_Bot.Account_Process
                             }
                             if (gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                             {
-                                ClientKiller.SuspendLeagueClient(); // Champ select geldiği gibi suspend ve hide et. 
+                                //ClientKiller.SuspendLeagueClient(); // Champ select geldiği gibi suspend ve hide et. 
+                                KillUxRender();
                                 PickRandomAvailableChampion();
                                 Logger.Log(SetSpell().Success, SetSpell().Message);
                                 gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
@@ -676,13 +688,9 @@ namespace Evelynn_Bot.Account_Process
                             }
                             else
                             {
-                                //DashboardHelper.SetOfflineAccount(int_1);
-                                using (var helper = new Helper())
-                                {
-                                    helper.KillLeagueProcess();
-                                }
-                                Thread.Sleep(10000);
-                                //LoginAccount(new LeagueAccount()); //TODO Fix with new login system.
+                                ClientKiller.KillLeagueClient();
+                                Thread.Sleep(7000);
+                                processManager.Start(license);
                             }
                         }
                     }
@@ -698,13 +706,9 @@ namespace Evelynn_Bot.Account_Process
                     {
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
-                        //DashboardHelper.SetOfflineAccount(int_1);
-                        using (var helper = new Helper())
-                        {
-                            helper.KillLeagueProcess();
-                        }
-                        Thread.Sleep(10000);
-                        //LoginAccount(new LeagueAccount()); //TODO Fix with new login system.
+                        ClientKiller.KillLeagueClient();
+                        Thread.Sleep(7000);
+                        processManager.Start(license);
                     }
                 }
             }
@@ -738,12 +742,38 @@ namespace Evelynn_Bot.Account_Process
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             int[] objectArray = GetPickableChampions();
+            List<int> champList = objectArray != null ? ((IEnumerable<int>)objectArray).ToList<int>() : (List<int>)null;
+            champList?.Remove(34);
+            champList?.Remove(136);
+            champList?.Remove(68);
+            champList?.Remove(777);
+            champList?.Remove(54);
+            champList?.Remove(147);
+            champList?.Remove(777);
+            champList?.Remove(360);
+            champList?.Remove(526);
+            champList?.Remove(234);
 
-            ChampionDatas.ADCChampions = (objectArray != null) ? objectArray.ToList<int>() : null;
+            List<int> champList2 = new List<int>();
+            for (int i1 = 0; i1 < champList.Count; ++i1)
+            {
+                for (int i2 = 0; i2 < ChampionDatas.ADCChampions.Count; ++i2)
+                {
+                    if (champList.Contains(ChampionDatas.ADCChampions[i2]))
+                        champList2.Add(ChampionDatas.ADCChampions[i2]);
+                }
+            }
+            if (champList2.Count > 0)
+            {
+                int index = new Random().Next(0, champList2.Count);
+                champion = champList2[index];
+            }
+            else
+            {
+                int index = new Random().Next(0, champList.Count);
+                champion = champList[index];
+            }
 
-            Random random = new Random();
-            int index = random.Next(0, ChampionDatas.ADCChampions.Count);
-            champion = ChampionDatas.ADCChampions[index];
 
             ChampionSelectInformation champSelectInfos = new ChampionSelectInformation();
             champSelectInfos.actorCellId = 0;

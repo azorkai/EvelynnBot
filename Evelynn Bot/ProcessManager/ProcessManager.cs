@@ -54,9 +54,10 @@ namespace Evelynn_Bot.ProcessManager
                 accountProcess.StartLeague(license);
                 accountProcess.LoginAccount(license);
                 accountProcess.Initialize();
+                accountProcess.KillUxRender();
                 accountProcess.DoMission();
                 accountProcess.GetSetWallet();
-                ClientKiller.SuspendLeagueClient();
+                //ClientKiller.SuspendLeagueClient();
 
                 if (license.Lol_maxLevel != 0 && AccountProcess.summoner.summonerLevel >= license.Lol_maxLevel)
                 {
@@ -96,6 +97,7 @@ namespace Evelynn_Bot.ProcessManager
                     }
 
                     accountProcess.CreateGame(license);
+                    accountProcess.KillUxRender();
                     accountProcess.StartQueue(license);
                 }
             }
@@ -162,6 +164,14 @@ namespace Evelynn_Bot.ProcessManager
                         Console.WriteLine("Altın: " + player.CurrentGold);
                         Console.WriteLine("Level: " + player.Level);
 
+                        float attackPercantage = ((player.MaxHealth - player.CurrentHealth) * 100) / player.CurrentHealth;
+
+                        if ((int)attackPercantage >= 30) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
+                        {
+                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                        }
+
                         switch (player.Level)
                         {
                             case 1:
@@ -214,9 +224,13 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
-
+            using (AccountProcess accountProcess = new AccountProcess())
+            {
+                accountProcess.Initialize();
+                accountProcess.KillUxRender();
+            }
             Thread.Sleep(70000);
-
+            
             CHECKACTIONS:
             if (DashboardHelper.req.dashboardActions.IsStart) // Dashboard Action Start
             {
@@ -227,11 +241,6 @@ namespace Evelynn_Bot.ProcessManager
                 DashboardHelper.req.dashboardActions.IsStop = false;
                 DashboardHelper.req.dashboardActions.IsStart = false;
                 Console.WriteLine("Panelden Start Geldi!");
-
-                /* Else kaldırdık çünkü restarta geldiği zaman altına play again runlanmaması lazım
-                 * Stoptan sonra start gelirse zaten oynamaya devam etmesini isteyeceğiz.
-                 */
-                
             }
 
             else if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop

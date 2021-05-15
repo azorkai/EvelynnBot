@@ -22,23 +22,23 @@ namespace Evelynn_Bot.League_API.GameData
 
 		public static List<int> ADCChampions = new List<int>
 		{
-			21,
-			202,
-			29,
-			81,
-			51,
-			67,
-			523,
-			236,
-			222,
-			15,
-			145,
-			18,
-			110,
-			22,
-			429,
-			119,
-			498
+            21,
+            202,
+            29,
+            81,
+            51,
+            67,
+            523,
+            236,
+            222,
+            15,
+            145,
+            18,
+            110,
+            22,
+            429,
+            119,
+            498
 		};
 
 		// Token: 0x02000044 RID: 68
