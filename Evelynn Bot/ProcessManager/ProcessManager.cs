@@ -138,10 +138,7 @@ namespace Evelynn_Bot.ProcessManager
 
                     while (gameAi.ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
                     {
-                        gameAi.SkillUp("q", "j");
-                        gameAi.SkillUp("w", "k");
-                        gameAi.SkillUp("e", "m");
-                        gameAi.SkillUp("r", "l");
+
 
                         gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
@@ -163,6 +160,35 @@ namespace Evelynn_Bot.ProcessManager
                         gameAi.CurrentPlayerStats(player);
                         Console.WriteLine("Can: " + player.CurrentHealth);
                         Console.WriteLine("Altın: " + player.CurrentGold);
+                        Console.WriteLine("Level: " + player.Level);
+
+                        switch (player.Level)
+                        {
+                            case 1:
+                                gameAi.SkillUp("q", "j");
+                                break;
+                            case 2:
+                                gameAi.SkillUp("w", "k");
+                                break;
+                            case 3:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 4:
+                                gameAi.SkillUp("q", "j");
+                                break;
+                            case 5:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 6:
+                                gameAi.SkillUp("r", "l");
+                                break;
+                            default:
+                                gameAi.SkillUp("q", "j");
+                                gameAi.SkillUp("w", "k");
+                                gameAi.SkillUp("e", "m");
+                                gameAi.SkillUp("r", "l");
+                                break;
+                        }
 
                         if (player.CurrentGold > 3000)
                         {

@@ -395,6 +395,7 @@ namespace Evelynn_Bot.GameAI
                 player.MaxHealth = liveData.activePlayer.championStats.maxHealth;
                 player.CurrentHealth = liveData.activePlayer.championStats.currentHealth;
                 player.CurrentGold = liveData.activePlayer.currentGold;
+                player.Level = liveData.activePlayer.level;
             }
         }
 

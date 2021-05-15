@@ -11,6 +11,7 @@ namespace Evelynn_Bot.Entities
         public float MaxHealth { get; set; }
         public float CurrentHealth { get; set; }
         public double CurrentGold { get; set; }
+        public int Level { get; set; }
 
     }
 }
