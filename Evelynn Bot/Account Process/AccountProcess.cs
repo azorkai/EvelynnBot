@@ -231,10 +231,8 @@ namespace Evelynn_Bot.Account_Process
                         Logger.Log(true, "Successfully used name!");
                         ClientKiller.KillLeagueClient();
                         Thread.Sleep(7000);
-                        StartLeague(license);
-                        Thread.Sleep(25000);
-                        LoginAccount(license);
-                        AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 570, 340);
+                        ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
+                        processManager.Start(license);
                     }
                     else
                     {
@@ -244,10 +242,8 @@ namespace Evelynn_Bot.Account_Process
                         Logger.Log(true, "Successfully used name!");
                         ClientKiller.KillLeagueClient();
                         Thread.Sleep(7000);
-                        StartLeague(license);
-                        Thread.Sleep(25000);
-                        LoginAccount(license);
-                        AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 570, 340);
+                        ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
+                        processManager.Start(license);
                     }
                 }
             }

@@ -146,13 +146,13 @@ namespace Evelynn_Bot.GameAI
         public void GoBase()
         {
             Thread.Sleep(1500);
-            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
             Thread.Sleep(6000);
             AutoItX.Send("b");
             Thread.Sleep(19000);
-            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
         }
         public void RandomLaner()
         {
