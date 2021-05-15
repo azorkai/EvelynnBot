@@ -150,9 +150,7 @@ namespace Evelynn_Bot.Account_Process
                     }
 
                     Thread.Sleep(15000);
-                    IntPtr HWND = FindWindow(null, "League of Legends");
-                    ShowWindow(HWND, SW_HIDE);
-                    EnableWindow(HWND, true);
+                    ClientKiller.SuspendLeagueClient();
                     Thread.Sleep(15000);
 
                     return new Result(true, Messages.SuccessLogin);
@@ -604,10 +602,7 @@ namespace Evelynn_Bot.Account_Process
                                 MACBULUNDUSTATE:
                                 if (matchmaking.searchState.ToUpper() == "FOUND")
                                 {
-                                    //TODO FIX!
-                                    //IntPtr HWNDS = API.FindWindow(null, "League of Legends");
-                                    //API.ShowWindow(HWNDS, API.SW_HIDE);
-                                    //API.EnableWindow(HWNDS, true);
+                                    ClientKiller.SuspendLeagueClient(); // Maç bulunduğu anda suspendd ve hide eder.
                                     try
                                     {
                                         Thread.Sleep(50);
@@ -665,6 +660,7 @@ namespace Evelynn_Bot.Account_Process
                             }
                             if (gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                             {
+                                ClientKiller.SuspendLeagueClient(); // Champ select geldiği gibi suspend ve hide et. 
                                 PickRandomAvailableChampion();
                                 Logger.Log(SetSpell().Success, SetSpell().Message);
                                 gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);

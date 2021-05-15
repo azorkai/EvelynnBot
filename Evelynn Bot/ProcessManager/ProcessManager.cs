@@ -78,7 +78,7 @@ namespace Evelynn_Bot.ProcessManager
 
                 else
                 {
-                    if (!license.Lol_isEmptyNick)
+                    if (license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner.
                     {
                         accountProcess.CheckNewAccount(license);
                     }
