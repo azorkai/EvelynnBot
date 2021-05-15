@@ -192,6 +192,21 @@ namespace Evelynn_Bot.ProcessManager
             Thread.Sleep(70000);
 
             CHECKACTIONS:
+            if (DashboardHelper.req.dashboardActions.IsStart) // Dashboard Action Start
+            {
+                /*
+                 * Burda olmasının sebebi eğer Stop olduktan sonra Start gelirse
+                 * İlk start gelmiş mi diye kontrol edecek. Sonra Stop u false edecek.
+                 */
+                DashboardHelper.req.dashboardActions.IsStop = false;
+                Console.WriteLine("Panelden Start Geldi!");
+
+                /* Else kaldırdık çünkü restarta geldiği zaman altına play again runlanmaması lazım
+                 * Stoptan sonra start gelirse zaten oynamaya devam etmesini isteyeceğiz.
+                 */
+                PlayAgain(license);
+            }
+
             if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
             {
                 Console.WriteLine("Panelden Stop Geldi!");
@@ -200,15 +215,13 @@ namespace Evelynn_Bot.ProcessManager
 
             if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
             {
+                DashboardHelper.req.dashboardActions.IsRestart = false;
                 Console.WriteLine("Panelde Restart Geldi!");
                 ClientKiller.KillLeagueClient();
                 Start(license);
             }
 
-            else
-            {
-                PlayAgain(license);
-            }
+
 
         }
         public void PlayAgain(License license)
