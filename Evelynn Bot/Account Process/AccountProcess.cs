@@ -59,6 +59,7 @@ namespace Evelynn_Bot.Account_Process
 
                 Process lol = Process.Start(info);
                 lol.WaitForInputIdle();
+                lol.PriorityClass = ProcessPriorityClass.BelowNormal;
                 IntPtr HWND = FindWindow(null, "Riot Client");
                 ShowWindow(HWND, SW_HIDE);
                 EnableWindow(HWND, true);
@@ -194,7 +195,6 @@ namespace Evelynn_Bot.Account_Process
             {
                 summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", apiVariables.IAuth, apiVariables.IPort);
                 wallet = apiCalls.GetObject<Wallet>("/lol-store/v1/wallet", apiVariables.IAuth, apiVariables.IPort);
-                Console.WriteLine(wallet.ip);
                 DashboardHelper.UpdateLolWallet(summoner.summonerLevel.ToString(), wallet.ip.ToString());
             }
         }
@@ -671,6 +671,7 @@ namespace Evelynn_Bot.Account_Process
                                 KillUxRender();
                                 PickRandomAvailableChampion();
                                 Logger.Log(SetSpell().Success, SetSpell().Message);
+                                KillUxRender();
                                 gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
                                 while (gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
                                 {
