@@ -232,7 +232,7 @@ namespace Evelynn_Bot.ExternalCommands
     {
         public async Task Execute(IJobExecutionContext context)
         {
-            ClientKiller.SuspendLeagueClient(); // Her dakikada hide ve suspend eder clienti \\ Gerekli mi bilmiyorum
+            ClientKiller.SuspendLeagueClient(); // Her dakikada hide ve suspend eder clienti \\ Gerekli mi bilmiyorum \\
             string r = DashboardHelper.req.CreateRequest(DashboardHelper.URI,
                 new string[] { "data" },
                 new string[] { DashboardHelper.sec.EncryptString(
