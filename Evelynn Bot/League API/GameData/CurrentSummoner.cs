@@ -16,16 +16,7 @@ namespace Evelynn_Bot.League_API.GameData
 
         public string summonerName { get; set; }
 
-        [CompilerGenerated]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private ChampionStats championStats_0;
+        public int level { get; set; }
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        [CompilerGenerated]
-        private double double_0;
-
-        [CompilerGenerated]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string string_0;
     }
 }
