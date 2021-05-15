@@ -24,16 +24,17 @@ namespace Evelynn_Bot.ProcessManager
 
         public void Start(License license)
         {
-            StartAccountProcess(license);
-
-            while (IsGameStarted() == false)
+            if (CheckInGame())
             {
-                Thread.Sleep(15000);
-                IsGameStarted();
+                Player player = new Player();
+                GameAi(player, license);
             }
-
-            Player player = new Player();
-            GameAi(player, license);
+            else
+            {
+                StartAccountProcess(license);
+                Player player = new Player();
+                GameAi(player, license);
+            }
         }
 
         public void StartAccountProcess(License license)
@@ -96,9 +97,19 @@ namespace Evelynn_Bot.ProcessManager
                         accountProcess.TutorialMissions(license);
                     }
 
-                    accountProcess.CreateGame(license);
-                    accountProcess.KillUxRender();
-                    accountProcess.StartQueue(license);
+
+                    Thread.Sleep(15000);
+
+                    if(CheckInGame())
+                    {
+                        
+                    }
+                    else
+                    {
+                        accountProcess.CreateGame(license);
+                        accountProcess.KillUxRender();
+                        accountProcess.StartQueue(license);
+                    }
                 }
             }
         }
@@ -115,6 +126,22 @@ namespace Evelynn_Bot.ProcessManager
                 return false;
             }
         }
+
+        public bool CheckInGame()
+        {
+            while (winExist("League of Legends.exe"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool winExist(string win)
+        {
+            int a = AutoItX.ProcessExists(win);
+            return Convert.ToBoolean(a);
+        }
+
         public void GameAi(Player player, License license)
         {
             DashboardHelper.UpdateLolStatus("In Game", license);
@@ -140,7 +167,23 @@ namespace Evelynn_Bot.ProcessManager
 
                     while (gameAi.ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
                     {
+                        gameAi.CurrentPlayerStats(player);
+                        Console.WriteLine("Can: " + player.CurrentHealth);
+                        Console.WriteLine("Altın: " + player.CurrentGold);
+                        Console.WriteLine("Level: " + player.Level);
 
+                        float attackPercentage = ((player.MaxHealth - player.CurrentHealth) * 100) / player.CurrentHealth;
+
+                        if ((int)attackPercentage >= 55 && player.CurrentHealth != 0) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
+                        {
+                            AutoItX.Send("f");
+                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                            AutoItX.Send("d");
+                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                            Thread.Sleep(6000);
+                        }
 
                         gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
@@ -157,19 +200,6 @@ namespace Evelynn_Bot.ProcessManager
                             gameAi.HitMove(gameAi.X, gameAi.Y);
                             gameAi.Combo(gameAi.X, gameAi.Y);
                             Thread.Sleep(1500);
-                        }
-
-                        gameAi.CurrentPlayerStats(player);
-                        Console.WriteLine("Can: " + player.CurrentHealth);
-                        Console.WriteLine("Altın: " + player.CurrentGold);
-                        Console.WriteLine("Level: " + player.Level);
-
-                        float attackPercantage = ((player.MaxHealth - player.CurrentHealth) * 100) / player.CurrentHealth;
-
-                        if ((int)attackPercantage >= 30) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
-                        {
-                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
                         }
 
                         switch (player.Level)
