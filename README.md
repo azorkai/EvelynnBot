@@ -5,5 +5,4 @@ Evelynn Bot V3
 
 
 
-(Not: Dinini imanını sikeyim github ve visualstudio)
 &copy; &copy; &copy; Boolean Software &copy; &copy; &copy; 
