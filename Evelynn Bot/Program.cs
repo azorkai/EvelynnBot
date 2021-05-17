@@ -29,6 +29,7 @@ namespace Evelynn_Bot
         {
             JsonRead jsonRead = new JsonRead();
             DashboardHelper.LoginAndStartBot(jsonRead.Id(), jsonRead.Password());
+            Console.ReadLine();
         }
 
     }

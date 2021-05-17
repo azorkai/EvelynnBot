@@ -32,6 +32,13 @@ namespace Evelynn_Bot.ProcessManager
             else
             {
                 StartAccountProcess(license);
+
+                while (IsGameStarted() == false)
+                {
+                    Thread.Sleep(15000);
+                    IsGameStarted();
+                }
+
                 Player player = new Player();
                 GameAi(player, license);
             }
@@ -56,7 +63,7 @@ namespace Evelynn_Bot.ProcessManager
                 accountProcess.LoginAccount(license);
                 accountProcess.Initialize();
                 accountProcess.KillUxRender();
-                accountProcess.DoMission();
+                accountProcess.SelectChampion();
                 accountProcess.GetSetWallet();
                 //ClientKiller.SuspendLeagueClient();
 
@@ -144,6 +151,10 @@ namespace Evelynn_Bot.ProcessManager
 
         public void GameAi(Player player, License license)
         {
+
+            Thread aiThread = new Thread(() => GameAi2(player));
+            aiThread.Start();
+
             DashboardHelper.UpdateLolStatus("In Game", license);
             Thread.Sleep(15000);
             randomController = true;
@@ -254,11 +265,6 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
-            using (AccountProcess accountProcess = new AccountProcess())
-            {
-                accountProcess.Initialize();
-                accountProcess.KillUxRender();
-            }
             Thread.Sleep(70000);
             
             CHECKACTIONS:
@@ -271,6 +277,7 @@ namespace Evelynn_Bot.ProcessManager
                 DashboardHelper.req.dashboardActions.IsStop = false;
                 DashboardHelper.req.dashboardActions.IsStart = false;
                 Console.WriteLine("Panelden Start Geldi!");
+                PlayAgain(license);
             }
 
             else if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
@@ -294,16 +301,56 @@ namespace Evelynn_Bot.ProcessManager
             
 
         }
+
+        public void GameAi2(Player player)
+        {
+            Console.WriteLine("Thread 2 Test!");
+            using (GameAi gameAi = new GameAi())
+            {
+                float attackPercentage = ((player.MaxHealth - player.CurrentHealth) * 100) / player.CurrentHealth;
+                if ((int)attackPercentage >= 55 && player.CurrentHealth != 0) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
+                {
+                    Console.WriteLine("Can çok azaldı, bir tık geri çekilme zamanı!");
+                    AutoItX.Send("f");
+                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                    AutoItX.Send("d");
+                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
+                    Thread.Sleep(6000);
+                }
+
+                var maxHealth = player.MaxHealth;
+                var baseHealth = maxHealth / 2.7f;
+                var currentHealth = player.CurrentHealth;
+
+                if (player.CurrentGold > 3000)
+                {
+                    Console.WriteLine("Gold sınırı, base!");
+                    gameAi.GoBase();
+                }
+
+                if (currentHealth <= baseHealth)
+                {
+                    Console.WriteLine("Can sınırı, base!");
+                    gameAi.GoBase();
+                }
+            }
+
+            Thread.Sleep(1000);
+
+        }
+
         public void PlayAgain(License license)
         {
             using (AccountProcess accountProcess = new AccountProcess())
             {
                 Console.WriteLine("Yeni oyun başlatılıyor!");
                 accountProcess.Initialize();
-                accountProcess.DoMission();
+                accountProcess.SelectChampion();
                 accountProcess.GetSetWallet();
                 accountProcess.PatchCheck();
-                ClientKiller.SuspendLeagueClient();
+                accountProcess.KillUxRender();
 
                 if (license.Lol_maxLevel != 0 && AccountProcess.summoner.summonerLevel >= license.Lol_maxLevel)
                 {
