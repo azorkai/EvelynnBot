@@ -1,4 +1,4 @@
-﻿using Evelynn_Bot.Account_Process;
+using Evelynn_Bot.Account_Process;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,7 +104,6 @@ namespace Evelynn_Bot.ProcessManager
                         accountProcess.TutorialMissions(license);
                     }
 
-
                     Thread.Sleep(15000);
 
                     if(CheckInGame())
@@ -153,7 +152,6 @@ namespace Evelynn_Bot.ProcessManager
         {
             Thread aiThread = new Thread(() => GameAi2(player));
             aiThread.Start();
-
             DashboardHelper.UpdateLolStatus("In Game", license);
             Thread.Sleep(15000);
             randomController = true;
@@ -182,18 +180,6 @@ namespace Evelynn_Bot.ProcessManager
                         Console.WriteLine("Altın: " + player.CurrentGold);
                         Console.WriteLine("Level: " + player.Level);
 
-                        float attackPercentage = ((player.MaxHealth - player.CurrentHealth) * 100) / player.CurrentHealth;
-
-                        if ((int)attackPercentage >= 55 && player.CurrentHealth != 0) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
-                        {
-                            AutoItX.Send("f");
-                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                            AutoItX.Send("d");
-                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                            AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                            Thread.Sleep(6000);
-                        }
 
                         gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
@@ -240,20 +226,6 @@ namespace Evelynn_Bot.ProcessManager
                                 break;
                         }
 
-                        if (player.CurrentGold > 3000)
-                        {
-                            gameAi.GoBase();
-                        }
-
-                        var maxHealth = player.MaxHealth;
-                        var baseHealth = maxHealth / 2.7f;
-                        var currentHealth = player.CurrentHealth;
-
-                        if (currentHealth <= baseHealth)
-                        {
-                            gameAi.GoBase();
-                        }
-
                         Thread.Sleep(1000);
                     }
 
@@ -264,6 +236,15 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
+
+            aiThread.Abort();
+
+            using (AccountProcess accountProcess = new AccountProcess())
+            {
+                accountProcess.Initialize();
+                accountProcess.KillUxRender();
+            }
+
             Thread.Sleep(70000);
             
             CHECKACTIONS:
