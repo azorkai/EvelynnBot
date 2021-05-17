@@ -32,6 +32,13 @@ namespace Evelynn_Bot.ProcessManager
             else
             {
                 StartAccountProcess(license);
+
+                while (IsGameStarted() == false)
+                {
+                    Thread.Sleep(15000);
+                    IsGameStarted();
+                }
+
                 Player player = new Player();
                 GameAi(player, license);
             }
@@ -56,7 +63,7 @@ namespace Evelynn_Bot.ProcessManager
                 accountProcess.LoginAccount(license);
                 accountProcess.Initialize();
                 accountProcess.KillUxRender();
-                accountProcess.DoMission();
+                accountProcess.SelectChampion();
                 accountProcess.GetSetWallet();
                 //ClientKiller.SuspendLeagueClient();
 
@@ -145,8 +152,6 @@ namespace Evelynn_Bot.ProcessManager
         {
             Thread aiThread = new Thread(() => GameAi2(player));
             aiThread.Start();
-
-
             DashboardHelper.UpdateLolStatus("In Game", license);
             Thread.Sleep(15000);
             randomController = true;
@@ -231,6 +236,7 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
+
             aiThread.Abort();
 
             using (AccountProcess accountProcess = new AccountProcess())
@@ -238,6 +244,7 @@ namespace Evelynn_Bot.ProcessManager
                 accountProcess.Initialize();
                 accountProcess.KillUxRender();
             }
+
             Thread.Sleep(70000);
             
             CHECKACTIONS:
@@ -250,6 +257,7 @@ namespace Evelynn_Bot.ProcessManager
                 DashboardHelper.req.dashboardActions.IsStop = false;
                 DashboardHelper.req.dashboardActions.IsStart = false;
                 Console.WriteLine("Panelden Start Geldi!");
+                PlayAgain(license);
             }
 
             else if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
@@ -312,16 +320,17 @@ namespace Evelynn_Bot.ProcessManager
             Thread.Sleep(1000);
 
         }
+
         public void PlayAgain(License license)
         {
             using (AccountProcess accountProcess = new AccountProcess())
             {
                 Console.WriteLine("Yeni oyun başlatılıyor!");
                 accountProcess.Initialize();
-                accountProcess.DoMission();
+                accountProcess.SelectChampion();
                 accountProcess.GetSetWallet();
                 accountProcess.PatchCheck();
-                ClientKiller.SuspendLeagueClient();
+                accountProcess.KillUxRender();
 
                 if (license.Lol_maxLevel != 0 && AccountProcess.summoner.summonerLevel >= license.Lol_maxLevel)
                 {

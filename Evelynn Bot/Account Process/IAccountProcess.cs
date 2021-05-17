@@ -28,7 +28,6 @@ namespace Evelynn_Bot.Account_Process
         IResult SetSpell();
         IResult PickRandomAvailableChampion();
         int[] GetPickableChampions();
-        void DoMission();
         void SelectChampion();
         HttpRequest CreateRequest();
     }

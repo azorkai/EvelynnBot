@@ -191,11 +191,18 @@ namespace Evelynn_Bot.Account_Process
         }
         public void GetSetWallet()
         {
-            using (ApiCalls apiCalls = new ApiCalls())
+            try
             {
-                summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", apiVariables.IAuth, apiVariables.IPort);
-                wallet = apiCalls.GetObject<Wallet>("/lol-store/v1/wallet", apiVariables.IAuth, apiVariables.IPort);
-                DashboardHelper.UpdateLolWallet(summoner.summonerLevel.ToString(), wallet.ip.ToString());
+                using (ApiCalls apiCalls = new ApiCalls())
+                {
+                    summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", apiVariables.IAuth, apiVariables.IPort);
+                    wallet = apiCalls.GetObject<Wallet>("/lol-store/v1/wallet", apiVariables.IAuth, apiVariables.IPort);
+                    DashboardHelper.UpdateLolWallet(summoner.summonerLevel.ToString(), wallet.ip.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"GET SET WALLET HATA | SRC: {e.Source} | SATIR {e.StackTrace}");
             }
         }
 
@@ -357,8 +364,8 @@ namespace Evelynn_Bot.Account_Process
 
                             Logger.Log(true,"TUTORIAL 1 ENDED");
                             Thread.Sleep(15000);
-                            DoMission();
                             SelectChampion();
+                            KillUxRender();
                             Thread.Sleep(5000);
                         }
                         else
@@ -390,7 +397,8 @@ namespace Evelynn_Bot.Account_Process
 
                             Logger.Log(true,"TUTORIAL 2 ENDED");
                             Thread.Sleep(15000);
-                            DoMission();
+                            SelectChampion();
+                            KillUxRender();
                             Thread.Sleep(5000);
                         }
                     }
@@ -418,7 +426,8 @@ namespace Evelynn_Bot.Account_Process
 
                             Logger.Log(true,"TUTORIAL 3 ENDED");
                             Thread.Sleep(15000);
-                            DoMission();
+                            SelectChampion();
+                            KillUxRender();
                             Thread.Sleep(5000);
                         }
                     }
@@ -431,18 +440,25 @@ namespace Evelynn_Bot.Account_Process
         }
         public void PatchCheck()
         {
-            int tryNum = 1;
-            while (LeagueIsPatchAvailable())
+            try
             {
-                Logger.Log(true, "Patch bulundu!");
-                Thread.Sleep(60000);
-                tryNum++;
-                if (tryNum >= 15)
+                int tryNum = 1;
+                while (LeagueIsPatchAvailable())
                 {
-                    break;
+                    Logger.Log(true, "Patch bulundu!");
+                    Thread.Sleep(60000);
+                    tryNum++;
+                    if (tryNum >= 15)
+                    {
+                        break;
+                    }
                 }
             }
-            
+            catch (Exception e)
+            {
+                Console.WriteLine("PATCH CHECK HATASI");
+            }
+
         }
         public bool LeagueIsPatchAvailable()
         {
@@ -525,6 +541,7 @@ namespace Evelynn_Bot.Account_Process
                     lobby.gameMode = "CLASSIC";
                     lobby.queueId = 830;
                     var success = apiCalls.PostObject<Lobby>(lobby, "/lol-lobby/v2/lobby", apiVariables.IAuth, apiVariables.IPort);
+                    KillUxRender();
                     apiCalls.Dispose();
                     if (success == true)
                     {
@@ -642,6 +659,12 @@ namespace Evelynn_Bot.Account_Process
                                 {
                                     goto MACBULUNDUSTATE;
                                 }
+                                else
+                                {
+                                    ClientKiller.KillLeagueClient();
+                                    Thread.Sleep(7000);
+                                    processManager.Start(license);
+                                }
                             }
                             goto IL_28C;
                             ARAMAHATASIUZUNSURE:
@@ -703,14 +726,11 @@ namespace Evelynn_Bot.Account_Process
                 }
                 catch (Exception ex)
                 {
-                    if (!ex.GetType().IsAssignableFrom(typeof(ThreadAbortException)))
-                    {
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        ClientKiller.KillLeagueClient();
-                        Thread.Sleep(7000);
-                        processManager.Start(license);
-                    }
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    ClientKiller.KillLeagueClient();
+                    Thread.Sleep(7000);
+                    processManager.Start(license);
                 }
             }
             return null;
@@ -857,90 +877,99 @@ namespace Evelynn_Bot.Account_Process
             }
 
         }
-        public void DoMission()
+
+
+        public void SelectChampion()
         {
             try
             {
                 using (ApiCalls apiCalls = new ApiCalls())
                 {
-                    Missions[] object4 = apiCalls.GetObject<Missions[]>("/lol-missions/v1/missions", apiVariables.IAuth, apiVariables.IPort);
-                    for (int n = 0; n < object4.Length; n++)
+                    Missions[] missionArray = apiCalls.GetObject<Missions[]>("/lol-missions/v1/missions", apiVariables.IAuth, apiVariables.IPort);
+                    for (int index1 = 0; index1 < missionArray.Length; ++index1)
                     {
                         try
                         {
-                            if (object4[n].missionType.ToUpper() == "ONETIME")
+                            if ((!(missionArray[index1].missionType.ToUpper() == "ONETIME")
+                                ? 0
+                                : (missionArray[index1].status != "COMPLETED" ? 1 : 0)) != 0)
                             {
-                                for (int num = 0; num < object4[n].requirements.Length; num++)
+                                for (int index2 = 0; index2 < missionArray[index1].requirements.Length; ++index2)
                                 {
-                                    if (object4[n].requirements[num].ToUpper().Contains("LEVEL_UP:IN:[2]"))
+                                    if (missionArray[index1].requirements[index2].ToUpper().Contains("LEVEL_UP:IN:[2]"))
                                     {
-                                        apiCalls.PutObject<PutMission>(new PutMission
+                                        apiCalls.PutObject<PutMission>(new PutMission()
                                         {
-                                            rewardGroups = new string[]
+                                            rewardGroups = new string[1]
                                             {
-                                                        "ahri_group"
+                                                "ahri_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + object4[n].id, apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
                                     }
-                                    else if (object4[n].requirements[num].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step4:AFTER_DELAY:PT17H"))
+                                    else if (missionArray[index1].requirements[index2]
+                                        .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step4:AFTER_DELAY:PT17H"))
                                     {
-                                        apiCalls.PutObject<PutMission>(new PutMission
+                                        apiCalls.PutObject<PutMission>(new PutMission()
                                         {
-                                            rewardGroups = new string[]
+                                            rewardGroups = new string[1]
                                             {
-                                                        "ekko_group"
+                                                "ekko_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + object4[n].id, apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
                                     }
-                                    else if (object4[n].requirements[num].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step1:AFTER_DELAY:PT17H"))
+                                    else if (missionArray[index1].requirements[index2]
+                                        .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step1:AFTER_DELAY:PT17H"))
                                     {
-                                        apiCalls.PutObject<PutMission>(new PutMission
+                                        apiCalls.PutObject<PutMission>(new PutMission()
                                         {
-                                            rewardGroups = new string[]
+                                            rewardGroups = new string[1]
                                             {
-                                                        "illaoi_group"
+                                                "illaoi_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + object4[n].id, apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
                                     }
-                                    else if (object4[n].requirements[num].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step3:AFTER_DELAY:PT17H"))
+                                    else if (missionArray[index1].requirements[index2]
+                                        .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step3:AFTER_DELAY:PT17H"))
                                     {
-                                        apiCalls.PutObject<PutMission>(new PutMission
+                                        apiCalls.PutObject<PutMission>(new PutMission()
                                         {
-                                            rewardGroups = new string[]
+                                            rewardGroups = new string[1]
                                             {
-                                                        "nami_group"
+                                                "nami_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + object4[n].id, apiVariables.IAuth, apiVariables.IPort);
-                                       apiCalls. PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                       apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                    else if (object4[n].requirements[num].Contains("SERIES:OPT_IN:npe_rewards_login_v1_series"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                                        "caitlyn_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + object4[n].id, apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
                                     }
-                                    else if (object4[n].requirements[num].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step2:AFTER_DELAY:PT17H"))
+                                    else if (missionArray[index1].requirements[index2]
+                                        .Contains("SERIES:OPT_IN:npe_rewards_login_v1_series"))
                                     {
-                                        apiCalls.PutObject<PutMission>(new PutMission
+                                        apiCalls.PutObject<PutMission>(new PutMission()
                                         {
-                                            rewardGroups = new string[]
+                                            rewardGroups = new string[1]
                                             {
-                                                        "brand_group"
+                                                "caitlyn_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + object4[n].id, apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                    }
+                                    else if (missionArray[index1].requirements[index2]
+                                        .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step2:AFTER_DELAY:PT17H"))
+                                    {
+                                        apiCalls.PutObject<PutMission>(new PutMission()
+                                        {
+                                            rewardGroups = new string[1]
+                                            {
+                                                "brand_group"
+                                            }
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
                                         apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
                                     }
@@ -954,111 +983,13 @@ namespace Evelynn_Bot.Account_Process
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 Console.WriteLine("MISSION FIX HATA 2");
             }
         }
-        public void SelectChampion()
-        {
-            try
-            {
-                using (ApiCalls apiCalls = new ApiCalls())
-                {
-                    Missions[] @object = apiCalls.GetObject<Missions[]>("/lol-missions/v1/missions", apiVariables.IAuth, apiVariables.IPort);
-                    for (int i = 0; i < @object.Length; i++)
-                    {
-                        try
-                        {
-                            if (@object[i].missionType.ToUpper() == "ONETIME" && @object[i].status != "COMPLETED")
-                            {
-                                for (int j = 0; j < @object[i].requirements.Length; j++)
-                                {
-                                    if (@object[i].requirements[j].ToUpper().Contains("LEVEL_UP:IN:[2]"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                            "ahri_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + @object[i].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                    else if (@object[i].requirements[j].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step4:AFTER_DELAY:PT17H"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                            "ekko_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + @object[i].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                    else if (@object[i].requirements[j].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step1:AFTER_DELAY:PT17H"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                            "illaoi_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + @object[i].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                    else if (@object[i].requirements[j].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step3:AFTER_DELAY:PT17H"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                            "nami_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + @object[i].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                    else if (@object[i].requirements[j].Contains("SERIES:OPT_IN:npe_rewards_login_v1_series"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                            "caitlyn_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + @object[i].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                    else if (@object[i].requirements[j].Contains("MISSION:COMPLETED:npe_rewards_login_v1_step2:AFTER_DELAY:PT17H"))
-                                    {
-                                        apiCalls.PutObject<PutMission>(new PutMission
-                                        {
-                                            rewardGroups = new string[]
-                                            {
-                                            "brand_group"
-                                            }
-                                        }, "/lol-missions/v1/player/" + @object[i].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
-                                    }
-                                }
-                            }
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-            }
-            catch
-            {
-            }
-        }
+
+
         public HttpRequest CreateRequest()
         {
             HttpRequest request = new HttpRequest();
