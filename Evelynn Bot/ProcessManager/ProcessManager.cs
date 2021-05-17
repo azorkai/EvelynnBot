@@ -151,7 +151,6 @@ namespace Evelynn_Bot.ProcessManager
 
         public void GameAi(Player player, License license)
         {
-
             Thread aiThread = new Thread(() => GameAi2(player));
             aiThread.Start();
 
