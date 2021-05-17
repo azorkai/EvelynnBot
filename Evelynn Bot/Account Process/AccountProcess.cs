@@ -359,7 +359,7 @@ namespace Evelynn_Bot.Account_Process
 
                             using (GameAi gameAi = new GameAi())
                             {
-                                gameAi.GameStartedTutorial();
+                                gameAi.TutorialAI_1();
                             }
 
                             Logger.Log(true,"TUTORIAL 1 ENDED");
@@ -392,7 +392,7 @@ namespace Evelynn_Bot.Account_Process
 
                             using (GameAi gameAi = new GameAi())
                             {
-                                gameAi.GameStartedTutorial();
+                                gameAi.TutorialAI_2();
                             }
 
                             Logger.Log(true,"TUTORIAL 2 ENDED");
@@ -421,7 +421,7 @@ namespace Evelynn_Bot.Account_Process
 
                             using (GameAi gameAi = new GameAi())
                             {
-                                gameAi.GameStartedTutorial();
+                                gameAi.TutorialAI_2(); //Bilerek "2" olarak bırakılmıştır, aynı AI!
                             }
 
                             Logger.Log(true,"TUTORIAL 3 ENDED");
