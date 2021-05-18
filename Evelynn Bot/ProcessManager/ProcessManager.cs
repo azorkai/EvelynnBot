@@ -236,7 +236,6 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
-
             aiThread.Abort();
 
             using (AccountProcess accountProcess = new AccountProcess())

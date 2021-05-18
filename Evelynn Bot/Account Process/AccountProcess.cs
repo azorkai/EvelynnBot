@@ -28,14 +28,13 @@ namespace Evelynn_Bot.Account_Process
     {
         private int caps = 0;
 
-        private int errorCount;
-        public static int SW_HIDE = 0;
+        public int SW_HIDE = 0;
 
-        public static Encoding HttpRequestEncoding = Encoding.UTF8;
+        public Encoding HttpRequestEncoding = Encoding.UTF8;
 
         ApiVariables apiVariables = new ApiVariables();
-        public static Summoner summoner = new Summoner();
-        public static Wallet wallet = new Wallet();
+        public Summoner summoner = new Summoner();
+        public Wallet wallet = new Wallet();
         JsonRead jsonRead = new JsonRead();
 
         [DllImport("User32.dll", SetLastError = true)]
