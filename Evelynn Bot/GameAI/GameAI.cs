@@ -154,6 +154,33 @@ namespace Evelynn_Bot.GameAI
             AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
             AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
         }
+
+        public void PickTutorialChampionAI()
+        {
+            AutoItX.MouseClick("RIGHT", game_X - 199, game_Y -218, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X - 199, game_Y - 218, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X - 199, game_Y - 218, 1, 0);
+        }
+
+        public void BuyItem()
+        {
+            AutoItX.Send("p");
+            Thread.Sleep(2000);
+            AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
+            AutoItX.MouseDown();
+            Thread.Sleep(500);
+            AutoItX.MouseUp();
+            Thread.Sleep(700);
+            AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
+            Thread.Sleep(1500);
+            AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
+            AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 1, 0);
+            AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5,1);
+            Thread.Sleep(200);
+            AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5, 1);
+            AutoItX.Send("p");
+        }
+
         public void RandomLaner()
         {
             int random =_random.Next(1, 4);
@@ -178,210 +205,161 @@ namespace Evelynn_Bot.GameAI
 
 
         #region TutorialAI
-        public void GameStartedTutorial()
+        public void TutorialAI_1()
         {
-            try
+            while (IsGameStarted() == false)
             {
-                if (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStartedTutorial).Success)
+                Thread.Sleep(15000);
+                IsGameStarted();
+            }
+
+            while (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
+            {
+                GoMid();
+
+                if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
                 {
-                    AutoItX.WinActivate("League of Legends");
-                    Logger.Log(true, "We are in Game![Tutorial]");
-                    Thread.Sleep(15000);
-                    AutoItX.MouseClick("RIGHT", game_X + 47, game_Y - 34, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 47, game_Y - 34, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 30, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 30, 1, 1);
-                    Thread.Sleep(10000);
-                    AutoItX.Send("j");
-                    Thread.Sleep(1900);
-                    AutoItX.Send("p");
+                    AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                    HitMove(X, Y);
+                    Combo(X, Y);
+                    AutoItX.Send("d");
+                    AutoItX.Send("f");
                     Thread.Sleep(1500);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 15, 1);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 10, 10);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 10, 0);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 10, 30);
-                    Thread.Sleep(1900);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 5, 1);
-                    Thread.Sleep(1900);
-                    AutoItX.MouseClick("LEFT", game_X - 170, game_Y - 190, 5, 1);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 5, 1);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 3, 1);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 2, 1);
-                    Thread.Sleep(300);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 5, 1);
-                    Thread.Sleep(300);
-                    AutoItX.MouseClick("RIGHT", game_X - 170, game_Y - 190, 1, 1);  //ITEM BUY
-                    Thread.Sleep(300);
-                    AutoItX.Send("p");
-                    Enemy();
                 }
-                else
-                {
-                    AutoItX.WinActivate("League of Legends.exe");
-                    Thread.Sleep(25000);
-                    GameStartedTutorial();
-                }
-            }
-            catch
-            {
-                GameStartedTutorial();
-            }
 
-        }
-
-        public void Enemy()
-        {
-            try
-            {
-                if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                while (ImageSearch(ImagePaths.minions_tutorial, "3", Messages.SuccessMinion).Success)
                 {
-                    AutoItX.MouseClick("LEFT", X + 65, Y + 75, 1, 0);
-                    AutoItX.MouseClick("LEFT", X + 65, Y + 75, 1, 0);
-                    Logger.Log(true, "Enemy Found! [Sion]");
-                    AutoItX.Send("w");
-                    AutoItX.Send("a");
-                    Thread.Sleep(750);
-                    AutoItX.Send("r");
-                    AutoItX.Send("a");
-                    Thread.Sleep(750);
-                    AutoItX.Send("q");
-                    AutoItX.Send("a");
-                    AutoItX.Send("e");
-                    AutoItX.Send("f");
-                    AutoItX.Send("t");
-                    Thread.Sleep(750);
-                    AutoItX.Send("a");
-                    AutoItX.MouseClick("LEFT", X + 65, Y + 75, 1, 0);
-                    AutoItX.MouseClick("LEFT", X + 65, Y + 75, 1, 0);
-                    AutoItX.Send("a");
-                    Thread.Sleep(25000);
-                }
-                else
-                {
-                    Thread.Sleep(4000);
-                    AutoItX.MouseClick("RIGHT", game_X + 47, game_Y - 34, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 47, game_Y - 34, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 30, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 30, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 55, game_Y - 45, 1, 1);
-                    AutoItX.MouseClick("RIGHT", game_X + 55, game_Y - 45, 1, 1);
-                    Enemy();
-                }
-                Logger.Log(true,"Enemy is dead! [Sion]");
-                AutoItX.MouseClick("RIGHT", game_X + 47, game_Y - 34, 1, 1);
-                Thread.Sleep(6000);
-                AutoItX.MouseClick("RIGHT", game_X - 293, game_Y - 223, 1, 1);
-                MinionCheck();
-            }
-            catch
-            {
-                Enemy();
-            }
-
-        }
-        public void MinionCheck()
-        {
-            try
-            {
-                if (ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
-                {
-                    AutoItX.MouseClick("RIGHT", game_X + -30, game_Y + 55, 1, 0);
-                    Thread.Sleep(1000);
-                    AutoItX.Send("a");
+                    HitMove(X, Y);
                     Thread.Sleep(500);
-                    AutoItX.Send("a");
-                    AutoItX.MouseClick("LEFT", game_X + -30, game_Y + 55, 1, 0);
-                    EnemyMinionCheck();
-                    EnemyChampionCheck();
-                    MinionCheck();
-                }
-                else
-                {
-                    if (winExist("League of Legends.exe"))
+
+                    if (ImageSearch(ImagePaths.enemy_minions, "3", Messages.SuccessEnemyChampion).Success)
                     {
-                        Thread.Sleep(3500);
-                        AutoItX.MouseClick("RIGHT", game_X + 47, game_Y - 34, 1, 1);
-                        MinionCheck();
+                        AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
+                        AutoItX.Send("q");
+                        Thread.Sleep(1500);
+                        AutoItX.Send("w");
+                        Thread.Sleep(1500);
+                        AutoItX.Send("e");
+                        Thread.Sleep(1500);
+                        AutoItX.Send("r");
+                        AutoItX.Send("d");
+                        AutoItX.Send("f");
+                        Thread.Sleep(1500);
                     }
-                    else
+
+                    if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
                     {
-                        Console.Clear();
-                        Logger.Log(true, "Tutorial game is end!");
-                        AutoItX.MouseClick("LEFT", game_X - 50, game_Y - 50, 1, 0);
-                        Thread.Sleep(30000);
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        Thread.Sleep(1000);
-                        //AccountProcess.ClientProcess();
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        HitMove(X, Y);
+                        Combo(X, Y);
+                        AutoItX.Send("d");
+                        AutoItX.Send("f");
+                        Thread.Sleep(1500);
                     }
+
+                    if (ImageSearch(ImagePaths.tower, "2", Messages.SuccessEnemyChampion).Success)
+                    {
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        Thread.Sleep(3000);
+                    }
+
+                    GoMid();
                 }
+
+
+                Thread.Sleep(6000);
+                PickTutorialChampionAI();
             }
-            catch
-            {
-                MinionCheck();
-            }
+
 
         }
 
-        public void EnemyMinionCheck()
+        public void TutorialAI_2()
         {
-            try
+            while (IsGameStarted() == false)
             {
-                if (ImageSearch(ImagePaths.enemy_minions, "2", Messages.SuccessEnemyMinion).Success)
-                {
-                    AutoItX.MouseClick("LEFT", X + 35, Y + 30, 1, 0);
-                    AutoItX.Send("q");
-                }
-            }
-            catch
-            {
-
+                Thread.Sleep(15000);
+                IsGameStarted();
             }
 
-        }
-        public void EnemyChampionCheck()
-        {
-            try
+            Thread.Sleep(5000);
+
+            SkillUp("q", "j");
+
+            Thread.Sleep(5000);
+
+            BuyItem();
+
+            while (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
             {
+                GoMid();
+                Thread.Sleep(4000);
+
                 if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
                 {
-                    AutoItX.MouseClick("LEFT", X + 65, Y + 75, 1, 0);
-                    AutoItX.MouseClick("LEFT", X + 65, Y + 75, 1, 0);
-                    AutoItX.Send("w");
-                    AutoItX.Send("a");
-                    Thread.Sleep(750);
-                    AutoItX.Send("r");
-                    AutoItX.Send("a");
-                    Thread.Sleep(750);
-                    AutoItX.Send("q");
-                    AutoItX.Send("a");
-                    AutoItX.Send("e");
+                    AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                    HitMove(X, Y);
+                    Combo(X, Y);
+                    AutoItX.Send("d");
                     AutoItX.Send("f");
-                    AutoItX.Send("t");
-                    Thread.Sleep(750);
-                    AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
-                    AutoItX.Send("a");
-                    AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+                    Thread.Sleep(1500);
                 }
-            }
-            catch
-            {
 
+                while (ImageSearch(ImagePaths.minions, "3", Messages.SuccessMinion).Success)
+                {
+                    SkillUp("q", "j");
+                    SkillUp("w", "k");
+                    SkillUp("e", "m");
+                    SkillUp("r", "l");
+                    HitMove(X, Y);
+                    Thread.Sleep(500);
+
+                    if (ImageSearch(ImagePaths.enemy_minions, "3", Messages.SuccessEnemyChampion).Success)
+                    {
+                        AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
+                        AutoItX.Send("q");
+                        Thread.Sleep(1500);
+                        AutoItX.Send("w");
+                        Thread.Sleep(1500);
+                        AutoItX.Send("e");
+                        Thread.Sleep(1500);
+                        AutoItX.Send("r");
+                        AutoItX.Send("d");
+                        AutoItX.Send("f");
+                        Thread.Sleep(1500);
+                    }
+
+                    if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                    {
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        HitMove(X, Y);
+                        Combo(X, Y);
+                        AutoItX.Send("d");
+                        AutoItX.Send("f");
+                        Thread.Sleep(1500);
+                    }
+
+                    if (ImageSearch(ImagePaths.tower, "2", Messages.SuccessEnemyChampion).Success)
+                    {
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                        Thread.Sleep(3000);
+                    }
+
+                }
             }
         }
 
-        public bool winExist(string win)
+        public bool IsGameStarted()
         {
-            try
-            {
-                int a = AutoItX.ProcessExists(win);
-                return Convert.ToBoolean(a);
-            }
-            catch
+            if (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
             {
                 return true;
             }
-
+            return false;
         }
 
 
