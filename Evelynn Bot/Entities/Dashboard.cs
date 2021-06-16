@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.Entities
 {
-    public class Dashboard
+    public struct Dashboard
     {
         public bool IsStop { get; set; }
         public bool IsRestart { get; set; }

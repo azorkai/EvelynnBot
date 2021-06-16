@@ -1,7 +1,6 @@
 ﻿using Evelynn_Bot.Constants;
 using Evelynn_Bot.Entities;
 using Evelynn_Bot.League_API;
-using Evelynn_Bot.Results;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,23 +18,24 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.League_API.GameData;
 using Leaf.xNet;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using AutoIt;
+using bAUTH;
 using Evelynn_Bot.GameAI;
 
 namespace Evelynn_Bot.Account_Process
 {
     public class AccountProcess : IAccountProcess
     {
+
+
         private int caps = 0;
 
         public int SW_HIDE = 0;
 
         public Encoding HttpRequestEncoding = Encoding.UTF8;
 
-        ApiVariables apiVariables = new ApiVariables();
-        public Summoner summoner = new Summoner();
-        public Wallet wallet = new Wallet();
-        JsonRead jsonRead = new JsonRead();
+
 
         [DllImport("User32.dll", SetLastError = true)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
@@ -46,45 +46,41 @@ namespace Evelynn_Bot.Account_Process
         [DllImport("User32.dll")]
         public static extern bool EnableWindow(IntPtr hwnd, bool enabled);
 
-        public IResult StartLeague(License license)
+        public bool StartLeague(Interface itsInterface)
         {
             try
             {
                 ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = license.LeaguePath;
+                info.FileName = itsInterface.license.LeaguePath;
                 info.UseShellExecute = true;
                 info.CreateNoWindow = true;
                 info.WindowStyle = ProcessWindowStyle.Hidden;
 
                 Process lol = Process.Start(info);
-                lol.WaitForInputIdle();
                 lol.PriorityClass = ProcessPriorityClass.BelowNormal;
-                IntPtr HWND = FindWindow(null, "Riot Client");
-                ShowWindow(HWND, SW_HIDE);
-                EnableWindow(HWND, true);
-                return new Result(true, Messages.SuccessStartLeague);
+                lol.WaitForInputIdle();
+                return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
 
 
             }
             catch (Exception ex6)
             {
-                return new Result(false, Messages.ErrorStartLeague);
+                return itsInterface.Result(false, itsInterface.messages.ErrorStartLeague);
             }
         }
-        public IResult LoginAccount(License license)
+        public bool LoginAccount(Interface itsInterface)
         {
-            Thread.Sleep(20000);
             try
             {
                 using (ApiCalls apiCalls = new ApiCalls())
                 {
-                    if (license.Lol_username == "")
+                    if (itsInterface.license.Lol_username == "")
                     {
-                        return new Result(false, Messages.ErrorNullUsername);
+                        return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
                     }
-                    if (license.Lol_password == "")
+                    if (itsInterface.license.Lol_password == "")
                     {
-                        return new Result(false, Messages.ErrorNullPassword);
+                        return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
                     }
 
                     Thread.Sleep(20000);
@@ -116,7 +112,7 @@ namespace Evelynn_Bot.Account_Process
 
                     }
 
-                    string string_3 = $"{{ \"username\": \"{license.Lol_username}\", \"password\": \"{license.Lol_password}\", \"persistLogin\": false }}";
+                    string string_3 = $"{{ \"username\": \"{itsInterface.license.Lol_username}\", \"password\": \"{itsInterface.license.Lol_password}\", \"persistLogin\": false }}";
 
                     apiCalls.requestWeb("/rso-auth/v1/session/credentials", string_3, "PUT", string_2, string_);
 
@@ -150,24 +146,26 @@ namespace Evelynn_Bot.Account_Process
                     }
 
                     Thread.Sleep(15000);
-                    ClientKiller.SuspendLeagueClient();
+                    KillUxRender(itsInterface);
                     Thread.Sleep(15000);
-
-                    return new Result(true, Messages.SuccessLogin);
+                    Dispose(true);
+                    return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
                 }
 
             }
             catch (Exception e)
             {
-                ClientKiller.KillLeagueClient();
-                return new Result(false, Messages.ErrorLogin);
+                itsInterface.clientKiller.KillLeagueClient();
+                Dispose(true);
+                return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
+
             }
         }
-        public IResult Initialize()
+        public bool Initialize(Interface itsInterface)
         {
             try
             {
-                using (var fileStream = new FileStream(@jsonRead.Location() + "lockfile", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var fileStream = new FileStream(itsInterface.@jsonRead.Location() + "lockfile", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (var streamReader = new StreamReader(fileStream, Encoding.Default))
                     {
@@ -175,57 +173,60 @@ namespace Evelynn_Bot.Account_Process
                         while ((line = streamReader.ReadLine()) != null)
                         {
                             string[] lines = line.Split(':');
-                            apiVariables.IPort = int.Parse(lines[2]);
+                            itsInterface.apiVariables.IPort = int.Parse(lines[2]);
                             string riot_pass = lines[3];
-                            apiVariables.IAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes("riot:" + riot_pass));
+                            itsInterface.apiVariables.IAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes("riot:" + riot_pass));
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                return new Result(false, Messages.ErrorInitialize);
+                return itsInterface.Result(false, itsInterface.messages.ErrorInitialize);
             }
-            return new Result(true, Messages.SuccessInitialize);
+            return itsInterface.Result(true, itsInterface.messages.SuccessInitialize);
         }
-        public void GetSetWallet()
+        public bool GetSetWallet(Interface itsInterface)
         {
             try
             {
                 using (ApiCalls apiCalls = new ApiCalls())
                 {
-                    summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", apiVariables.IAuth, apiVariables.IPort);
-                    wallet = apiCalls.GetObject<Wallet>("/lol-store/v1/wallet", apiVariables.IAuth, apiVariables.IPort);
-                    DashboardHelper.UpdateLolWallet(summoner.summonerLevel.ToString(), wallet.ip.ToString());
+                    itsInterface.summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    itsInterface.wallet = apiCalls.GetObject<Wallet>("/lol-store/v1/wallet", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    itsInterface.dashboardHelper.UpdateLolWallet(itsInterface.summoner.summonerLevel.ToString(), itsInterface.wallet.ip.ToString(), itsInterface);
+                    return itsInterface.Result(true, "");
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine($"GET SET WALLET HATA | SRC: {e.Source} | SATIR {e.StackTrace}");
+                return itsInterface.Result(false, "");
             }
         }
 
-        public void KillUxRender()
+        public bool KillUxRender(Interface itsInterface)
         {
             using (ApiCalls apiCalls = new ApiCalls())
             {
-                apiCalls.PostObject<string>("", "/riotclient/kill-ux", apiVariables.IAuth, apiVariables.IPort);
+                apiCalls.PostObject<string>("", "/riotclient/kill-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                return itsInterface.Result(true, "");
             }
         }
 
-        public void ShowUxRender()
+        public bool ShowUxRender(Interface itsInterface)
         {
             using (ApiCalls apiCalls = new ApiCalls())
             {
-                apiCalls.PostObject<string>("", "/riotclient/ux-show", apiVariables.IAuth, apiVariables.IPort);
+                apiCalls.PostObject<string>("", "/riotclient/ux-show", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                return itsInterface.Result(true, "");
             }
         }
-
-        public void CheckNewAccount(License license)
+        public bool CheckNewAccount(Interface itsInterface)
         {
-            if (string.IsNullOrEmpty(summoner.displayName))
+            if (string.IsNullOrEmpty(itsInterface.summoner.displayName))
             {
-                Logger.Log(true, "New account!");
+                itsInterface.logger.Log(true, "New account!");
                 Thread.Sleep(5000);
                 AutoItX.ControlClick("Riot Client", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 647, 355);
                 Thread.Sleep(25000);
@@ -241,32 +242,30 @@ namespace Evelynn_Bot.Account_Process
 
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 640, 400); //This is for config bug.
 
-                NewLeaguePlayer newLeaguePlayer = new NewLeaguePlayer();
-                newLeaguePlayer.name = RandomNameGenerator();
+                itsInterface.newLeaguePlayer.name = RandomNameGenerator();
 
                 using (ApiCalls apiCalls = new ApiCalls())
                 {
-                    if (apiCalls.PostObject<NewLeaguePlayer>(newLeaguePlayer, "/lol-summoner/v1/summoners", apiVariables.IAuth, apiVariables.IPort))
+                    if (apiCalls.PostObject<NewLeaguePlayer>(itsInterface.newLeaguePlayer, "/lol-summoner/v1/summoners", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
                     {
-                        Logger.Log(true, "Successfully used name!");
-                        ClientKiller.KillLeagueClient();
+                        itsInterface.logger.Log(true, "Successfully used name!");
+                        itsInterface.clientKiller.KillLeagueClient();
                         Thread.Sleep(7000);
-                        ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
-                        processManager.Start(license);
+                        Dispose(true);
+                        return itsInterface.processManager.Start(itsInterface);
                     }
-                    else
-                    {
-                        Logger.Log(true, "Need another name..");
-                        newLeaguePlayer.name = RandomNameGenerator();
-                        apiCalls.PostObject<NewLeaguePlayer>(newLeaguePlayer, "/lol-summoner/v1/summoners", apiVariables.IAuth, apiVariables.IPort);
-                        Logger.Log(true, "Successfully used name!");
-                        ClientKiller.KillLeagueClient();
-                        Thread.Sleep(7000);
-                        ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
-                        processManager.Start(license);
-                    }
+
+                    itsInterface.logger.Log(true, "Need another name..");
+                    itsInterface.newLeaguePlayer.name = RandomNameGenerator();
+                    apiCalls.PostObject<NewLeaguePlayer>(itsInterface.newLeaguePlayer, "/lol-summoner/v1/summoners", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    itsInterface.logger.Log(true, "Successfully used name!");
+                    itsInterface.clientKiller.KillLeagueClient();
+                    Thread.Sleep(7000);
+                    Dispose(true);
+                    return itsInterface.processManager.Start(itsInterface);
                 }
             }
+            return itsInterface.Result(false, "");
         }
         public string RandomName(int len, bool two)
         {
@@ -331,40 +330,37 @@ namespace Evelynn_Bot.Account_Process
                 return RandomName(6, false);
             }
         }
-        public void TutorialMissions(License license)
+        public bool TutorialMissions(Interface itsInterface)
         {
-            Summoner summoner = new Summoner();
             using (ApiCalls apiCalls = new ApiCalls())
             {
-                DashboardHelper.UpdateLolStatus("Playing Tutorial", license);
-                summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", apiVariables.IAuth, apiVariables.IPort);
-                Logger.Log(true, summoner.summonerLevel.ToString());
-                if (summoner.summonerLevel < 11)
+                itsInterface.dashboardHelper.UpdateLolStatus("Playing Tutorial", itsInterface);
+                itsInterface.summoner = apiCalls.GetObject<Summoner>("/lol-summoner/v1/current-summoner", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                itsInterface.logger.Log(true, itsInterface.summoner.summonerLevel.ToString());
+                if (itsInterface.summoner.summonerLevel < 11)
                 {
 
-                    Tutorial[] objectArray = apiCalls.GetObjectArray<Tutorial>("/lol-npe-tutorial-path/v1/tutorials", apiVariables.IAuth, apiVariables.IPort);
+                    Tutorial[] objectArray = apiCalls.GetObjectArray<Tutorial>("/lol-npe-tutorial-path/v1/tutorials", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                     try
                     {
                         if (!objectArray[0].isViewed)
                         {
-                            Logger.Log(true,"TUTORIAL 1");
+                            itsInterface.logger.Log(true,"TUTORIAL 1");
                             apiCalls.PostObject<Lobby>(new Lobby
                             {
                                 gameMode = "TUTORIAL",
                                 queueId = 2000
-                            }, "/lol-lobby/v2/lobby", apiVariables.IAuth, apiVariables.IPort);
+                            }, "/lol-lobby/v2/lobby", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                             Thread.Sleep(10000);
-                            apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", apiVariables.IAuth, apiVariables.IPort);
+                            apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
-                            using (GameAi gameAi = new GameAi())
-                            {
-                                gameAi.TutorialAI_1();
-                            }
 
-                            Logger.Log(true,"TUTORIAL 1 ENDED");
+                            itsInterface.gameAi.TutorialAI_1(itsInterface);
+
+                            itsInterface.logger.Log(true,"TUTORIAL 1 ENDED");
                             Thread.Sleep(15000);
-                            SelectChampion();
-                            KillUxRender();
+                            SelectChampion(itsInterface);
+                            KillUxRender(itsInterface);
                             Thread.Sleep(5000);
                         }
                         else
@@ -380,24 +376,22 @@ namespace Evelynn_Bot.Account_Process
                     {
                         if (!objectArray[1].isViewed)
                         {
-                            Logger.Log(true,"TUTORIAL 2");
+                            itsInterface.logger.Log(true,"TUTORIAL 2");
                             apiCalls.PostObject<Lobby>(new Lobby
                             {
                                 gameMode = "TUTORIAL",
                                 queueId = 2010
-                            }, "/lol-lobby/v2/lobby", apiVariables.IAuth, apiVariables.IPort);
+                            }, "/lol-lobby/v2/lobby", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                             Thread.Sleep(10000);
-                            apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", apiVariables.IAuth, apiVariables.IPort);
+                            apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
-                            using (GameAi gameAi = new GameAi())
-                            {
-                                gameAi.TutorialAI_2();
-                            }
 
-                            Logger.Log(true,"TUTORIAL 2 ENDED");
+                            itsInterface.gameAi.TutorialAI_2(itsInterface);
+
+                            itsInterface.logger.Log(true,"TUTORIAL 2 ENDED");
                             Thread.Sleep(15000);
-                            SelectChampion();
-                            KillUxRender();
+                            SelectChampion(itsInterface);
+                            KillUxRender(itsInterface);
                             Thread.Sleep(5000);
                         }
                     }
@@ -409,66 +403,72 @@ namespace Evelynn_Bot.Account_Process
                     {
                         if (!objectArray[2].isViewed)
                         {
-                            Logger.Log(true,"TUTORIAL 3");
+                            itsInterface.logger.Log(true,"TUTORIAL 3");
                             apiCalls.PostObject<Lobby>(new Lobby
                             {
                                 gameMode = "TUTORIAL",
                                 queueId = 2020
-                            }, "/lol-lobby/v2/lobby", apiVariables.IAuth, apiVariables.IPort);
+                            }, "/lol-lobby/v2/lobby", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                             Thread.Sleep(10000);
-                            apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", apiVariables.IAuth, apiVariables.IPort);
+                            apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
-                            using (GameAi gameAi = new GameAi())
-                            {
-                                gameAi.TutorialAI_2(); //Bilerek "2" olarak bırakılmıştır, aynı AI!
-                            }
 
-                            Logger.Log(true,"TUTORIAL 3 ENDED");
+                            itsInterface.gameAi.TutorialAI_2(itsInterface); //Bilerek "2" olarak bırakılmıştır, aynı AI!
+                            
+
+                            itsInterface.logger.Log(true,"TUTORIAL 3 ENDED");
                             Thread.Sleep(15000);
-                            SelectChampion();
-                            KillUxRender();
+                            SelectChampion(itsInterface);
+                            KillUxRender(itsInterface);
                             Thread.Sleep(5000);
+                            Dispose(true);
+                            return itsInterface.Result(true, "Tutorial games are finished!");
                         }
                     }
                     catch
                     {
                     }
                 }
+                return itsInterface.Result(false, "");
             }
             
         }
-        public void PatchCheck()
+        public bool PatchCheck(Interface itsInterface)
         {
             try
             {
                 int tryNum = 1;
-                while (LeagueIsPatchAvailable())
+                while (LeagueIsPatchAvailable(itsInterface))
                 {
-                    Logger.Log(true, "Patch bulundu!");
+                    itsInterface.logger.Log(true, "Patch bulundu!");
                     Thread.Sleep(60000);
+                    Dispose(true);
                     tryNum++;
                     if (tryNum >= 15)
                     {
                         break;
                     }
                 }
+                return itsInterface.Result(true, "");
             }
             catch (Exception e)
             {
                 Console.WriteLine("PATCH CHECK HATASI");
+                return itsInterface.Result(false, "");
             }
 
         }
-        public bool LeagueIsPatchAvailable()
+        public bool LeagueIsPatchAvailable(Interface itsInterface)
         {
             using (ApiCalls apiCalls = new ApiCalls())
             {
-                LeaguePatch lolPatchNew = apiCalls.GetObject<LeaguePatch>("/lol-patch/v1/products/league_of_legends/state", apiVariables.IAuth, apiVariables.IPort);
+                LeaguePatch lolPatchNew = apiCalls.GetObject<LeaguePatch>("/lol-patch/v1/products/league_of_legends/state", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                 //Logger.Status($@"Is there a new league patch: {lolPatchNew.isUpdateAvailable}");
-                return lolPatchNew.isCorrupted || lolPatchNew.isUpdateAvailable || !lolPatchNew.isUpToDate;
+                return itsInterface.Result(lolPatchNew.isCorrupted || lolPatchNew.isUpdateAvailable || !lolPatchNew.isUpToDate, "");
+
             }
         }
-        public void Disenchant()
+        public bool Disenchant(Interface itsInterface)
         {
             try
             {
@@ -477,7 +477,7 @@ namespace Evelynn_Bot.Account_Process
                     if (caps < 50)
                     {
                         caps++;
-                        string playerLoot = apiCalls.GetObject("/lol-loot/v1/player-loot-map", apiVariables.IAuth, apiVariables.IPort);
+                        string playerLoot = apiCalls.GetObject("/lol-loot/v1/player-loot-map", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                         bool flag = false;
                         string[] array = playerLoot.Split(new char[]
                         {
@@ -493,7 +493,7 @@ namespace Evelynn_Bot.Account_Process
                                     apiCalls.PostObject<string[]>(new string[]
                                     {
                                     text
-                                    }, "/lol-loot/v1/recipes/CHAMPION_RENTAL_disenchant/craft", apiVariables.IAuth, apiVariables.IPort);
+                                    }, "/lol-loot/v1/recipes/CHAMPION_RENTAL_disenchant/craft", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     Thread.Sleep(500);
                                 }
                                 else if (text.StartsWith("CHEST_") && !text.StartsWith("CHEST_generic"))
@@ -502,7 +502,7 @@ namespace Evelynn_Bot.Account_Process
                                     apiCalls.PostObject<string[]>(new string[]
                                     {
                                     text
-                                    }, "/lol-loot/v1/recipes/" + text + "_OPEN/craft", apiVariables.IAuth, apiVariables.IPort);
+                                    }, "/lol-loot/v1/recipes/" + text + "_OPEN/craft", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     Thread.Sleep(500);
                                 }
                                 else if (text.StartsWith("CHAMPION_"))
@@ -510,27 +510,31 @@ namespace Evelynn_Bot.Account_Process
                                     apiCalls.PostObject<string[]>(new string[]
                                     {
                                     text
-                                    }, "/lol-loot/v1/recipes/CHAMPION_disenchant/craft", apiVariables.IAuth, apiVariables.IPort);
+                                    }, "/lol-loot/v1/recipes/CHAMPION_disenchant/craft", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     Thread.Sleep(500);
                                 }
                             }
                         }
                         if (flag)
                         {
-                            Disenchant();
+
+                            Dispose(true);
+                            return Disenchant(itsInterface);
                         }
                     }
+                    return itsInterface.Result(false, "");
                 }
             }
-
             catch (Exception e)
             {
-                Logger.Log(false, Messages.ErrorDisenchant);
+
+                Dispose(true);
+                return itsInterface.Result(false, itsInterface.messages.ErrorDisenchant);
+
             }
         }
-        public IResult CreateGame(License license)
+        public bool CreateGame(Interface itsInterface)
         { 
-            ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
             try
             {
                
@@ -539,44 +543,42 @@ namespace Evelynn_Bot.Account_Process
                     Lobby lobby = new Lobby();
                     lobby.gameMode = "CLASSIC";
                     lobby.queueId = 830;
-                    var success = apiCalls.PostObject<Lobby>(lobby, "/lol-lobby/v2/lobby", apiVariables.IAuth, apiVariables.IPort);
-                    KillUxRender();
-                    apiCalls.Dispose();
+                    var success = apiCalls.PostObject<Lobby>(lobby, "/lol-lobby/v2/lobby", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    KillUxRender(itsInterface);
                     if (success == true)
                     {
-                        DashboardHelper.UpdateLolStatus("In Lobby", license);
-                        return new Result(success, Messages.SuccessCreateGame);
+                        itsInterface.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface);
+                        return itsInterface.Result(success, itsInterface.messages.SuccessCreateGame);
                     }
-                    ClientKiller.KillLeagueClient();
+                    itsInterface.clientKiller.KillLeagueClient();
                     Thread.Sleep(7000);
-                    processManager.Start(license);
-                    return new Result(true, Messages.ErrorCreateGame);
+                    Dispose(true);
+                    return itsInterface.processManager.Start(itsInterface);
                 }
             }
             catch (Exception e)
             {
-                ClientKiller.KillLeagueClient();
+                itsInterface.clientKiller.KillLeagueClient();
                 Thread.Sleep(7000);
-                processManager.Start(license);
-                return new Result(true, Messages.ErrorCreateGame);
+                Dispose(true);
+                return itsInterface.processManager.Start(itsInterface);
             }
         }
-        public IResult StartQueue(License license)
+        public bool StartQueue(Interface itsInterface)
         {
-            ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
             using (var apiCalls = new ApiCalls())
             {
-                DashboardHelper.UpdateLolStatus("In Queue", license);
+                itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
                 try
                 {
 
                     try
                     {
                         /*
-                         * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue();}
+                         * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue2();}
                         */
 
-                        apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", apiVariables.IAuth, apiVariables.IPort);
+                        apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
                         //IF RESPONSE IS EMPTY, THAT MEANS THE CHAMPION IS IN LQP
                         //TODO: CHECK THE RESPONSE, IF ITS EMPTY RUN THE LQP PRIOITY PROCESS
@@ -586,20 +588,190 @@ namespace Evelynn_Bot.Account_Process
                     {
                         LQP_HATASI:
                         Thread.Sleep(300000);
-                        StartQueue(license);
-                        return new Result(true, Messages.ErrorStartQueue);
+                        Dispose(true);
+                        return StartQueue2(itsInterface);
                     }
                     Thread.Sleep(500);
-                    Matchmaking matchmaking = new Matchmaking();
-                    matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", apiVariables.IAuth, apiVariables.IPort);
-                    GameflowSession gameflowSession = new GameflowSession();
-                    if (matchmaking != null)
+                    Matchmaking matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    if (matchmaking.Equals(null) == false)
                     {
                         if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
                         {
-                            ClientKiller.KillLeagueClient();
+                            itsInterface.clientKiller.KillLeagueClient();
                             Thread.Sleep(7000);
-                            processManager.Start(license);
+                            Dispose(true);
+                            return itsInterface.processManager.Start(itsInterface);
+                        }
+                        else
+                        {
+                            DateTime now = DateTime.Now;
+                            for (; ; )
+                            {
+                                DateTime now2 = DateTime.Now;
+                                TimeSpan timeSpan = now - now2;
+                                if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
+                                {
+                                    goto ARAMAHATASIUZUNSURE;
+                                }
+                                matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                try
+                                {
+                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                    goto MACHATASI;
+                                }
+                                catch
+                                {
+                                    goto MACHATASI;
+                                }
+                                MACBULUNDUSTATE:
+                                if (matchmaking.searchState.ToUpper() == "FOUND")
+                                {
+                                    KillUxRender(itsInterface);
+                                    try
+                                    {
+                                        Thread.Sleep(50);
+                                        if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
+                                        {
+
+                                        }
+                                        if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
+                                        {
+
+                                        }
+                                    }
+                                    catch
+                                    {
+                                    }
+                                    if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                                    {
+                                        break;
+                                    }
+                                }
+                                if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                                {
+                                    break;
+                                }
+                                continue;
+                            MACHATASI:
+                                if (matchmaking.Equals(null) == false)
+                                {
+                                    goto MACBULUNDUSTATE;
+                                }
+                                else
+                                {
+                                    itsInterface.clientKiller.KillLeagueClient();
+                                    Thread.Sleep(7000);
+                                    Dispose(true);
+                                    return itsInterface.processManager.Start(itsInterface);
+                                }
+                            }
+                            goto IL_28C;
+                        ARAMAHATASIUZUNSURE:
+                            itsInterface.clientKiller.KillLeagueClient();
+                            Thread.Sleep(7000);
+                            Dispose(true);
+                            return itsInterface.processManager.Start(itsInterface);
+                        IL_28C:
+                            Thread.Sleep(50);
+                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                            while (itsInterface.gameflowSession == null && itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                            {
+                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                            }
+                            while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                            {
+                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+                                {
+                                    Dispose(true);
+                                    return StartQueue2(itsInterface);
+                                }
+                            }
+                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                            {
+                                KillUxRender(itsInterface);
+                                PickRandomAvailableChampion(itsInterface);
+                                SetSpell(itsInterface);
+                                KillUxRender(itsInterface);
+                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+                                {
+                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+                                    {
+                                        Dispose(true);
+                                        return StartQueue2(itsInterface);
+                                    }
+                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+                                    {
+                                        break;
+                                    }
+                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                }
+                            }
+                            else
+                            {
+                                itsInterface.clientKiller.KillLeagueClient();
+                                Thread.Sleep(7000);
+                                Dispose(true);
+                                return itsInterface.processManager.Start(itsInterface);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Dispose(true);
+                        return StartQueue2(itsInterface);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    itsInterface.clientKiller.KillLeagueClient();
+                    Thread.Sleep(7000);
+                    Dispose(true);
+                    return itsInterface.processManager.Start(itsInterface);
+                }
+            }
+            return itsInterface.Result(true, "");
+        }
+
+        public bool StartQueue2(Interface itsInterface)
+        {
+            using (var apiCalls = new ApiCalls())
+            {
+                itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
+                try
+                {
+
+                    try
+                    {
+                        /*
+                         * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue();}
+                        */
+
+                        apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+
+                        //IF RESPONSE IS EMPTY, THAT MEANS THE CHAMPION IS IN LQP
+                        //TODO: CHECK THE RESPONSE, IF ITS EMPTY RUN THE LQP PRIOITY PROCESS
+
+                    }
+                    catch
+                    {
+                        LQP_HATASI:
+                        Thread.Sleep(300000);
+                        Dispose(true);
+                        return StartQueue(itsInterface);
+                    }
+                    Thread.Sleep(500);
+                    Matchmaking matchmaking = new Matchmaking();
+                    matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    if (matchmaking.Equals(null) == false)
+                    {
+                        if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
+                        {
+                            itsInterface.clientKiller.KillLeagueClient();
+                            Thread.Sleep(7000);
+                            Dispose(true);
+                            return itsInterface.processManager.Start(itsInterface);
                         }
                         else
                         {
@@ -612,11 +784,10 @@ namespace Evelynn_Bot.Account_Process
                                 {
                                     goto ARAMAHATASIUZUNSURE;
                                 }
-                                matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", apiVariables.IAuth, apiVariables.IPort);
+                                matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                 try
                                 {
-                                    gameflowSession = new GameflowSession();
-                                    gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
+                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     goto MACHATASI;
                                 }
                                 catch
@@ -626,16 +797,15 @@ namespace Evelynn_Bot.Account_Process
                                 MACBULUNDUSTATE:
                                 if (matchmaking.searchState.ToUpper() == "FOUND")
                                 {
-                                    //ClientKiller.SuspendLeagueClient(); // Maç bulunduğu anda suspendd ve hide eder.
-                                    KillUxRender();
+                                    KillUxRender(itsInterface);
                                     try
                                     {
                                         Thread.Sleep(50);
-                                        if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", apiVariables.IAuth, apiVariables.IPort))
+                                        if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
                                         {
 
                                         }
-                                        if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", apiVariables.IAuth, apiVariables.IPort))
+                                        if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
                                         {
 
                                         }
@@ -643,125 +813,297 @@ namespace Evelynn_Bot.Account_Process
                                     catch
                                     {
                                     }
-                                    if (gameflowSession != null && ((gameflowSession != null) ? gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                                    if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                                     {
                                         break;
                                     }
                                 }
-                                if (gameflowSession != null && ((gameflowSession != null) ? gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                                if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                                 {
                                     break;
                                 }
                                 continue;
-                                MACHATASI:
-                                if (matchmaking != null)
+                            MACHATASI:
+                                if (matchmaking.Equals(null) == false)
                                 {
                                     goto MACBULUNDUSTATE;
                                 }
                                 else
                                 {
-                                    ClientKiller.KillLeagueClient();
+                                    Dispose(true);
+                                    itsInterface.clientKiller.KillLeagueClient();
                                     Thread.Sleep(7000);
-                                    processManager.Start(license);
+                                    return itsInterface.processManager.Start(itsInterface);
                                 }
                             }
                             goto IL_28C;
-                            ARAMAHATASIUZUNSURE:
-                            ClientKiller.KillLeagueClient();
+                        ARAMAHATASIUZUNSURE:
+                            Dispose(true);
+                            itsInterface.clientKiller.KillLeagueClient();
                             Thread.Sleep(7000);
-                            processManager.Start(license);
-                            IL_28C:
+                            return itsInterface.processManager.Start(itsInterface);
+                        IL_28C:
                             Thread.Sleep(50);
-                            gameflowSession = new GameflowSession();
-                            gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
-                            while (gameflowSession == null && gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                            while (itsInterface.gameflowSession == null && itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                             {
-                                gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
+                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                             }
-                            while (gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                            while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                             {
-                                gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
-                                if (gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
                                 {
-                                    StartQueue(license);
-                                    //return new Result(false, Messages.ErrorCreateGame);
+                                    Dispose(true);
+                                    return StartQueue(itsInterface);
                                 }
                             }
-                            if (gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
                             {
-                                //ClientKiller.SuspendLeagueClient(); // Champ select geldiği gibi suspend ve hide et. 
-                                KillUxRender();
-                                PickRandomAvailableChampion();
-                                Logger.Log(SetSpell().Success, SetSpell().Message);
-                                KillUxRender();
-                                gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
-                                while (gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+                                KillUxRender(itsInterface);
+                                PickRandomAvailableChampion(itsInterface);
+                                SetSpell(itsInterface);
+                                KillUxRender(itsInterface);
+                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
                                 {
-                                    if (gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
                                     {
-                                        StartQueue(license);
+                                        Dispose(true);
+                                        return StartQueue(itsInterface);
+                                    }
+                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+                                    {
                                         break;
                                     }
-                                    if (gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                                    {
-                                        break;
-                                    }
-                                    gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
+                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                 }
                             }
                             else
                             {
-                                ClientKiller.KillLeagueClient();
+                                Dispose(true);
+                                itsInterface.clientKiller.KillLeagueClient();
                                 Thread.Sleep(7000);
-                                processManager.Start(license);
+                                return itsInterface.processManager.Start(itsInterface);
                             }
                         }
                     }
                     else
                     {
-                        //AccountProcess.FirstProcess();
-                        StartQueue(license);
+                        Dispose(true);
+                        return StartQueue(itsInterface);
                     }
+                    Dispose(true);
                 }
                 catch (Exception ex)
                 {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    ClientKiller.KillLeagueClient();
+                    Dispose(true);
+                    itsInterface.clientKiller.KillLeagueClient();
                     Thread.Sleep(7000);
-                    processManager.Start(license);
+                    return itsInterface.processManager.Start(itsInterface);
                 }
             }
-            return null;
+            return itsInterface.Result(true, "");
         }
-        public IResult SetSpell()
+
+        public bool SearchQueue(Interface itsInterface)
+        {
+            using (var apiCalls = new ApiCalls())
+            {
+                try
+                {
+                    // Set dashboard status
+                    itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
+
+                    try
+                    {
+                        // Start matchmaking
+                        itsInterface.matchmaking =  apiCalls.GetObject<Matchmaking>("/lol-lobby/v2/lobby/matchmaking/search-state", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                        //if (itsInterface.matchmaking.lowPriorityData.penaltyTime > 0)
+                        //{
+                        //    Thread.Sleep(300000);
+                        //    itsInterface.logger.Log(false, "LPQ Detected!");
+                        //    Dispose(true);
+                        //    return CallQueue(itsInterface);
+                        //}
+                    }
+                    catch (Exception e)
+                    {
+                        Thread.Sleep(300000);
+                        itsInterface.logger.Log(false, "LPQ Detected!");
+                        Dispose(true);
+                        return CallQueue(itsInterface);
+                    }
+                    Thread.Sleep(500);
+
+                    // Start queue search
+                    itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    if (itsInterface.matchmaking.Equals(null) == false)
+                    {
+                        string searchState = itsInterface.matchmaking.searchState.ToUpper();
+                        if (searchState != Matchmaking.SearchStateEnum.SEARCHING.ToString() && searchState != Matchmaking.SearchStateEnum.FOUND.ToString())
+                        {
+                            itsInterface.clientKiller.KillLeagueClient();
+                            Thread.Sleep(7000);
+                            Dispose(true);
+                            return itsInterface.processManager.Start(itsInterface);
+                        }
+                        else
+                        {
+                            DateTime now = DateTime.Now;
+                            while (true)
+                            {
+                                DateTime now2 = DateTime.Now;
+                                TimeSpan timeSpan = now - now2;
+
+                                // Check for searching error
+                                if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
+                                {
+                                    itsInterface.clientKiller.KillLeagueClient();
+                                    Thread.Sleep(7000);
+                                    Dispose(true);
+                                    return itsInterface.processManager.Start(itsInterface);
+                                }
+
+                                // Search game
+                                itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                try
+                                {
+                                    // Get current game session
+                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                }
+                                catch { }
+
+                                string gFS = itsInterface.gameflowSession?.phase.ToUpper();
+
+                                if (searchState == Matchmaking.SearchStateEnum.FOUND.ToString())
+                                {
+                                    KillUxRender(itsInterface);
+                                    try
+                                    {
+                                        Thread.Sleep(50);
+                                        //Accept Match
+                                        apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+
+                                        // Accept Match
+                                        apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                    }
+                                    catch { }
+
+                                    if (itsInterface.gameflowSession != null && gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                                    {
+                                        // Champ Select now
+                                        return ChampSelect(itsInterface);
+
+                                    }
+                                }
+                                if (itsInterface.gameflowSession != null && gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                                {
+                                    // Champ Select now
+                                    return ChampSelect(itsInterface);
+                                }
+                            }
+
+
+                        }
+                    }
+                    else
+                    {
+                        Dispose(true);
+                        return CallQueue(itsInterface);
+                    }
+
+                }
+                catch
+                {
+                    itsInterface.clientKiller.KillLeagueClient();
+                    Thread.Sleep(7000);
+                    Dispose(true);
+                    return itsInterface.processManager.Start(itsInterface);
+                }
+            }
+        }
+
+        public bool ChampSelect(Interface itsInterface)
+        {
+            Thread.Sleep(50);
+            using (var apiCalls = new ApiCalls())
+            {
+                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                string gFS = itsInterface.gameflowSession.phase.ToUpper();
+                if (gFS == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gFS == GameflowSession.GameflowSessionEnum.NONE.ToString())
+                {
+                    Dispose(true);
+                    return SearchQueue(itsInterface);
+                }
+
+                if (gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+                {
+                    KillUxRender(itsInterface);
+                    PickRandomAvailableChampion(itsInterface);
+                    SetSpell(itsInterface);
+                    KillUxRender(itsInterface);
+                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                    while (gFS != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || gFS != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+                    {
+                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                        if (gFS == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gFS != GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || gFS == GameflowSession.GameflowSessionEnum.NONE.ToString())
+                        {
+                            Dispose(true);
+                            return CallQueue(itsInterface);
+                        }
+
+                        if (gFS == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    itsInterface.clientKiller.KillLeagueClient();
+                    Thread.Sleep(7000);
+                    Dispose(true);
+                    return itsInterface.processManager.Start(itsInterface);
+                }
+            }
+            
+            return itsInterface.Result(true, "");
+        }
+
+        public bool CallQueue(Interface itsInterface)
+        {
+            return SearchQueue(itsInterface);
+        }
+
+        public bool SetSpell(Interface itsInterface)
         {
             try
             {
                 //TODO Dashboard'a bağla! veya Spelleri randomlaştır.
-                MySelection mySelection = new MySelection();
-                mySelection.wardSkinId = 0;
-                mySelection.selectedSkinId = 0;
-                mySelection.spell1Id = 4;
-                mySelection.spell2Id = 7;
+                itsInterface.mySelection.wardSkinId = 0;
+                itsInterface.mySelection.selectedSkinId = 0;
+                itsInterface.mySelection.spell1Id = 4;
+                itsInterface.mySelection.spell2Id = 7;
                 using (var apiCalls = new ApiCalls())
                 {
-                    apiCalls.PatchObject<MySelection>(mySelection, "/lol-champ-select/v1/session/my-selection", apiVariables.IAuth, apiVariables.IPort);
+                    apiCalls.PatchObject<MySelection>(itsInterface.mySelection, "/lol-champ-select/v1/session/my-selection", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                 }
             }
             catch
             {
-                return new Result(true, Messages.ErrorSpell);
+                return itsInterface.Result(true, itsInterface.messages.ErrorSpell);
             }
-            return new Result(true, Messages.SuccessSpell);
+            return itsInterface.Result(true, itsInterface.messages.SuccessSpell);
         }
-        public IResult PickRandomAvailableChampion()
+        public bool PickRandomAvailableChampion(Interface itsInterface)
         {
+            KillUxRender(itsInterface);
             int champion = 0;
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            int[] objectArray = GetPickableChampions();
+            int[] objectArray = GetPickableChampions(itsInterface);
             List<int> champList = objectArray != null ? ((IEnumerable<int>)objectArray).ToList<int>() : (List<int>)null;
             champList?.Remove(34);
             champList?.Remove(136);
@@ -777,10 +1119,10 @@ namespace Evelynn_Bot.Account_Process
             List<int> champList2 = new List<int>();
             for (int i1 = 0; i1 < champList.Count; ++i1)
             {
-                for (int i2 = 0; i2 < ChampionDatas.ADCChampions.Count; ++i2)
+                for (int i2 = 0; i2 < itsInterface.championDatas.ADCChampions.Count; ++i2)
                 {
-                    if (champList.Contains(ChampionDatas.ADCChampions[i2]))
-                        champList2.Add(ChampionDatas.ADCChampions[i2]);
+                    if (champList.Contains(itsInterface.championDatas.ADCChampions[i2]))
+                        champList2.Add(itsInterface.championDatas.ADCChampions[i2]);
                 }
             }
             if (champList2.Count > 0)
@@ -795,12 +1137,11 @@ namespace Evelynn_Bot.Account_Process
             }
 
 
-            ChampionSelectInformation champSelectInfos = new ChampionSelectInformation();
-            champSelectInfos.actorCellId = 0;
-            champSelectInfos.championId = champion;
-            champSelectInfos.completed = true;
-            champSelectInfos.id = 0;
-            champSelectInfos.type = "pick";
+            itsInterface.champSelectInfos.actorCellId = 0;
+            itsInterface.champSelectInfos.championId = champion;
+            itsInterface.champSelectInfos.completed = true;
+            itsInterface.champSelectInfos.id = 0;
+            itsInterface.champSelectInfos.type = "pick";
 
             using (var apiCalls = new ApiCalls())
             {
@@ -810,10 +1151,10 @@ namespace Evelynn_Bot.Account_Process
                     {
                         try
                         {
-                            champSelectInfos.actorCellId = k;
-                            champSelectInfos.id = l;
-                            apiCalls.PatchObject<ChampionSelectInformation>(champSelectInfos, "/lol-champ-select/v1/session/actions/" + k.ToString(), apiVariables.IAuth, apiVariables.IPort);
-                            apiCalls.PostObject<int>(k, "/lol-champ-select/v1/session/actions/" + k.ToString() + "/complete", apiVariables.IAuth, apiVariables.IPort);
+                            itsInterface.champSelectInfos.actorCellId = k;
+                            itsInterface.champSelectInfos.id = l;
+                            apiCalls.PatchObject<ChampionSelectInformation>(itsInterface.champSelectInfos, "/lol-champ-select/v1/session/actions/" + k.ToString(), itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                            apiCalls.PostObject<int>(k, "/lol-champ-select/v1/session/actions/" + k.ToString() + "/complete", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                             goto IL_KIRMANOKTASI;
                         }
                         catch
@@ -824,22 +1165,22 @@ namespace Evelynn_Bot.Account_Process
                         IL_KIRMANOKTASI:;
                     }
                 }
-                GameflowSession gameflowSession = new GameflowSession();
-                gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", apiVariables.IAuth, apiVariables.IPort);
-                if (!(gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString()))
+
+                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                if (!(itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString()))
                 {
                     int num3 = 0;
-                    num3 = apiCalls.GetObject<int>("/lol-champ-select/v1/current-champion", apiVariables.IAuth, apiVariables.IPort);
+                    num3 = apiCalls.GetObject<int>("/lol-champ-select/v1/current-champion", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                     if (num3 != 0)
                     {
-                        List<string> list3 = Enum.GetNames(typeof(ChampionDatas.LeagueChampions)).ToList<string>();
+                        List<int> list3 = itsInterface.championDatas.LeagueChampions;
                         list3.Sort();
-                        ChampionDatas.LeagueChampions leagueChampions = ChampionDatas.LeagueChampions.Aatrox;
                         for (int m = 0; m < list3.Count; m++)
                         {
                             try
                             {
-                                Enum.TryParse<ChampionDatas.LeagueChampions>(list3[m], out leagueChampions);
+                                var leagueChampions = 266;
+                                Enum.TryParse<int>(list3[m].ToString(), out leagueChampions);
                                 int num4 = (int)leagueChampions;
                                 if (num4 == champion)
                                 {
@@ -853,38 +1194,38 @@ namespace Evelynn_Bot.Account_Process
                     }
                     if (num3 == 0)
                     {
-                        PickRandomAvailableChampion();
+                        PickRandomAvailableChampion(itsInterface);
                     }
                 }
             }
-            return new Result(true, Messages.SuccessChampionPick);
+            return itsInterface.Result(true, itsInterface.messages.SuccessChampionPick);
         }
-        public int[] GetPickableChampions()
+
+        public int[] GetPickableChampions(Interface itsInterface)
         {
             try
             {
-                using (var request = CreateRequest())
+                using (var request = CreateRequest(itsInterface))
                 {
-                    var result = request.Get("https://127.0.0.1:"+ apiVariables.IPort +"/lol-champ-select/v1/pickable-champion-ids").ToString();
+                    var result = request.Get("https://127.0.0.1:"+ itsInterface.apiVariables.IPort +"/lol-champ-select/v1/pickable-champion-ids").ToString();
                     result = Regex.Match(result, @"\[(.*)\]").Groups[1].Value;
                     return result.Split(',').Select(Int32.Parse).ToArray();
                 }
             }
             catch
             {
-                return GetPickableChampions();
+                return GetPickableChampions(itsInterface);
             }
 
         }
 
-
-        public void SelectChampion()
+        public bool SelectChampion(Interface itsInterface)
         {
             try
             {
                 using (ApiCalls apiCalls = new ApiCalls())
                 {
-                    Missions[] missionArray = apiCalls.GetObject<Missions[]>("/lol-missions/v1/missions", apiVariables.IAuth, apiVariables.IPort);
+                    Missions[] missionArray = apiCalls.GetObject<Missions[]>("/lol-missions/v1/missions", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                     for (int index1 = 0; index1 < missionArray.Length; ++index1)
                     {
                         try
@@ -903,9 +1244,9 @@ namespace Evelynn_Bot.Account_Process
                                             {
                                                 "ahri_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     }
                                     else if (missionArray[index1].requirements[index2]
                                         .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step4:AFTER_DELAY:PT17H"))
@@ -916,9 +1257,9 @@ namespace Evelynn_Bot.Account_Process
                                             {
                                                 "ekko_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     }
                                     else if (missionArray[index1].requirements[index2]
                                         .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step1:AFTER_DELAY:PT17H"))
@@ -929,9 +1270,9 @@ namespace Evelynn_Bot.Account_Process
                                             {
                                                 "illaoi_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     }
                                     else if (missionArray[index1].requirements[index2]
                                         .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step3:AFTER_DELAY:PT17H"))
@@ -942,9 +1283,9 @@ namespace Evelynn_Bot.Account_Process
                                             {
                                                 "nami_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     }
                                     else if (missionArray[index1].requirements[index2]
                                         .Contains("SERIES:OPT_IN:npe_rewards_login_v1_series"))
@@ -955,9 +1296,9 @@ namespace Evelynn_Bot.Account_Process
                                             {
                                                 "caitlyn_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     }
                                     else if (missionArray[index1].requirements[index2]
                                         .Contains("MISSION:COMPLETED:npe_rewards_login_v1_step2:AFTER_DELAY:PT17H"))
@@ -968,34 +1309,41 @@ namespace Evelynn_Bot.Account_Process
                                             {
                                                 "brand_group"
                                             }
-                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", apiVariables.IAuth, apiVariables.IPort);
-                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", apiVariables.IAuth, apiVariables.IPort);
+                                        }, "/lol-missions/v1/player/" + missionArray[index1].id, itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/lol-missions/v1/force", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+                                        apiCalls.PostObject<string>("", "/riotclient/kill-and-restart-ux", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
                                     }
                                 }
                             }
+                            Dispose(true);
+                            return itsInterface.Result(true, "");
                         }
                         catch
                         {
                             Console.WriteLine("MISSION FIX HATA 1");
+                            Dispose(true);
+                            return itsInterface.Result(true, "");
                         }
                     }
+                    Dispose(true);
+                    return itsInterface.Result(true, "");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("MISSION FIX HATA 2");
+                Dispose(true);
+                return itsInterface.Result(true, "");
             }
         }
 
 
-        public HttpRequest CreateRequest()
+        public HttpRequest CreateRequest(Interface itsInterface)
         {
-            HttpRequest request = new HttpRequest();
-            request.IgnoreProtocolErrors = true;
-            request.CharacterSet = HttpRequestEncoding;
-            request.AddHeader("Authorization", "Basic " + apiVariables.IAuth);
-            return request;
+            itsInterface.request.IgnoreProtocolErrors = true;
+            itsInterface.request.CharacterSet = HttpRequestEncoding;
+            itsInterface.request.AddHeader("Authorization", "Basic " + itsInterface.apiVariables.IAuth);
+            return itsInterface.request;
         }
 
         #region Dispose
@@ -1004,6 +1352,7 @@ namespace Evelynn_Bot.Account_Process
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
+                GC.Collect();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

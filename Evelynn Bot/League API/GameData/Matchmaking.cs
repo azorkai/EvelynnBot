@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class Matchmaking
+    public struct Matchmaking
     {
         public string searchState
         {
@@ -22,6 +22,17 @@ namespace Evelynn_Bot.League_API.GameData
 
         private string string_0;
 
+        public LowPriorityData lowPriorityData { get; set; }
+
+        public struct LowPriorityData
+        {
+            public string bustedLeaverAccessToken { get; set; }
+            public List<object> penalizedSummonerIds { get; set; }
+            public double penaltyTime { get; set; }
+            public double penaltyTimeRemaining { get; set; }
+            public string reason { get; set; }
+        }
+
         public enum SearchStateEnum
         {
             INVALID,
@@ -31,7 +42,7 @@ namespace Evelynn_Bot.League_API.GameData
             FOUND,
             ERROR,
             SERVICEERROR,
-            SERVICESHUTDOWN
+            SERVICESHUTDOWN,
         }
     }
 }

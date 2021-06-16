@@ -1,5 +1,4 @@
 ﻿using AutoIt;
-using Evelynn_Bot.Results;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,15 +40,17 @@ namespace Evelynn_Bot.GameAI
                 int x; int y;
                 int.TryParse(data[1], out x);
                 int.TryParse(data[2], out y);
+                Dispose(true);
                 return data;
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine(e);
                 return null;
             }
 
         }
-        public IResult ImageSearchForGameStart(string path, string tolerance, string message)
+        public bool ImageSearchForGameStart(string path, string tolerance, string message, Interface itsInterface)
         {
             int x;
             int y;
@@ -62,16 +63,16 @@ namespace Evelynn_Bot.GameAI
                     Int32.TryParse(results[2], out y);
                     game_X = x;
                     game_Y = y;
-                    return new Result(true, message);
+                    return itsInterface.Result(true, message);
                 }
-                return new Result(false, "Oyun başlamadı!");
+                return itsInterface.Result(false, "Oyun başlamadı!");
             }
             catch (Exception e)
             {
-                return new Result(false, "ERROR!");
+                return itsInterface.Result(false, "ERROR!");
             }
         }
-        public IResult ImageSearch(string path, string tolerance, string message)
+        public bool ImageSearch(string path, string tolerance, string message, Interface itsInterface)
         {
             int x;
             int y;
@@ -84,13 +85,13 @@ namespace Evelynn_Bot.GameAI
                     Int32.TryParse(results[2], out y);
                     X = x;
                     Y = y;
-                    return new Result(true, message);
+                    return itsInterface.Result(true, message);
                 }
-                return new Result(false, "Görsel bulunamadı");
+                return itsInterface.Result(false, "");
             }
             catch (Exception e)
             {
-                return new Result(false, "ERROR!");
+                return itsInterface.Result(false, "ERROR!");
             }
         }
 
@@ -205,19 +206,19 @@ namespace Evelynn_Bot.GameAI
 
 
         #region TutorialAI
-        public void TutorialAI_1()
+        public void TutorialAI_1(Interface itsInterface)
         {
-            while (IsGameStarted() == false)
+            while (IsGameStarted(itsInterface) == false)
             {
                 Thread.Sleep(15000);
-                IsGameStarted();
+                IsGameStarted(itsInterface);
             }
 
-            while (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
+            while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
             {
                 GoMid();
 
-                if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                 {
                     AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
                     HitMove(X, Y);
@@ -227,12 +228,12 @@ namespace Evelynn_Bot.GameAI
                     Thread.Sleep(1500);
                 }
 
-                while (ImageSearch(ImagePaths.minions_tutorial, "3", Messages.SuccessMinion).Success)
+                while (ImageSearch(itsInterface.ImgPaths.minions_tutorial, "3", itsInterface.messages.SuccessMinion, itsInterface))
                 {
                     HitMove(X, Y);
                     Thread.Sleep(500);
 
-                    if (ImageSearch(ImagePaths.enemy_minions, "3", Messages.SuccessEnemyChampion).Success)
+                    if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
                         AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
                         AutoItX.Send("q");
@@ -247,7 +248,7 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(1500);
                     }
 
-                    if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                    if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
                         AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
                         HitMove(X, Y);
@@ -257,7 +258,7 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(1500);
                     }
 
-                    if (ImageSearch(ImagePaths.tower, "2", Messages.SuccessEnemyChampion).Success)
+                    if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
                         AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
                         AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
@@ -276,12 +277,12 @@ namespace Evelynn_Bot.GameAI
 
         }
 
-        public void TutorialAI_2()
+        public void TutorialAI_2(Interface itsInterface)
         {
-            while (IsGameStarted() == false)
+            while (IsGameStarted(itsInterface) == false)
             {
                 Thread.Sleep(15000);
-                IsGameStarted();
+                IsGameStarted(itsInterface);
             }
 
             Thread.Sleep(5000);
@@ -292,12 +293,12 @@ namespace Evelynn_Bot.GameAI
 
             BuyItem();
 
-            while (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
+            while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
             {
                 GoMid();
                 Thread.Sleep(4000);
 
-                if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                 {
                     AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
                     HitMove(X, Y);
@@ -307,7 +308,7 @@ namespace Evelynn_Bot.GameAI
                     Thread.Sleep(1500);
                 }
 
-                while (ImageSearch(ImagePaths.minions, "3", Messages.SuccessMinion).Success)
+                while (ImageSearch(itsInterface.ImgPaths.minions, "3", itsInterface.messages.SuccessMinion, itsInterface))
                 {
                     SkillUp("q", "j");
                     SkillUp("w", "k");
@@ -316,7 +317,7 @@ namespace Evelynn_Bot.GameAI
                     HitMove(X, Y);
                     Thread.Sleep(500);
 
-                    if (ImageSearch(ImagePaths.enemy_minions, "3", Messages.SuccessEnemyChampion).Success)
+                    if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
                         AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
                         AutoItX.Send("q");
@@ -331,7 +332,7 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(1500);
                     }
 
-                    if (ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                    if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
                         AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
                         HitMove(X, Y);
@@ -341,7 +342,7 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(1500);
                     }
 
-                    if (ImageSearch(ImagePaths.tower, "2", Messages.SuccessEnemyChampion).Success)
+                    if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
                         AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
                         AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
@@ -353,9 +354,9 @@ namespace Evelynn_Bot.GameAI
             }
         }
 
-        public bool IsGameStarted()
+        public bool IsGameStarted(Interface itsInterface)
         {
-            if (ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
+            if (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
             {
                 return true;
             }
@@ -365,15 +366,15 @@ namespace Evelynn_Bot.GameAI
 
         #endregion
 
-        public void CurrentPlayerStats(Player player)
+        public void CurrentPlayerStats(Interface itsInterface)
         {
             using (ApiCalls apiCalls = new ApiCalls())
             {
                 var liveData = apiCalls.GetLiveGameData();
-                player.MaxHealth = liveData.activePlayer.championStats.maxHealth;
-                player.CurrentHealth = liveData.activePlayer.championStats.currentHealth;
-                player.CurrentGold = liveData.activePlayer.currentGold;
-                player.Level = liveData.activePlayer.level;
+                itsInterface.player.MaxHealth = liveData.activePlayer.championStats.maxHealth;
+                itsInterface.player.CurrentHealth = liveData.activePlayer.championStats.currentHealth;
+                itsInterface.player.CurrentGold = liveData.activePlayer.currentGold;
+                itsInterface.player.Level = liveData.activePlayer.level;
             }
         }
 
@@ -382,7 +383,7 @@ namespace Evelynn_Bot.GameAI
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
+                GC.Collect();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

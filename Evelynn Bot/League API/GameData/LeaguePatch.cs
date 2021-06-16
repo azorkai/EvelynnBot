@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class LeaguePatch
+    public struct LeaguePatch
     {
         public bool isCorrupted { get; set; }
         public bool isStopped { get; set; }

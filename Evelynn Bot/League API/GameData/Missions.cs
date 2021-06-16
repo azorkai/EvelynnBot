@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class Missions
+    public struct Missions
     {
         public string id { get; set; }
 

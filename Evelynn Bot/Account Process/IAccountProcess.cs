@@ -1,34 +1,38 @@
 ﻿using Evelynn_Bot.Entities;
-using Evelynn_Bot.Results;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using bAUTH;
+using Evelynn_Bot.Constants;
+using Evelynn_Bot.ExternalCommands;
+using Evelynn_Bot.GameAI;
+using Evelynn_Bot.League_API.GameData;
 using Leaf.xNet;
 
 namespace Evelynn_Bot.Account_Process
 {
     public interface IAccountProcess:IDisposable
     {
-        IResult StartLeague(License license);
-        IResult LoginAccount(License license);
-        IResult Initialize();
-        void GetSetWallet();
-        void CheckNewAccount(License license);
+        bool StartLeague(Interface itsInterface);
+        bool LoginAccount(Interface itsInterface);
+        bool Initialize(Interface itsInterface);
+        bool GetSetWallet(Interface itsInterface);
+        bool CheckNewAccount(Interface itsInterface);
         string RandomName(int len, bool two);
         string RandomNameGenerator();
-        void TutorialMissions(License license);
-        void PatchCheck();
-        bool LeagueIsPatchAvailable();
-        void Disenchant();
-        IResult CreateGame(License license);
-        IResult StartQueue(License license);
-        IResult SetSpell();
-        IResult PickRandomAvailableChampion();
-        int[] GetPickableChampions();
-        void SelectChampion();
-        HttpRequest CreateRequest();
+        bool TutorialMissions(Interface itsInterface);
+        bool PatchCheck(Interface itsInterface);
+        bool LeagueIsPatchAvailable(Interface itsInterface);
+        bool Disenchant(Interface itsInterface);
+        bool CreateGame(Interface itsInterface);
+        bool StartQueue(Interface itsInterface);
+        bool SetSpell(Interface itsInterface);
+        bool PickRandomAvailableChampion(Interface itsInterface);
+        int[] GetPickableChampions(Interface itsInterface);
+        bool SelectChampion(Interface itsInterface);
+        HttpRequest CreateRequest(Interface itsInterface);
     }
 }

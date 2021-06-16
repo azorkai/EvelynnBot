@@ -12,22 +12,21 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Evelynn_Bot.Constants;
-using Evelynn_Bot.Results;
 
 namespace Evelynn_Bot.League_API
 {
-    public class ApiCalls:ApiVariables, IApiCalls
+    public class ApiCalls : ApiVariables, IApiCalls
     {
         private int Port;
         private string Auth;
 
-        public static Encoding HttpRequestEncoding = Encoding.UTF8;
+        public Encoding HttpRequestEncoding = Encoding.UTF8;
         #region DLL
 
         [DllImport("User32.dll")]
         private static extern int SetForegroundWindow(IntPtr intptr_0);
 
-        static int SW_SHOW = 5;
+        int SW_SHOW = 5;
         private bool disposedValue;
 
         [DllImport("User32.dll", SetLastError = true)]
@@ -140,6 +139,7 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+               Dispose(true);
             }
         }
 
@@ -201,6 +201,8 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+                Dispose(true);
+
             }
         }
 
@@ -235,6 +237,7 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+                Dispose(true);
                 result = false;
             }
             return result;
@@ -265,6 +268,7 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+                Dispose(true);
                 result = null;
             }
             return result;
@@ -300,6 +304,7 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+                Dispose(true);
                 result = null;
             }
             return result;
@@ -330,6 +335,7 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+                Dispose(true);
                 result = null;
             }
             return result;
@@ -359,6 +365,7 @@ namespace Evelynn_Bot.League_API
             }
             catch
             {
+                Dispose(true);
                 result = new LiveGameData();
             }
             return result;
@@ -371,7 +378,7 @@ namespace Evelynn_Bot.League_API
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
+                GC.Collect();
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer

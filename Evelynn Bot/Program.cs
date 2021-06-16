@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -27,9 +28,10 @@ namespace Evelynn_Bot
     {
         static void Main(string[] args)
         {
-            JsonRead jsonRead = new JsonRead();
-            DashboardHelper.LoginAndStartBot(jsonRead.Id(), jsonRead.Password());
-
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+            Interface itsInterface = new Interface();
+            itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
             Console.ReadLine();
         }
 
