@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml;
 using AutoIt;
 using bAUTH;
@@ -23,11 +22,11 @@ namespace Evelynn_Bot.ProcessManager
         
         private bool randomController;
 
-        public bool Start(Interface itsInterface)
+        public void Start(Interface itsInterface)
         {
             if (CheckInGame(itsInterface))
             {
-                return this.GameAi(itsInterface);
+                GameAi(itsInterface);
             }
 
             StartAccountProcess(itsInterface);
@@ -37,10 +36,10 @@ namespace Evelynn_Bot.ProcessManager
                 Thread.Sleep(15000);
                 IsGameStarted(itsInterface);
             }
-            return this.GameAi(itsInterface);
+            GameAi(itsInterface);
         }
 
-        public bool StartAccountProcess(Interface itsInterface)
+        public void StartAccountProcess(Interface itsInterface)
         {
             try
             {
@@ -64,6 +63,7 @@ namespace Evelynn_Bot.ProcessManager
                     accountProcess.GetSetWallet(itsInterface);
                     //ClientKiller.SuspendLeagueClient();
                     Dispose(true);
+
                     if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
                     {
                         itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
@@ -71,7 +71,7 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                         Thread.Sleep(15000);
                         Dispose(true);
-                        return Start(itsInterface);
+                        Start(itsInterface);
                     }
 
                     if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
@@ -81,13 +81,13 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                         Thread.Sleep(15000);
                         Dispose(true);
-                        return Start(itsInterface);
+                        Start(itsInterface);
                     }
 
                     if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
                     {
                         Dispose(true);
-                        return accountProcess.CheckNewAccount(itsInterface);
+                        accountProcess.CheckNewAccount(itsInterface);
                     }
 
                     accountProcess.PatchCheck(itsInterface);
@@ -106,13 +106,14 @@ namespace Evelynn_Bot.ProcessManager
 
                     if (CheckInGame(itsInterface))
                     {
-                        return itsInterface.Result(true, "");
+                        itsInterface.Result(true, "Oyun Bulundu");
                     }
 
-                    accountProcess.CreateGame(itsInterface);
+                    //accountProcess.CreateGame(itsInterface);
+
                     accountProcess.KillUxRender(itsInterface);
                     Dispose(true);
-                    return accountProcess.StartQueue(itsInterface);
+                    NewQueue.Test();
                 }
 
             }
@@ -120,7 +121,7 @@ namespace Evelynn_Bot.ProcessManager
             {
                 Console.WriteLine($"START ACCOUNT PROCESS HATA {e}");
                 Dispose(true);
-                return itsInterface.Result(false, "");
+                itsInterface.Result(false, "");
             }
         }
 
@@ -140,7 +141,7 @@ namespace Evelynn_Bot.ProcessManager
 
         public bool CheckInGame(Interface itsInterface)
         {
-            while (winExist("League Of Legends.exe", itsInterface))
+            while (winExist("League of Legends (TM) Client", itsInterface))
             {
                 return itsInterface.Result(true, "");
             }
@@ -153,7 +154,7 @@ namespace Evelynn_Bot.ProcessManager
             return itsInterface.Result(Convert.ToBoolean(a), "");
         }
 
-        public bool GameAi(Interface itsInterface)
+        public void GameAi(Interface itsInterface)
         {
             Thread aiThread = new Thread(() => GameAi2(itsInterface));
             aiThread.Start();
@@ -241,7 +242,7 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
-            aiThread.Abort();
+            try {  aiThread.Interrupt(); } catch (ThreadInterruptedException e) { }
             Dispose(true);
             using (AccountProcess accountProcess = new AccountProcess())
             {
@@ -263,7 +264,7 @@ namespace Evelynn_Bot.ProcessManager
                 itsInterface.dashboard.IsStart = false;
                 Console.WriteLine("Panelden Start Geldi!");
                 Dispose(true);
-                return PlayAgain(itsInterface);
+                PlayAgain(itsInterface);
             }
 
             if (itsInterface.dashboard.IsStop) // Dashboard Action Stop
@@ -278,16 +279,16 @@ namespace Evelynn_Bot.ProcessManager
                 Console.WriteLine("Panelden Restart Geldi!");
                 itsInterface.clientKiller.KillLeagueClient();
                 Dispose(true);
-                return Start(itsInterface);
+                Start(itsInterface);
             }
 
             Dispose(true);
-            return PlayAgain(itsInterface);
+            PlayAgain(itsInterface);
 
 
         }
 
-        public bool GameAi2(Interface itsInterface)
+        public void GameAi2(Interface itsInterface)
         {
             Console.WriteLine("Thread 2 Test!");
             using (GameAi gameAi = new GameAi())
@@ -321,13 +322,9 @@ namespace Evelynn_Bot.ProcessManager
                     gameAi.GoBase();
                 }
             }
-
-            Thread.Sleep(1000);
-
-            return itsInterface.Result(true, "");
         }
 
-        public bool PlayAgain(Interface itsInterface)
+        public void PlayAgain(Interface itsInterface)
         {
             using (AccountProcess accountProcess = new AccountProcess())
             {
@@ -345,7 +342,7 @@ namespace Evelynn_Bot.ProcessManager
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     Thread.Sleep(15000);
                     Dispose(true);
-                    return Start(itsInterface);
+                    Start(itsInterface);
                 }
 
                 if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
@@ -355,7 +352,7 @@ namespace Evelynn_Bot.ProcessManager
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     Thread.Sleep(15000);
                     Dispose(true);
-                    return Start(itsInterface);
+                    Start(itsInterface);
                 }
 
                 if (itsInterface.license.Lol_disenchant)
@@ -363,8 +360,7 @@ namespace Evelynn_Bot.ProcessManager
                     accountProcess.Disenchant(itsInterface);
                 }
 
-                accountProcess.CreateGame(itsInterface);
-                accountProcess.StartQueue(itsInterface);
+                NewQueue.Test();
 
                 while (IsGameStarted(itsInterface) == false)
                 {
@@ -373,7 +369,7 @@ namespace Evelynn_Bot.ProcessManager
                 }
                 
                 Dispose(true);
-                return this.GameAi(itsInterface);
+                this.GameAi(itsInterface);
 
             }
         }

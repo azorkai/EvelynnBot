@@ -31,7 +31,8 @@ namespace Evelynn_Bot
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             Interface itsInterface = new Interface();
-            itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
+            //itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
+            NewQueue.Test();
             Console.ReadLine();
         }
 

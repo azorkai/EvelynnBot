@@ -4,13 +4,13 @@ namespace Evelynn_Bot.ProcessManager
 {
     public interface IProcessManager
     {
-        bool Start(Interface itsInterface);
-        bool StartAccountProcess(Interface itsInterface);
+        void Start(Interface itsInterface);
+        void StartAccountProcess(Interface itsInterface);
         bool IsGameStarted(Interface itsInterface);
         bool CheckInGame(Interface itsInterface);
         bool winExist(string win, Interface itsInterface);
-        bool GameAi(Interface itsInterface);
-        bool GameAi2(Interface itsInterface);
-        bool PlayAgain(Interface itsInterface);
+        void GameAi(Interface itsInterface);
+        void GameAi2(Interface itsInterface);
+        void PlayAgain(Interface itsInterface);
     }
 }

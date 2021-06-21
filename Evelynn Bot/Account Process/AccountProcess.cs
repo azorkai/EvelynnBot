@@ -17,8 +17,6 @@ using System.Threading.Tasks;
 using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.League_API.GameData;
 using Leaf.xNet;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using AutoIt;
 using bAUTH;
 using Evelynn_Bot.GameAI;
@@ -85,14 +83,14 @@ namespace Evelynn_Bot.Account_Process
 
                     Thread.Sleep(20000);
 
-                    if (File.Exists(Application.StartupPath + "\\lockfile"))
+                    if (File.Exists(AppContext.BaseDirectory + "\\lockfile"))
                     {
-                        File.Delete(Application.StartupPath + "\\lockfile");
+                        File.Delete(AppContext.BaseDirectory + "\\lockfile");
                     }
 
                     string sourceFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Riot Games\\Riot Client\\Config\\lockfile";
-                    File.Copy(sourceFileName, Application.StartupPath + "\\lockfile");
-                    string text = File.ReadAllText(Application.StartupPath + "\\lockfile");
+                    File.Copy(sourceFileName, AppContext.BaseDirectory + "\\lockfile");
+                    string text = File.ReadAllText(AppContext.BaseDirectory + "\\lockfile");
                     string[] separator = new string[]
                     {":"};
                     string[] array = text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
@@ -146,7 +144,7 @@ namespace Evelynn_Bot.Account_Process
                     }
 
                     Thread.Sleep(15000);
-                    KillUxRender(itsInterface);
+                    //KillUxRender(itsInterface);
                     Thread.Sleep(15000);
                     Dispose(true);
                     return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
@@ -252,7 +250,7 @@ namespace Evelynn_Bot.Account_Process
                         itsInterface.clientKiller.KillLeagueClient();
                         Thread.Sleep(7000);
                         Dispose(true);
-                        return itsInterface.processManager.Start(itsInterface);
+                        itsInterface.processManager.Start(itsInterface);
                     }
 
                     itsInterface.logger.Log(true, "Need another name..");
@@ -262,7 +260,7 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.clientKiller.KillLeagueClient();
                     Thread.Sleep(7000);
                     Dispose(true);
-                    return itsInterface.processManager.Start(itsInterface);
+                    itsInterface.processManager.Start(itsInterface);
                 }
             }
             return itsInterface.Result(false, "");
@@ -533,691 +531,691 @@ namespace Evelynn_Bot.Account_Process
 
             }
         }
-        public bool CreateGame(Interface itsInterface)
-        { 
-            try
-            {
+        //public void CreateGame(Interface itsInterface)
+        //{ 
+        //    try
+        //    {
                
-                using (var apiCalls = new ApiCalls())
-                {
-                    Lobby lobby = new Lobby();
-                    lobby.gameMode = "CLASSIC";
-                    lobby.queueId = 830;
-                    var success = apiCalls.PostObject<Lobby>(lobby, "/lol-lobby/v2/lobby", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                    KillUxRender(itsInterface);
-                    if (success == true)
-                    {
-                        itsInterface.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface);
-                        return itsInterface.Result(success, itsInterface.messages.SuccessCreateGame);
-                    }
-                    itsInterface.clientKiller.KillLeagueClient();
-                    Thread.Sleep(7000);
-                    Dispose(true);
-                    return itsInterface.processManager.Start(itsInterface);
-                }
-            }
-            catch (Exception e)
-            {
-                itsInterface.clientKiller.KillLeagueClient();
-                Thread.Sleep(7000);
-                Dispose(true);
-                return itsInterface.processManager.Start(itsInterface);
-            }
-        }
-        public bool StartQueue(Interface itsInterface)
-        {
-            using (var apiCalls = new ApiCalls())
-            {
-                itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
-                try
-                {
+        //        using (var apiCalls = new ApiCalls())
+        //        {
+        //            Lobby lobby = new Lobby();
+        //            lobby.gameMode = "CLASSIC";
+        //            lobby.queueId = 830;
+        //            var success = apiCalls.PostObject<Lobby>(lobby, "/lol-lobby/v2/lobby", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //            KillUxRender(itsInterface);
+        //            if (success == true)
+        //            {
+        //                itsInterface.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface);
+        //                itsInterface.Result(success, itsInterface.messages.SuccessCreateGame);
+        //            }
+        //            itsInterface.clientKiller.KillLeagueClient();
+        //            Thread.Sleep(7000);
+        //            Dispose(true);
+        //            itsInterface.processManager.Start(itsInterface);
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        itsInterface.clientKiller.KillLeagueClient();
+        //        Thread.Sleep(7000);
+        //        Dispose(true);
+        //        itsInterface.processManager.Start(itsInterface);
+        //    }
+        //}
+        //public bool StartQueue(Interface itsInterface)
+        //{
+        //    using (var apiCalls = new ApiCalls())
+        //    {
+        //        itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
+        //        try
+        //        {
 
-                    try
-                    {
-                        /*
-                         * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue2();}
-                        */
+        //            try
+        //            {
+        //                /*
+        //                 * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue2();}
+        //                */
 
-                        apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
-                        //IF RESPONSE IS EMPTY, THAT MEANS THE CHAMPION IS IN LQP
-                        //TODO: CHECK THE RESPONSE, IF ITS EMPTY RUN THE LQP PRIOITY PROCESS
+        //                //IF RESPONSE IS EMPTY, THAT MEANS THE CHAMPION IS IN LQP
+        //                //TODO: CHECK THE RESPONSE, IF ITS EMPTY RUN THE LQP PRIOITY PROCESS
 
-                    }
-                    catch
-                    {
-                        LQP_HATASI:
-                        Thread.Sleep(300000);
-                        Dispose(true);
-                        return StartQueue2(itsInterface);
-                    }
-                    Thread.Sleep(500);
-                    Matchmaking matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                    if (matchmaking.Equals(null) == false)
-                    {
-                        if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
-                        {
-                            itsInterface.clientKiller.KillLeagueClient();
-                            Thread.Sleep(7000);
-                            Dispose(true);
-                            return itsInterface.processManager.Start(itsInterface);
-                        }
-                        else
-                        {
-                            DateTime now = DateTime.Now;
-                            for (; ; )
-                            {
-                                DateTime now2 = DateTime.Now;
-                                TimeSpan timeSpan = now - now2;
-                                if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
-                                {
-                                    goto ARAMAHATASIUZUNSURE;
-                                }
-                                matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                try
-                                {
-                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                    goto MACHATASI;
-                                }
-                                catch
-                                {
-                                    goto MACHATASI;
-                                }
-                                MACBULUNDUSTATE:
-                                if (matchmaking.searchState.ToUpper() == "FOUND")
-                                {
-                                    KillUxRender(itsInterface);
-                                    try
-                                    {
-                                        Thread.Sleep(50);
-                                        if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
-                                        {
+        //            }
+        //            catch
+        //            {
+        //            LQP_HATASI:
+        //                Thread.Sleep(300000);
+        //                Dispose(true);
+        //                return StartQueue2(itsInterface);
+        //            }
+        //            Thread.Sleep(500);
+        //            Matchmaking matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //            if (matchmaking.Equals(null) == false)
+        //            {
+        //                if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
+        //                {
+        //                    itsInterface.clientKiller.KillLeagueClient();
+        //                    Thread.Sleep(7000);
+        //                    Dispose(true);
+        //                    itsInterface.processManager.Start(itsInterface);
+        //                }
+        //                else
+        //                {
+        //                    DateTime now = DateTime.Now;
+        //                    for (; ; )
+        //                    {
+        //                        DateTime now2 = DateTime.Now;
+        //                        TimeSpan timeSpan = now - now2;
+        //                        if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
+        //                        {
+        //                            goto ARAMAHATASIUZUNSURE;
+        //                        }
+        //                        matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        try
+        //                        {
+        //                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                            goto MACHATASI;
+        //                        }
+        //                        catch
+        //                        {
+        //                            goto MACHATASI;
+        //                        }
+        //                    MACBULUNDUSTATE:
+        //                        if (matchmaking.searchState.ToUpper() == "FOUND")
+        //                        {
+        //                            KillUxRender(itsInterface);
+        //                            try
+        //                            {
+        //                                Thread.Sleep(50);
+        //                                if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
+        //                                {
 
-                                        }
-                                        if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
-                                        {
+        //                                }
+        //                                if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
+        //                                {
 
-                                        }
-                                    }
-                                    catch
-                                    {
-                                    }
-                                    if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                                    {
-                                        break;
-                                    }
-                                }
-                                if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                                {
-                                    break;
-                                }
-                                continue;
-                            MACHATASI:
-                                if (matchmaking.Equals(null) == false)
-                                {
-                                    goto MACBULUNDUSTATE;
-                                }
-                                else
-                                {
-                                    itsInterface.clientKiller.KillLeagueClient();
-                                    Thread.Sleep(7000);
-                                    Dispose(true);
-                                    return itsInterface.processManager.Start(itsInterface);
-                                }
-                            }
-                            goto IL_28C;
-                        ARAMAHATASIUZUNSURE:
-                            itsInterface.clientKiller.KillLeagueClient();
-                            Thread.Sleep(7000);
-                            Dispose(true);
-                            return itsInterface.processManager.Start(itsInterface);
-                        IL_28C:
-                            Thread.Sleep(50);
-                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                            while (itsInterface.gameflowSession == null && itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                            {
-                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                            }
-                            while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                            {
-                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
-                                {
-                                    Dispose(true);
-                                    return StartQueue2(itsInterface);
-                                }
-                            }
-                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                            {
-                                KillUxRender(itsInterface);
-                                PickRandomAvailableChampion(itsInterface);
-                                SetSpell(itsInterface);
-                                KillUxRender(itsInterface);
-                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                                {
-                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
-                                    {
-                                        Dispose(true);
-                                        return StartQueue2(itsInterface);
-                                    }
-                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                                    {
-                                        break;
-                                    }
-                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                }
-                            }
-                            else
-                            {
-                                itsInterface.clientKiller.KillLeagueClient();
-                                Thread.Sleep(7000);
-                                Dispose(true);
-                                return itsInterface.processManager.Start(itsInterface);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Dispose(true);
-                        return StartQueue2(itsInterface);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    itsInterface.clientKiller.KillLeagueClient();
-                    Thread.Sleep(7000);
-                    Dispose(true);
-                    return itsInterface.processManager.Start(itsInterface);
-                }
-            }
-            return itsInterface.Result(true, "");
-        }
+        //                                }
+        //                            }
+        //                            catch
+        //                            {
+        //                            }
+        //                            if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                            {
+        //                                break;
+        //                            }
+        //                        }
+        //                        if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                        {
+        //                            break;
+        //                        }
+        //                        continue;
+        //                    MACHATASI:
+        //                        if (matchmaking.Equals(null) == false)
+        //                        {
+        //                            goto MACBULUNDUSTATE;
+        //                        }
+        //                        else
+        //                        {
+        //                            itsInterface.clientKiller.KillLeagueClient();
+        //                            Thread.Sleep(7000);
+        //                            Dispose(true);
+        //                            return itsInterface.processManager.Start(itsInterface);
+        //                        }
+        //                    }
+        //                    goto IL_28C;
+        //                ARAMAHATASIUZUNSURE:
+        //                    itsInterface.clientKiller.KillLeagueClient();
+        //                    Thread.Sleep(7000);
+        //                    Dispose(true);
+        //                    return itsInterface.processManager.Start(itsInterface);
+        //                IL_28C:
+        //                    Thread.Sleep(50);
+        //                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                    while (itsInterface.gameflowSession == null && itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                    {
+        //                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                    }
+        //                    while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                    {
+        //                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+        //                        {
+        //                            Dispose(true);
+        //                            return StartQueue2(itsInterface);
+        //                        }
+        //                    }
+        //                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                    {
+        //                        KillUxRender(itsInterface);
+        //                        PickRandomAvailableChampion(itsInterface);
+        //                        SetSpell(itsInterface);
+        //                        KillUxRender(itsInterface);
+        //                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+        //                        {
+        //                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+        //                            {
+        //                                Dispose(true);
+        //                                return StartQueue2(itsInterface);
+        //                            }
+        //                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+        //                            {
+        //                                break;
+        //                            }
+        //                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        itsInterface.clientKiller.KillLeagueClient();
+        //                        Thread.Sleep(7000);
+        //                        Dispose(true);
+        //                        return itsInterface.processManager.Start(itsInterface);
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                Dispose(true);
+        //                return StartQueue2(itsInterface);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            itsInterface.clientKiller.KillLeagueClient();
+        //            Thread.Sleep(7000);
+        //            Dispose(true);
+        //            return itsInterface.processManager.Start(itsInterface);
+        //        }
+        //    }
+        //    return itsInterface.Result(true, "");
+        //}
 
-        public bool StartQueue2(Interface itsInterface)
-        {
-            using (var apiCalls = new ApiCalls())
-            {
-                itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
-                try
-                {
+        //public bool StartQueue2(Interface itsInterface)
+        //{
+        //    using (var apiCalls = new ApiCalls())
+        //    {
+        //        itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
+        //        try
+        //        {
 
-                    try
-                    {
-                        /*
-                         * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue();}
-                        */
+        //            try
+        //            {
+        //                /*
+        //                 * if (API.leaverbuster()){ Logger.Status("LQP detected."); } else {API.StartQueue();}
+        //                */
 
-                        apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                apiCalls.PostObject<string>("", "/lol-lobby/v2/lobby/matchmaking/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
-                        //IF RESPONSE IS EMPTY, THAT MEANS THE CHAMPION IS IN LQP
-                        //TODO: CHECK THE RESPONSE, IF ITS EMPTY RUN THE LQP PRIOITY PROCESS
+        //                //IF RESPONSE IS EMPTY, THAT MEANS THE CHAMPION IS IN LQP
+        //                //TODO: CHECK THE RESPONSE, IF ITS EMPTY RUN THE LQP PRIOITY PROCESS
 
-                    }
-                    catch
-                    {
-                        LQP_HATASI:
-                        Thread.Sleep(300000);
-                        Dispose(true);
-                        return StartQueue(itsInterface);
-                    }
-                    Thread.Sleep(500);
-                    Matchmaking matchmaking = new Matchmaking();
-                    matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                    if (matchmaking.Equals(null) == false)
-                    {
-                        if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
-                        {
-                            itsInterface.clientKiller.KillLeagueClient();
-                            Thread.Sleep(7000);
-                            Dispose(true);
-                            return itsInterface.processManager.Start(itsInterface);
-                        }
-                        else
-                        {
-                            DateTime now = DateTime.Now;
-                            for (;;)
-                            {
-                                DateTime now2 = DateTime.Now;
-                                TimeSpan timeSpan = now - now2;
-                                if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
-                                {
-                                    goto ARAMAHATASIUZUNSURE;
-                                }
-                                matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                try
-                                {
-                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                    goto MACHATASI;
-                                }
-                                catch
-                                {
-                                    goto MACHATASI;
-                                }
-                                MACBULUNDUSTATE:
-                                if (matchmaking.searchState.ToUpper() == "FOUND")
-                                {
-                                    KillUxRender(itsInterface);
-                                    try
-                                    {
-                                        Thread.Sleep(50);
-                                        if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
-                                        {
+        //            }
+        //            catch
+        //            {
+        //            LQP_HATASI:
+        //                Thread.Sleep(300000);
+        //                Dispose(true);
+        //                return StartQueue(itsInterface);
+        //            }
+        //            Thread.Sleep(500);
+        //            Matchmaking matchmaking = new Matchmaking();
+        //            matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //            if (matchmaking.Equals(null) == false)
+        //            {
+        //                if (matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.SEARCHING.ToString() && matchmaking.searchState.ToUpper() != Matchmaking.SearchStateEnum.FOUND.ToString())
+        //                {
+        //                    itsInterface.clientKiller.KillLeagueClient();
+        //                    Thread.Sleep(7000);
+        //                    Dispose(true);
+        //                    return itsInterface.processManager.Start(itsInterface);
+        //                }
+        //                else
+        //                {
+        //                    DateTime now = DateTime.Now;
+        //                    for (; ; )
+        //                    {
+        //                        DateTime now2 = DateTime.Now;
+        //                        TimeSpan timeSpan = now - now2;
+        //                        if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
+        //                        {
+        //                            goto ARAMAHATASIUZUNSURE;
+        //                        }
+        //                        matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        try
+        //                        {
+        //                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                            goto MACHATASI;
+        //                        }
+        //                        catch
+        //                        {
+        //                            goto MACHATASI;
+        //                        }
+        //                    MACBULUNDUSTATE:
+        //                        if (matchmaking.searchState.ToUpper() == "FOUND")
+        //                        {
+        //                            KillUxRender(itsInterface);
+        //                            try
+        //                            {
+        //                                Thread.Sleep(50);
+        //                                if (apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
+        //                                {
 
-                                        }
-                                        if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
-                                        {
+        //                                }
+        //                                if (apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort))
+        //                                {
 
-                                        }
-                                    }
-                                    catch
-                                    {
-                                    }
-                                    if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                                    {
-                                        break;
-                                    }
-                                }
-                                if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                                {
-                                    break;
-                                }
-                                continue;
-                            MACHATASI:
-                                if (matchmaking.Equals(null) == false)
-                                {
-                                    goto MACBULUNDUSTATE;
-                                }
-                                else
-                                {
-                                    Dispose(true);
-                                    itsInterface.clientKiller.KillLeagueClient();
-                                    Thread.Sleep(7000);
-                                    return itsInterface.processManager.Start(itsInterface);
-                                }
-                            }
-                            goto IL_28C;
-                        ARAMAHATASIUZUNSURE:
-                            Dispose(true);
-                            itsInterface.clientKiller.KillLeagueClient();
-                            Thread.Sleep(7000);
-                            return itsInterface.processManager.Start(itsInterface);
-                        IL_28C:
-                            Thread.Sleep(50);
-                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                            while (itsInterface.gameflowSession == null && itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                            {
-                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                            }
-                            while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                            {
-                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
-                                {
-                                    Dispose(true);
-                                    return StartQueue(itsInterface);
-                                }
-                            }
-                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                            {
-                                KillUxRender(itsInterface);
-                                PickRandomAvailableChampion(itsInterface);
-                                SetSpell(itsInterface);
-                                KillUxRender(itsInterface);
-                                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                                {
-                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
-                                    {
-                                        Dispose(true);
-                                        return StartQueue(itsInterface);
-                                    }
-                                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                                    {
-                                        break;
-                                    }
-                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                }
-                            }
-                            else
-                            {
-                                Dispose(true);
-                                itsInterface.clientKiller.KillLeagueClient();
-                                Thread.Sleep(7000);
-                                return itsInterface.processManager.Start(itsInterface);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Dispose(true);
-                        return StartQueue(itsInterface);
-                    }
-                    Dispose(true);
-                }
-                catch (Exception ex)
-                {
-                    Dispose(true);
-                    itsInterface.clientKiller.KillLeagueClient();
-                    Thread.Sleep(7000);
-                    return itsInterface.processManager.Start(itsInterface);
-                }
-            }
-            return itsInterface.Result(true, "");
-        }
+        //                                }
+        //                            }
+        //                            catch
+        //                            {
+        //                            }
+        //                            if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                            {
+        //                                break;
+        //                            }
+        //                        }
+        //                        if (itsInterface.gameflowSession != null && ((itsInterface.gameflowSession != null) ? itsInterface.gameflowSession.phase.ToUpper() : null) == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                        {
+        //                            break;
+        //                        }
+        //                        continue;
+        //                    MACHATASI:
+        //                        if (matchmaking.Equals(null) == false)
+        //                        {
+        //                            goto MACBULUNDUSTATE;
+        //                        }
+        //                        else
+        //                        {
+        //                            Dispose(true);
+        //                            itsInterface.clientKiller.KillLeagueClient();
+        //                            Thread.Sleep(7000);
+        //                            return itsInterface.processManager.Start(itsInterface);
+        //                        }
+        //                    }
+        //                    goto IL_28C;
+        //                ARAMAHATASIUZUNSURE:
+        //                    Dispose(true);
+        //                    itsInterface.clientKiller.KillLeagueClient();
+        //                    Thread.Sleep(7000);
+        //                    return itsInterface.processManager.Start(itsInterface);
+        //                IL_28C:
+        //                    Thread.Sleep(50);
+        //                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                    while (itsInterface.gameflowSession == null && itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                    {
+        //                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                    }
+        //                    while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                    {
+        //                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+        //                        {
+        //                            Dispose(true);
+        //                            return StartQueue(itsInterface);
+        //                        }
+        //                    }
+        //                    if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                    {
+        //                        KillUxRender(itsInterface);
+        //                        PickRandomAvailableChampion(itsInterface);
+        //                        SetSpell(itsInterface);
+        //                        KillUxRender(itsInterface);
+        //                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        while (itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+        //                        {
+        //                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.NONE.ToString())
+        //                            {
+        //                                Dispose(true);
+        //                                return StartQueue(itsInterface);
+        //                            }
+        //                            if (itsInterface.gameflowSession.phase.ToUpper() == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+        //                            {
+        //                                break;
+        //                            }
+        //                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        Dispose(true);
+        //                        itsInterface.clientKiller.KillLeagueClient();
+        //                        Thread.Sleep(7000);
+        //                        return itsInterface.processManager.Start(itsInterface);
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                Dispose(true);
+        //                return StartQueue(itsInterface);
+        //            }
+        //            Dispose(true);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Dispose(true);
+        //            itsInterface.clientKiller.KillLeagueClient();
+        //            Thread.Sleep(7000);
+        //            return itsInterface.processManager.Start(itsInterface);
+        //        }
+        //    }
+        //    return itsInterface.Result(true, "");
+        //}
 
-        public bool SearchQueue(Interface itsInterface)
-        {
-            using (var apiCalls = new ApiCalls())
-            {
-                try
-                {
-                    // Set dashboard status
-                    itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
+        //public bool SearchQueue(Interface itsInterface)
+        //{
+        //    using (var apiCalls = new ApiCalls())
+        //    {
+        //        try
+        //        {
+        //            // Set dashboard status
+        //            itsInterface.dashboardHelper.UpdateLolStatus("In Queue", itsInterface);
 
-                    try
-                    {
-                        // Start matchmaking
-                        itsInterface.matchmaking =  apiCalls.GetObject<Matchmaking>("/lol-lobby/v2/lobby/matchmaking/search-state", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                        //if (itsInterface.matchmaking.lowPriorityData.penaltyTime > 0)
-                        //{
-                        //    Thread.Sleep(300000);
-                        //    itsInterface.logger.Log(false, "LPQ Detected!");
-                        //    Dispose(true);
-                        //    return CallQueue(itsInterface);
-                        //}
-                    }
-                    catch (Exception e)
-                    {
-                        Thread.Sleep(300000);
-                        itsInterface.logger.Log(false, "LPQ Detected!");
-                        Dispose(true);
-                        return CallQueue(itsInterface);
-                    }
-                    Thread.Sleep(500);
+        //            try
+        //            {
+        //                // Start matchmaking
+        //                itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-lobby/v2/lobby/matchmaking/search-state", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                //if (itsInterface.matchmaking.lowPriorityData.penaltyTime > 0)
+        //                //{
+        //                //    Thread.Sleep(300000);
+        //                //    itsInterface.logger.Log(false, "LPQ Detected!");
+        //                //    Dispose(true);
+        //                //    return CallQueue(itsInterface);
+        //                //}
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                Thread.Sleep(300000);
+        //                itsInterface.logger.Log(false, "LPQ Detected!");
+        //                Dispose(true);
+        //                return CallQueue(itsInterface);
+        //            }
+        //            Thread.Sleep(500);
 
-                    // Start queue search
-                    itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                    if (itsInterface.matchmaking.Equals(null) == false)
-                    {
-                        string searchState = itsInterface.matchmaking.searchState.ToUpper();
-                        if (searchState != Matchmaking.SearchStateEnum.SEARCHING.ToString() && searchState != Matchmaking.SearchStateEnum.FOUND.ToString())
-                        {
-                            itsInterface.clientKiller.KillLeagueClient();
-                            Thread.Sleep(7000);
-                            Dispose(true);
-                            return itsInterface.processManager.Start(itsInterface);
-                        }
-                        else
-                        {
-                            DateTime now = DateTime.Now;
-                            while (true)
-                            {
-                                DateTime now2 = DateTime.Now;
-                                TimeSpan timeSpan = now - now2;
+        //            // Start queue search
+        //            itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //            if (itsInterface.matchmaking.Equals(null) == false)
+        //            {
+        //                string searchState = itsInterface.matchmaking.searchState.ToUpper();
+        //                if (searchState != Matchmaking.SearchStateEnum.SEARCHING.ToString() && searchState != Matchmaking.SearchStateEnum.FOUND.ToString())
+        //                {
+        //                    itsInterface.clientKiller.KillLeagueClient();
+        //                    Thread.Sleep(7000);
+        //                    Dispose(true);
+        //                    return itsInterface.processManager.Start(itsInterface);
+        //                }
+        //                else
+        //                {
+        //                    DateTime now = DateTime.Now;
+        //                    while (true)
+        //                    {
+        //                        DateTime now2 = DateTime.Now;
+        //                        TimeSpan timeSpan = now - now2;
 
-                                // Check for searching error
-                                if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
-                                {
-                                    itsInterface.clientKiller.KillLeagueClient();
-                                    Thread.Sleep(7000);
-                                    Dispose(true);
-                                    return itsInterface.processManager.Start(itsInterface);
-                                }
+        //                        // Check for searching error
+        //                        if (timeSpan.TotalMinutes > 30.0 || timeSpan.TotalMinutes < -30.0)
+        //                        {
+        //                            itsInterface.clientKiller.KillLeagueClient();
+        //                            Thread.Sleep(7000);
+        //                            Dispose(true);
+        //                            return itsInterface.processManager.Start(itsInterface);
+        //                        }
 
-                                // Search game
-                                itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                try
-                                {
-                                    // Get current game session
-                                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                }
-                                catch { }
+        //                        // Search game
+        //                        itsInterface.matchmaking = apiCalls.GetObject<Matchmaking>("/lol-matchmaking/v1/search", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        try
+        //                        {
+        //                            // Get current game session
+        //                            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        }
+        //                        catch { }
 
-                                string gFS = itsInterface.gameflowSession?.phase.ToUpper();
+        //                        string gFS = itsInterface.gameflowSession?.phase.ToUpper();
 
-                                if (searchState == Matchmaking.SearchStateEnum.FOUND.ToString())
-                                {
-                                    KillUxRender(itsInterface);
-                                    try
-                                    {
-                                        Thread.Sleep(50);
-                                        //Accept Match
-                                        apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                        if (searchState == Matchmaking.SearchStateEnum.FOUND.ToString())
+        //                        {
+        //                            KillUxRender(itsInterface);
+        //                            try
+        //                            {
+        //                                Thread.Sleep(50);
+        //                                //Accept Match
+        //                                apiCalls.PostObject<string>("", "/lol-matchmaking/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
 
-                                        // Accept Match
-                                        apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                                    }
-                                    catch { }
+        //                                // Accept Match
+        //                                apiCalls.PostObject<string>("", "/lol-lobby-team-builder/v1/ready-check/accept", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                            }
+        //                            catch { }
 
-                                    if (itsInterface.gameflowSession != null && gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                                    {
-                                        // Champ Select now
-                                        return ChampSelect(itsInterface);
+        //                            if (itsInterface.gameflowSession != null && gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                            {
+        //                                // Champ Select now
+        //                                return ChampSelect(itsInterface);
 
-                                    }
-                                }
-                                if (itsInterface.gameflowSession != null && gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                                {
-                                    // Champ Select now
-                                    return ChampSelect(itsInterface);
-                                }
-                            }
-
-
-                        }
-                    }
-                    else
-                    {
-                        Dispose(true);
-                        return CallQueue(itsInterface);
-                    }
-
-                }
-                catch
-                {
-                    itsInterface.clientKiller.KillLeagueClient();
-                    Thread.Sleep(7000);
-                    Dispose(true);
-                    return itsInterface.processManager.Start(itsInterface);
-                }
-            }
-        }
-
-        public bool ChampSelect(Interface itsInterface)
-        {
-            Thread.Sleep(50);
-            using (var apiCalls = new ApiCalls())
-            {
-                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                string gFS = itsInterface.gameflowSession.phase.ToUpper();
-                if (gFS == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gFS == GameflowSession.GameflowSessionEnum.NONE.ToString())
-                {
-                    Dispose(true);
-                    return SearchQueue(itsInterface);
-                }
-
-                if (gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
-                {
-                    KillUxRender(itsInterface);
-                    PickRandomAvailableChampion(itsInterface);
-                    SetSpell(itsInterface);
-                    KillUxRender(itsInterface);
-                    itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                    while (gFS != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || gFS != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                    {
-                        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                        if (gFS == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gFS != GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || gFS == GameflowSession.GameflowSessionEnum.NONE.ToString())
-                        {
-                            Dispose(true);
-                            return CallQueue(itsInterface);
-                        }
-
-                        if (gFS == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
-                        {
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    itsInterface.clientKiller.KillLeagueClient();
-                    Thread.Sleep(7000);
-                    Dispose(true);
-                    return itsInterface.processManager.Start(itsInterface);
-                }
-            }
-            
-            return itsInterface.Result(true, "");
-        }
-
-        public bool CallQueue(Interface itsInterface)
-        {
-            return SearchQueue(itsInterface);
-        }
-
-        public bool SetSpell(Interface itsInterface)
-        {
-            try
-            {
-                //TODO Dashboard'a bağla! veya Spelleri randomlaştır.
-                itsInterface.mySelection.wardSkinId = 0;
-                itsInterface.mySelection.selectedSkinId = 0;
-                itsInterface.mySelection.spell1Id = 4;
-                itsInterface.mySelection.spell2Id = 7;
-                using (var apiCalls = new ApiCalls())
-                {
-                    apiCalls.PatchObject<MySelection>(itsInterface.mySelection, "/lol-champ-select/v1/session/my-selection", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                }
-            }
-            catch
-            {
-                return itsInterface.Result(true, itsInterface.messages.ErrorSpell);
-            }
-            return itsInterface.Result(true, itsInterface.messages.SuccessSpell);
-        }
-        public bool PickRandomAvailableChampion(Interface itsInterface)
-        {
-            KillUxRender(itsInterface);
-            int champion = 0;
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            int[] objectArray = GetPickableChampions(itsInterface);
-            List<int> champList = objectArray != null ? ((IEnumerable<int>)objectArray).ToList<int>() : (List<int>)null;
-            champList?.Remove(34);
-            champList?.Remove(136);
-            champList?.Remove(68);
-            champList?.Remove(777);
-            champList?.Remove(54);
-            champList?.Remove(147);
-            champList?.Remove(777);
-            champList?.Remove(360);
-            champList?.Remove(526);
-            champList?.Remove(234);
-
-            List<int> champList2 = new List<int>();
-            for (int i1 = 0; i1 < champList.Count; ++i1)
-            {
-                for (int i2 = 0; i2 < itsInterface.championDatas.ADCChampions.Count; ++i2)
-                {
-                    if (champList.Contains(itsInterface.championDatas.ADCChampions[i2]))
-                        champList2.Add(itsInterface.championDatas.ADCChampions[i2]);
-                }
-            }
-            if (champList2.Count > 0)
-            {
-                int index = new Random().Next(0, champList2.Count);
-                champion = champList2[index];
-            }
-            else
-            {
-                int index = new Random().Next(0, champList.Count);
-                champion = champList[index];
-            }
+        //                            }
+        //                        }
+        //                        if (itsInterface.gameflowSession != null && gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //                        {
+        //                            // Champ Select now
+        //                            return ChampSelect(itsInterface);
+        //                        }
+        //                    }
 
 
-            itsInterface.champSelectInfos.actorCellId = 0;
-            itsInterface.champSelectInfos.championId = champion;
-            itsInterface.champSelectInfos.completed = true;
-            itsInterface.champSelectInfos.id = 0;
-            itsInterface.champSelectInfos.type = "pick";
+        //                }
+        //            }
+        //            else
+        //            {
+        //                Dispose(true);
+        //                return CallQueue(itsInterface);
+        //            }
 
-            using (var apiCalls = new ApiCalls())
-            {
-                for (int k = 0; k < 6; k++)
-                {
-                    for (int l = 0; l < 6; l++)
-                    {
-                        try
-                        {
-                            itsInterface.champSelectInfos.actorCellId = k;
-                            itsInterface.champSelectInfos.id = l;
-                            apiCalls.PatchObject<ChampionSelectInformation>(itsInterface.champSelectInfos, "/lol-champ-select/v1/session/actions/" + k.ToString(), itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                            apiCalls.PostObject<int>(k, "/lol-champ-select/v1/session/actions/" + k.ToString() + "/complete", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                            goto IL_KIRMANOKTASI;
-                        }
-                        catch
-                        {
-                            goto IL_KIRMANOKTASI;
-                        }
-                        break;
-                        IL_KIRMANOKTASI:;
-                    }
-                }
+        //        }
+        //        catch
+        //        {
+        //            itsInterface.clientKiller.KillLeagueClient();
+        //            Thread.Sleep(7000);
+        //            Dispose(true);
+        //            return itsInterface.processManager.Start(itsInterface);
+        //        }
+        //    }
+        //}
 
-                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                if (!(itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString()))
-                {
-                    int num3 = 0;
-                    num3 = apiCalls.GetObject<int>("/lol-champ-select/v1/current-champion", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
-                    if (num3 != 0)
-                    {
-                        List<int> list3 = itsInterface.championDatas.LeagueChampions;
-                        list3.Sort();
-                        for (int m = 0; m < list3.Count; m++)
-                        {
-                            try
-                            {
-                                var leagueChampions = 266;
-                                Enum.TryParse<int>(list3[m].ToString(), out leagueChampions);
-                                int num4 = (int)leagueChampions;
-                                if (num4 == champion)
-                                {
-                                    break;
-                                }
-                            }
-                            catch
-                            {
-                            }
-                        }
-                    }
-                    if (num3 == 0)
-                    {
-                        PickRandomAvailableChampion(itsInterface);
-                    }
-                }
-            }
-            return itsInterface.Result(true, itsInterface.messages.SuccessChampionPick);
-        }
+        //public bool ChampSelect(Interface itsInterface)
+        //{
+        //    Thread.Sleep(50);
+        //    using (var apiCalls = new ApiCalls())
+        //    {
+        //        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //        string gFS = itsInterface.gameflowSession.phase.ToUpper();
+        //        if (gFS == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gFS == GameflowSession.GameflowSessionEnum.NONE.ToString())
+        //        {
+        //            Dispose(true);
+        //            return SearchQueue(itsInterface);
+        //        }
 
-        public int[] GetPickableChampions(Interface itsInterface)
-        {
-            try
-            {
-                using (var request = CreateRequest(itsInterface))
-                {
-                    var result = request.Get("https://127.0.0.1:"+ itsInterface.apiVariables.IPort +"/lol-champ-select/v1/pickable-champion-ids").ToString();
-                    result = Regex.Match(result, @"\[(.*)\]").Groups[1].Value;
-                    return result.Split(',').Select(Int32.Parse).ToArray();
-                }
-            }
-            catch
-            {
-                return GetPickableChampions(itsInterface);
-            }
+        //        if (gFS == GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString())
+        //        {
+        //            KillUxRender(itsInterface);
+        //            PickRandomAvailableChampion(itsInterface);
+        //            SetSpell(itsInterface);
+        //            KillUxRender(itsInterface);
+        //            itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //            while (gFS != GameflowSession.GameflowSessionEnum.GAMESTART.ToString() || gFS != GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+        //            {
+        //                itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                if (gFS == GameflowSession.GameflowSessionEnum.LOBBY.ToString() || gFS != GameflowSession.GameflowSessionEnum.MATCHMAKING.ToString() || gFS == GameflowSession.GameflowSessionEnum.NONE.ToString())
+        //                {
+        //                    Dispose(true);
+        //                    return CallQueue(itsInterface);
+        //                }
 
-        }
+        //                if (gFS == GameflowSession.GameflowSessionEnum.INPROGRESS.ToString())
+        //                {
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            itsInterface.clientKiller.KillLeagueClient();
+        //            Thread.Sleep(7000);
+        //            Dispose(true);
+        //            return itsInterface.processManager.Start(itsInterface);
+        //        }
+        //    }
+
+        //    return itsInterface.Result(true, "");
+        //}
+
+        //public bool CallQueue(Interface itsInterface)
+        //{
+        //    return SearchQueue(itsInterface);
+        //}
+
+        //public bool SetSpell(Interface itsInterface)
+        //{
+        //    try
+        //    {
+        //        //TODO Dashboard'a bağla! veya Spelleri randomlaştır.
+        //        itsInterface.mySelection.wardSkinId = 0;
+        //        itsInterface.mySelection.selectedSkinId = 0;
+        //        itsInterface.mySelection.spell1Id = 4;
+        //        itsInterface.mySelection.spell2Id = 7;
+        //        using (var apiCalls = new ApiCalls())
+        //        {
+        //            apiCalls.PatchObject<MySelection>(itsInterface.mySelection, "/lol-champ-select/v1/session/my-selection", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return itsInterface.Result(true, itsInterface.messages.ErrorSpell);
+        //    }
+        //    return itsInterface.Result(true, itsInterface.messages.SuccessSpell);
+        //}
+        //public bool PickRandomAvailableChampion(Interface itsInterface)
+        //{
+        //    KillUxRender(itsInterface);
+        //    int champion = 0;
+        //    ServicePointManager.Expect100Continue = true;
+        //    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+        //    int[] objectArray = GetPickableChampions(itsInterface);
+        //    List<int> champList = objectArray != null ? ((IEnumerable<int>)objectArray).ToList<int>() : (List<int>)null;
+        //    champList?.Remove(34);
+        //    champList?.Remove(136);
+        //    champList?.Remove(68);
+        //    champList?.Remove(777);
+        //    champList?.Remove(54);
+        //    champList?.Remove(147);
+        //    champList?.Remove(777);
+        //    champList?.Remove(360);
+        //    champList?.Remove(526);
+        //    champList?.Remove(234);
+
+        //    List<int> champList2 = new List<int>();
+        //    for (int i1 = 0; i1 < champList.Count; ++i1)
+        //    {
+        //        for (int i2 = 0; i2 < itsInterface.championDatas.ADCChampions.Count; ++i2)
+        //        {
+        //            if (champList.Contains(itsInterface.championDatas.ADCChampions[i2]))
+        //                champList2.Add(itsInterface.championDatas.ADCChampions[i2]);
+        //        }
+        //    }
+        //    if (champList2.Count > 0)
+        //    {
+        //        int index = new Random().Next(0, champList2.Count);
+        //        champion = champList2[index];
+        //    }
+        //    else
+        //    {
+        //        int index = new Random().Next(0, champList.Count);
+        //        champion = champList[index];
+        //    }
+
+
+        //    itsInterface.champSelectInfos.actorCellId = 0;
+        //    itsInterface.champSelectInfos.championId = champion;
+        //    itsInterface.champSelectInfos.completed = true;
+        //    itsInterface.champSelectInfos.id = 0;
+        //    itsInterface.champSelectInfos.type = "pick";
+
+        //    using (var apiCalls = new ApiCalls())
+        //    {
+        //        for (int k = 0; k < 6; k++)
+        //        {
+        //            for (int l = 0; l < 6; l++)
+        //            {
+        //                try
+        //                {
+        //                    itsInterface.champSelectInfos.actorCellId = k;
+        //                    itsInterface.champSelectInfos.id = l;
+        //                    apiCalls.PatchObject<ChampionSelectInformation>(itsInterface.champSelectInfos, "/lol-champ-select/v1/session/actions/" + k.ToString(), itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                    apiCalls.PostObject<int>(k, "/lol-champ-select/v1/session/actions/" + k.ToString() + "/complete", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //                    goto IL_KIRMANOKTASI;
+        //                }
+        //                catch
+        //                {
+        //                    goto IL_KIRMANOKTASI;
+        //                }
+        //                break;
+        //            IL_KIRMANOKTASI:;
+        //            }
+        //        }
+
+        //        itsInterface.gameflowSession = apiCalls.GetObject<GameflowSession>("/lol-gameflow/v1/session", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //        if (!(itsInterface.gameflowSession.phase.ToUpper() != GameflowSession.GameflowSessionEnum.CHAMPSELECT.ToString()))
+        //        {
+        //            int num3 = 0;
+        //            num3 = apiCalls.GetObject<int>("/lol-champ-select/v1/current-champion", itsInterface.apiVariables.IAuth, itsInterface.apiVariables.IPort);
+        //            if (num3 != 0)
+        //            {
+        //                List<int> list3 = itsInterface.championDatas.LeagueChampions;
+        //                list3.Sort();
+        //                for (int m = 0; m < list3.Count; m++)
+        //                {
+        //                    try
+        //                    {
+        //                        var leagueChampions = 266;
+        //                        Enum.TryParse<int>(list3[m].ToString(), out leagueChampions);
+        //                        int num4 = (int)leagueChampions;
+        //                        if (num4 == champion)
+        //                        {
+        //                            break;
+        //                        }
+        //                    }
+        //                    catch
+        //                    {
+        //                    }
+        //                }
+        //            }
+        //            if (num3 == 0)
+        //            {
+        //                PickRandomAvailableChampion(itsInterface);
+        //            }
+        //        }
+        //    }
+        //    return itsInterface.Result(true, itsInterface.messages.SuccessChampionPick);
+        //}
+
+        //public int[] GetPickableChampions(Interface itsInterface)
+        //{
+        //    try
+        //    {
+        //        using (var request = CreateRequest(itsInterface))
+        //        {
+        //            var result = request.Get("https://127.0.0.1:" + itsInterface.apiVariables.IPort + "/lol-champ-select/v1/pickable-champion-ids").ToString();
+        //            result = Regex.Match(result, @"\[(.*)\]").Groups[1].Value;
+        //            return result.Split(',').Select(Int32.Parse).ToArray();
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return GetPickableChampions(itsInterface);
+        //    }
+
+        //}
 
         public bool SelectChampion(Interface itsInterface)
         {

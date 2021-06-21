@@ -26,12 +26,12 @@ namespace Evelynn_Bot.Account_Process
         bool TutorialMissions(Interface itsInterface);
         bool PatchCheck(Interface itsInterface);
         bool LeagueIsPatchAvailable(Interface itsInterface);
-        bool Disenchant(Interface itsInterface);
-        bool CreateGame(Interface itsInterface);
-        bool StartQueue(Interface itsInterface);
-        bool SetSpell(Interface itsInterface);
-        bool PickRandomAvailableChampion(Interface itsInterface);
-        int[] GetPickableChampions(Interface itsInterface);
+        //bool Disenchant(Interface itsInterface);
+        //void CreateGame(Interface itsInterface);
+        //bool StartQueue(Interface itsInterface);
+        //bool SetSpell(Interface itsInterface);
+        //bool PickRandomAvailableChampion(Interface itsInterface);
+        //int[] GetPickableChampions(Interface itsInterface);
         bool SelectChampion(Interface itsInterface);
         HttpRequest CreateRequest(Interface itsInterface);
     }
