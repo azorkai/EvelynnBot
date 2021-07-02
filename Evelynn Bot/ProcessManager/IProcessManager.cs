@@ -1,16 +1,16 @@
-﻿using Evelynn_Bot.Constants;
+﻿using System.Threading.Tasks;
+using Evelynn_Bot.Constants;
 
 namespace Evelynn_Bot.ProcessManager
 {
     public interface IProcessManager
     {
-        void Start(Interface itsInterface);
-        void StartAccountProcess(Interface itsInterface);
+        Task<Task> Start(Interface itsInterface);
+        Task<Task> StartAccountProcess(Interface itsInterface);
         bool IsGameStarted(Interface itsInterface);
         bool CheckInGame(Interface itsInterface);
         bool winExist(string win, Interface itsInterface);
-        void GameAi(Interface itsInterface);
-        void GameAi2(Interface itsInterface);
-        void PlayAgain(Interface itsInterface);
+        Task<Task> GameAi(Interface itsInterface);
+        Task<Task> PlayAgain(Interface itsInterface);
     }
 }

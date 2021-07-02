@@ -14,53 +14,45 @@ using Newtonsoft.Json;
 using LCU.NET;
 using LCU.NET.API_Models;
 using LCU.NET.Utils;
-using LCU.NET.Plugins;
-using Lobby = LCU.NET.Plugins.LoL.Lobby;
 
 namespace Evelynn_Bot
 {
     public class NewQueue
     {
-        private static ILeagueClient api;
-        private static Lobby lobby;
-        private static RiotClient riotClient;
-        private static LCU.NET.Plugins.LoL.Matchmaking matchmaking;
-        private static LCU.NET.Plugins.LoL.ChampSelect champSelect;
         private static event MessageHandlerDelegate<UxState> UxStateChanged;
         private static event MessageHandlerDelegate<GameFlow> StateChanged;
         private static event MessageHandlerDelegate<Search> OnSearchStateChanged;
-
+        private static Interface itsInterface2;
 
         private static readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
-        private static Interface itsInterface = new Interface();
-
-        public static bool Test()
+        public async Task<Task> Test(Interface itsInterface)
         {
+            itsInterface2 = itsInterface;
             Connect();
-            return true;
+            return Task.CompletedTask;
         }
 
-        private async static Task Connect()
+        private static bool isDone = false;
+
+        private async Task Connect()
         {
-            Console.WriteLine("[TEST]: Connecting...");
-            api = LeagueClient.CreateNew();
-            api.BeginTryInit(InitializeMethod.Lockfile);
-            Console.WriteLine("[TEST]: Connected!");
-            lobby = new Lobby(api);
-            riotClient = new RiotClient(api);
-            matchmaking = new LCU.NET.Plugins.LoL.Matchmaking(api);
-            champSelect = new LCU.NET.Plugins.LoL.ChampSelect(api);
+            isDone = false;
             EventExampleAsync();
             Console.WriteLine("Creating Lobby!");
             CreateLobby();
+            //while (!isDone)
+            //{
+            //    //ignored
+            //}
+            // finished
         }
 
-        async static void CreateLobby()
+        async void CreateLobby()
         {
             try
             {
                 await Task.Delay(1000);
-                await lobby.PostLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830}); 
+                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830}); 
                 //Console.WriteLine(json);
             }
             catch (Exception e)
@@ -70,40 +62,17 @@ namespace Evelynn_Bot
 
         }
 
-        async static void StartQueue()
-        {
-            try
-            {
-                await lobby.PostMatchmakingSearch();
 
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
 
-        async static void AcceptQueue()
-        {
-            try
-            {
-                await matchmaking.PostReadyCheckAccept();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-        async static void PickChampion(Interface itsInterface)
+        async static void PickChampion()
         {
             try
             {
                 //Get the Pickable Champions.
                 LolChampSelectChampSelectAction champSelectInfos = new LolChampSelectChampSelectAction();
 
-           
-                int[] pickableChampions = await champSelect.GetPickableChampions();
+
+                int[] pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
 
                 List<int> champList = pickableChampions != null ? ((IEnumerable<int>)pickableChampions).ToList<int>() : (List<int>)null;
                 List<int> champList2 = new List<int>();
@@ -112,10 +81,10 @@ namespace Evelynn_Bot
 
                 for (int i1 = 0; i1 < champList.Count; ++i1)
                 {
-                    for (int i2 = 0; i2 < itsInterface.championDatas.ADCChampions.Count; ++i2)
+                    for (int i2 = 0; i2 < itsInterface2.championDatas.ADCChampions.Count; ++i2)
                     {
-                        if (champList.Contains(itsInterface.championDatas.ADCChampions[i2]))
-                            champList2.Add(itsInterface.championDatas.ADCChampions[i2]);
+                        if (champList.Contains(itsInterface2.championDatas.ADCChampions[i2]))
+                            champList2.Add(itsInterface2.championDatas.ADCChampions[i2]);
                     }
                 }
                 if (champList2.Count > 0)
@@ -138,7 +107,7 @@ namespace Evelynn_Bot
                         {
                             champSelectInfos.actorCellId = k;
                             champSelectInfos.id = l;
-                            await champSelect.PatchActionById(champSelectInfos, k);
+                            itsInterface2.lcuPlugins.SelectChampionAsync(champSelectInfos, k);
                             goto IL_KIRMANOKTASI;
                         }
                         catch
@@ -150,10 +119,10 @@ namespace Evelynn_Bot
                     }
                 }
 
-                int currentChampion = await champSelect.GetCurrentChampion();
+                int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
                 if (currentChampion == 0)
                 {
-                    PickChampion(itsInterface);
+                    PickChampion();
                 }
 
 
@@ -172,9 +141,9 @@ namespace Evelynn_Bot
             StateChanged += OnStateChanged;
             OnSearchStateChanged += OnSearchChanged;
 
-            api.Socket.Subscribe("/lol-lobby/v2/lobby/matchmaking/search-state", OnSearchStateChanged);
-            api.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
-            api.Socket.Subscribe("/lol-gameflow/v1/session", StateChanged);
+            itsInterface2.lcuApi.Socket.Subscribe("/lol-lobby/v2/lobby/matchmaking/search-state", OnSearchStateChanged);
+            itsInterface2.lcuApi.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
+            itsInterface2.lcuApi.Socket.Subscribe("/lol-gameflow/v1/session", StateChanged);
 
             // Wait until work is complete.
             await _work.Task;
@@ -183,24 +152,31 @@ namespace Evelynn_Bot
 
         private static async void OnSearchChanged(EventType sender, Search result)
         {
-            string state;
-            
-            switch (result.SearchState)
+            try
             {
-                case "Error":
-                    state = $"{result.Errors[0].ErrorType} | Remaining Time: {result.Errors[0].PenaltyTimeRemaining}";
-                    break;
-                default:
-                    state = "unknown";
-                    for (int i = 0; i < result.Errors.Length; i++)
-                    {
-                        Console.WriteLine(result.Errors[i]);
-                    }
-                    break;
-            }
+                string state;
+            
+                switch (result.SearchState)
+                {
+                    case "Error":
+                        state = $"{result.Errors[0].ErrorType} | Remaining Time: {result.Errors[0].PenaltyTimeRemaining}";
+                        break;
+                    default:
+                        state = "unknown";
+                        for (int i = 0; i < result.Errors.Length; i++)
+                        {
+                            Console.WriteLine(result.Errors[i]);
+                        }
+                        break;
+                }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Search State: {state}.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                //Console.WriteLine($"Search State: {state}.");
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
 
@@ -212,10 +188,10 @@ namespace Evelynn_Bot
             {
                 case "ShowMain":
                     state = "show";
+                    await Task.Delay(4000);
                     //api.RequestHandler.ChangeSettings(port, auth);
                     //Console.WriteLine("Port Set! " + port + " " + auth);
-                    riotClient.KillUXAsync();
-                    Console.WriteLine("UxRender Killed");
+                    itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 case "Quit":
                     state = "quit";
@@ -231,7 +207,7 @@ namespace Evelynn_Bot
             }
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"UX update: {state}.");
+            //Console.WriteLine($"UX update: {state}.");
         }
 
         private static async void OnStateChanged(EventType sender, GameFlow result)
@@ -246,32 +222,35 @@ namespace Evelynn_Bot
                 case "Lobby":
                     state = "lobby";
                     await Task.Delay(2500);
-                    StartQueue();
+                    itsInterface2.lcuPlugins.PostMatchmakingSearch();
                     break;
                 case "ChampSelect":
                     state = "champ select";
                     await Task.Delay(3800);
-                    riotClient.KillUXAsync();
-                    PickChampion(itsInterface);
+                    PickChampion();
                     break;
                 case "GameStart":
                     state = "game started";
                     break;
                 case "ReadyCheck":
                     state = "Match Found";
-                    await Task.Delay(2000);
-                    riotClient.KillUXAsync();
-                    AcceptQueue();
+                    itsInterface2.lcuPlugins.AcceptReadyCheck();
                     break;
                 case "InProgress":
                     state = "game";
-                    //GameAI loop! :D ez pz
+                    await itsInterface2.processManager.GameAi(itsInterface2);
+                    isDone = true;
                     break;
                 case "WaitingForStats":
                     state = "waiting for stats";
+                    itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 case "Matchmaking":
                     state = "Matchmaking";
+                    break;
+                case "PreEndOfGame":
+                    state = "Honor Screen";
+                    itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 default:
                     state = $"unknown state: {result.Phase}";

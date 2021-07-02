@@ -65,7 +65,7 @@ namespace Evelynn_Bot.GameAI
                     game_Y = y;
                     return itsInterface.Result(true, message);
                 }
-                return itsInterface.Result(false, "Oyun başlamadı!");
+                return itsInterface.Result(false, "");
             }
             catch (Exception e)
             {
@@ -368,14 +368,11 @@ namespace Evelynn_Bot.GameAI
 
         public void CurrentPlayerStats(Interface itsInterface)
         {
-            using (ApiCalls apiCalls = new ApiCalls())
-            {
-                var liveData = apiCalls.GetLiveGameData();
-                itsInterface.player.MaxHealth = liveData.activePlayer.championStats.maxHealth;
-                itsInterface.player.CurrentHealth = liveData.activePlayer.championStats.currentHealth;
-                itsInterface.player.CurrentGold = liveData.activePlayer.currentGold;
-                itsInterface.player.Level = liveData.activePlayer.level;
-            }
+            var liveData = itsInterface.lcuPlugins.GetLiveGameData();
+            itsInterface.player.MaxHealth = liveData.Result.activePlayer.championStats.maxHealth;
+            itsInterface.player.CurrentHealth = liveData.Result.activePlayer.championStats.currentHealth;
+            itsInterface.player.CurrentGold = liveData.Result.activePlayer.currentGold;
+            itsInterface.player.Level = liveData.Result.activePlayer.level;
         }
 
         #region Dispose
@@ -399,7 +396,7 @@ namespace Evelynn_Bot.GameAI
         public void Dispose()
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            //GC.SuppressFinalize(this);
         }
         #endregion
 

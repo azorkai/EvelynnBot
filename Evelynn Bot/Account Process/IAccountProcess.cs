@@ -17,22 +17,14 @@ namespace Evelynn_Bot.Account_Process
     public interface IAccountProcess:IDisposable
     {
         bool StartLeague(Interface itsInterface);
-        bool LoginAccount(Interface itsInterface);
+        Task<bool> LoginAccount(Interface itsInterface);
         bool Initialize(Interface itsInterface);
-        bool GetSetWallet(Interface itsInterface);
-        bool CheckNewAccount(Interface itsInterface);
+        Task<bool> GetSetWallet(Interface itsInterface);
+        Task<Task> CheckNewAccount(Interface itsInterface);
         string RandomName(int len, bool two);
         string RandomNameGenerator();
         bool TutorialMissions(Interface itsInterface);
         bool PatchCheck(Interface itsInterface);
         bool LeagueIsPatchAvailable(Interface itsInterface);
-        //bool Disenchant(Interface itsInterface);
-        //void CreateGame(Interface itsInterface);
-        //bool StartQueue(Interface itsInterface);
-        //bool SetSpell(Interface itsInterface);
-        //bool PickRandomAvailableChampion(Interface itsInterface);
-        //int[] GetPickableChampions(Interface itsInterface);
-        bool SelectChampion(Interface itsInterface);
-        HttpRequest CreateRequest(Interface itsInterface);
     }
 }

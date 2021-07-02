@@ -22,24 +22,24 @@ namespace Evelynn_Bot.ProcessManager
         
         private bool randomController;
 
-        public void Start(Interface itsInterface)
+        public async Task<Task> Start(Interface itsInterface)
         {
             if (CheckInGame(itsInterface))
             {
-                GameAi(itsInterface);
+                return GameAi(itsInterface);
             }
 
-            StartAccountProcess(itsInterface);
+            await StartAccountProcess(itsInterface);
 
             while (IsGameStarted(itsInterface) == false)
             {
                 Thread.Sleep(15000);
                 IsGameStarted(itsInterface);
             }
-            GameAi(itsInterface);
+            return GameAi(itsInterface);
         }
 
-        public void StartAccountProcess(Interface itsInterface)
+        public async Task<Task> StartAccountProcess(Interface itsInterface)
         {
             try
             {
@@ -55,12 +55,12 @@ namespace Evelynn_Bot.ProcessManager
 
                 using (AccountProcess accountProcess = new AccountProcess())
                 {
+                    itsInterface.clientKiller.KillLeagueClient();
                     accountProcess.StartLeague(itsInterface);
-                    accountProcess.LoginAccount(itsInterface);
+                    await accountProcess.LoginAccount(itsInterface);
                     accountProcess.Initialize(itsInterface);
-                    accountProcess.KillUxRender(itsInterface);
-                    accountProcess.SelectChampion(itsInterface);
-                    accountProcess.GetSetWallet(itsInterface);
+                    itsInterface.lcuPlugins.KillUXAsync();
+                    await accountProcess.GetSetWallet(itsInterface);
                     //ClientKiller.SuspendLeagueClient();
                     Dispose(true);
 
@@ -71,7 +71,7 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                         Thread.Sleep(15000);
                         Dispose(true);
-                        Start(itsInterface);
+                        return Start(itsInterface);
                     }
 
                     if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
@@ -81,20 +81,20 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                         Thread.Sleep(15000);
                         Dispose(true);
-                        Start(itsInterface);
+                        return Start(itsInterface);
                     }
 
                     if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
                     {
                         Dispose(true);
-                        accountProcess.CheckNewAccount(itsInterface);
+                        await accountProcess.CheckNewAccount(itsInterface);
                     }
 
-                    accountProcess.PatchCheck(itsInterface);
+                    accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak
 
                     if (itsInterface.license.Lol_disenchant)
                     {
-                        accountProcess.Disenchant(itsInterface);
+                        await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
                     }
 
                     if (itsInterface.license.Lol_doTutorial)
@@ -111,9 +111,9 @@ namespace Evelynn_Bot.ProcessManager
 
                     //accountProcess.CreateGame(itsInterface);
 
-                    accountProcess.KillUxRender(itsInterface);
+                    itsInterface.lcuPlugins.KillUXAsync();
                     Dispose(true);
-                    NewQueue.Test();
+                    return itsInterface.newQueue.Test(itsInterface);
                 }
 
             }
@@ -123,6 +123,7 @@ namespace Evelynn_Bot.ProcessManager
                 Dispose(true);
                 itsInterface.Result(false, "");
             }
+            return Task.CompletedTask;
         }
 
         public bool IsGameStarted(Interface itsInterface)
@@ -154,10 +155,8 @@ namespace Evelynn_Bot.ProcessManager
             return itsInterface.Result(Convert.ToBoolean(a), "");
         }
 
-        public void GameAi(Interface itsInterface)
+        public Task<Task> GameAi(Interface itsInterface)
         {
-            Thread aiThread = new Thread(() => GameAi2(itsInterface));
-            aiThread.Start();
             itsInterface.dashboardHelper.UpdateLolStatus("In Game", itsInterface);
             Thread.Sleep(15000);
             randomController = true;
@@ -179,24 +178,30 @@ namespace Evelynn_Bot.ProcessManager
                         gameAi.GoMid();
                     }
 
-                    while (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface))
+                    gameAi.CurrentPlayerStats(itsInterface);
+
+                    if (itsInterface.player.CurrentHealth < 15)
                     {
+                        Dispose(true);
+                    }
+
+                    while (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                    {
+                        if (itsInterface.player.CurrentHealth < 15)
+                        {
+                            Dispose(true);
+                        }
                         gameAi.CurrentPlayerStats(itsInterface);
-                        Console.WriteLine("Can: " + itsInterface.player.CurrentHealth);
-                        Console.WriteLine("Altın: " + itsInterface.player.CurrentGold);
-                        Console.WriteLine("Level: " + itsInterface.player.Level);
-
-
                         gameAi.HitMove(gameAi.X, gameAi.Y);
                         Thread.Sleep(500);
 
-                        if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_minions, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface))
+                        if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_minions, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) && itsInterface.player.CurrentHealth > 0)
                         {
                             AutoItX.MouseClick("RIGHT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
                             AutoItX.Send("q");
                         }
 
-                        if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface) && itsInterface.player.CurrentHealth > 0)
                         {
                             AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
                             gameAi.HitMove(gameAi.X, gameAi.Y);
@@ -219,11 +224,48 @@ namespace Evelynn_Bot.ProcessManager
                                 gameAi.SkillUp("q", "j");
                                 break;
                             case 5:
-                                gameAi.SkillUp("e", "m");
+                                gameAi.SkillUp("q", "j");
                                 break;
                             case 6:
                                 gameAi.SkillUp("r", "l");
                                 break;
+                            case 7:
+                                gameAi.SkillUp("q", "j");
+                                break;
+                            case 8:
+                                gameAi.SkillUp("w", "k");
+                                break;
+                            case 9:
+                                gameAi.SkillUp("q", "j");
+                                break;
+                            case 10:
+                                gameAi.SkillUp("w", "k");
+                                break;
+                            case 11:
+                                gameAi.SkillUp("r", "l");
+                                break;
+                            case 12:
+                                gameAi.SkillUp("w", "k");
+                                break;
+                            case 13:
+                                gameAi.SkillUp("w", "k");
+                                break;
+                            case 14:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 15:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 16:
+                                gameAi.SkillUp("r", "l");
+                                break;
+                            case 17:
+                                gameAi.SkillUp("e", "m");
+                                break;
+                            case 18:
+                                gameAi.SkillUp("e", "m");
+                                break;
+
                             default:
                                 gameAi.SkillUp("q", "j");
                                 gameAi.SkillUp("w", "k");
@@ -242,14 +284,13 @@ namespace Evelynn_Bot.ProcessManager
             }
 
             Console.WriteLine("Oyun bitti!");
-            try {  aiThread.Interrupt(); } catch (ThreadInterruptedException e) { }
             Dispose(true);
-            using (AccountProcess accountProcess = new AccountProcess())
-            {
-                accountProcess.Initialize(itsInterface);
-                Thread.Sleep(3500);
-                accountProcess.KillUxRender(itsInterface);
-            }
+            //using (AccountProcess accountProcess = new AccountProcess())
+            //{
+            //    accountProcess.Initialize(itsInterface);
+            //    Thread.Sleep(3500);
+            //    itsInterface.lcuPlugins.KillUXAsync();
+            //}
 
             Thread.Sleep(70000);
             
@@ -264,7 +305,17 @@ namespace Evelynn_Bot.ProcessManager
                 itsInterface.dashboard.IsStart = false;
                 Console.WriteLine("Panelden Start Geldi!");
                 Dispose(true);
-                PlayAgain(itsInterface);
+                return PlayAgain(itsInterface);
+            }
+
+            if (itsInterface.dashboard.IsRestart) // Dashboard Action Restart
+            {
+                itsInterface.dashboard.IsRestart = false;
+                itsInterface.dashboard.IsStop = false;
+                Console.WriteLine("Panelden Restart Geldi!");
+                itsInterface.clientKiller.KillLeagueClient();
+                Dispose(true);
+                return Start(itsInterface);
             }
 
             if (itsInterface.dashboard.IsStop) // Dashboard Action Stop
@@ -273,67 +324,22 @@ namespace Evelynn_Bot.ProcessManager
                 goto CHECKACTIONS;
             }
 
-            if (itsInterface.dashboard.IsRestart) // Dashboard Action Restart
-            {
-                itsInterface.dashboard.IsRestart = false;
-                Console.WriteLine("Panelden Restart Geldi!");
-                itsInterface.clientKiller.KillLeagueClient();
-                Dispose(true);
-                Start(itsInterface);
-            }
-
             Dispose(true);
-            PlayAgain(itsInterface);
-
+            //return PlayAgain(itsInterface);
+            return (Task<Task>)Task.CompletedTask;
 
         }
 
-        public void GameAi2(Interface itsInterface)
-        {
-            Console.WriteLine("Thread 2 Test!");
-            using (GameAi gameAi = new GameAi())
-            {
-                float attackPercentage = ((itsInterface.player.MaxHealth - itsInterface.player.CurrentHealth) * 100) / itsInterface.player.CurrentHealth;
-                if ((int)attackPercentage >= 55 && itsInterface.player.CurrentHealth != 0) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
-                {
-                    Console.WriteLine("Can çok azaldı, bir tık geri çekilme zamanı!");
-                    AutoItX.Send("f");
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    AutoItX.Send("d");
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    Thread.Sleep(6000);
-                }
-
-                var maxHealth = itsInterface.player.MaxHealth;
-                var baseHealth = maxHealth / 2.7f;
-                var currentHealth = itsInterface.player.CurrentHealth;
-
-                if (itsInterface.player.CurrentGold > 3000)
-                {
-                    Console.WriteLine("Gold sınırı, base!");
-                    gameAi.GoBase();
-                }
-
-                if (currentHealth <= baseHealth)
-                {
-                    Console.WriteLine("Can sınırı, base!");
-                    gameAi.GoBase();
-                }
-            }
-        }
-
-        public void PlayAgain(Interface itsInterface)
+        public async Task<Task> PlayAgain(Interface itsInterface)
         {
             using (AccountProcess accountProcess = new AccountProcess())
             {
                 Console.WriteLine("Yeni oyun başlatılıyor!");
                 accountProcess.Initialize(itsInterface);
-                accountProcess.SelectChampion(itsInterface);
-                accountProcess.GetSetWallet(itsInterface);
+                await itsInterface.lcuPlugins.GetSetMissions();
+                await accountProcess.GetSetWallet(itsInterface);
                 accountProcess.PatchCheck(itsInterface);
-                accountProcess.KillUxRender(itsInterface);
+                itsInterface.lcuPlugins.KillUXAsync();
                 Dispose(true);
                 if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
                 {
@@ -342,7 +348,7 @@ namespace Evelynn_Bot.ProcessManager
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     Thread.Sleep(15000);
                     Dispose(true);
-                    Start(itsInterface);
+                    return Start(itsInterface);
                 }
 
                 if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
@@ -352,15 +358,15 @@ namespace Evelynn_Bot.ProcessManager
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     Thread.Sleep(15000);
                     Dispose(true);
-                    Start(itsInterface);
+                    return Start(itsInterface);
                 }
 
                 if (itsInterface.license.Lol_disenchant)
                 {
-                    accountProcess.Disenchant(itsInterface);
+                    await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
                 }
 
-                NewQueue.Test();
+                await itsInterface.newQueue.Test(itsInterface);
 
                 while (IsGameStarted(itsInterface) == false)
                 {
@@ -369,8 +375,7 @@ namespace Evelynn_Bot.ProcessManager
                 }
                 
                 Dispose(true);
-                this.GameAi(itsInterface);
-
+                return this.GameAi(itsInterface);
             }
         }
 
@@ -396,7 +401,7 @@ namespace Evelynn_Bot.ProcessManager
         public void Dispose()
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            //GC.SuppressFinalize(this);
 
         }
         #endregion

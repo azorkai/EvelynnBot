@@ -20,6 +20,7 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
+using EvelynnLCU.Plugins.LoL;
 using Console = System.Console;
 
 namespace Evelynn_Bot
@@ -28,11 +29,11 @@ namespace Evelynn_Bot
     {
         static void Main(string[] args)
         {
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+            //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
             Interface itsInterface = new Interface();
-            //itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
-            NewQueue.Test();
+            itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
+            //NewQueue.Test();
             Console.ReadLine();
         }
 

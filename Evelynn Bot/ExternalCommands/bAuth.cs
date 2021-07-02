@@ -275,7 +275,6 @@ namespace bAUTH
             }
             catch (Exception e)
             {
-                Console.WriteLine($"BAUTH DECRYPT STRING HATA {e}");
                 return "";
             }
         }

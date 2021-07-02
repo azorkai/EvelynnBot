@@ -57,6 +57,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Evelynn_Bot.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AutoItX3.Assembly, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a646454c8d475470, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoItX.Dotnet.3.3.14.5\lib\AutoItX3.Assembly.dll</HintPath>
@@ -64,8 +67,8 @@
     <Reference Include="Costura, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.5.3.0\lib\netstandard1.0\Costura.dll</HintPath>
     </Reference>
-    <Reference Include="LCU.NET">
-      <HintPath>..\LCU.NET.dll</HintPath>
+    <Reference Include="EvelynnLCU">
+      <HintPath>..\EvelynnLCU.dll</HintPath>
     </Reference>
     <Reference Include="Leaf.xNet, Version=5.2.10.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Leaf.xNet.5.2.10\lib\net45\Leaf.xNet.dll</HintPath>
@@ -305,6 +308,9 @@
     <Reference Include="websocket-sharp, Version=1.0.2.59611, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocketSharp.1.0.3-rc11\lib\websocket-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="Websocket.Client, Version=4.3.0.0, Culture=neutral, PublicKeyToken=ae648c6d12f59b1b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Websocket.Client.4.3.32\lib\netstandard2.0\Websocket.Client.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -324,7 +330,6 @@
     <Compile Include="ExternalCommands\Logger.cs" />
     <Compile Include="GameAI\GameAI.cs" />
     <Compile Include="GameAI\IGameAI.cs" />
-    <Compile Include="League API\ApiCalls.cs" />
     <Compile Include="League API\ApiVariables.cs" />
     <Compile Include="League API\GameData\ChampionDatas.cs" />
     <Compile Include="League API\GameData\ChampionSelectInformation.cs" />
@@ -334,18 +339,14 @@
     <Compile Include="League API\GameData\Missions.cs" />
     <Compile Include="League API\GameData\CurrentSummoner.cs" />
     <Compile Include="League API\GameData\GameflowSession.cs" />
-    <Compile Include="League API\GameData\LeaguePatch.cs" />
     <Compile Include="League API\GameData\LiveGameData.cs" />
-    <Compile Include="League API\GameData\Lobby.cs" />
     <Compile Include="League API\GameData\Matchmaking.cs" />
     <Compile Include="League API\GameData\MySelection.cs" />
     <Compile Include="League API\GameData\NewLeaguePlayer.cs" />
     <Compile Include="League API\GameData\PutMission.cs" />
     <Compile Include="League API\GameData\Search.cs" />
     <Compile Include="League API\GameData\Summoner.cs" />
-    <Compile Include="League API\GameData\Tutorial.cs" />
     <Compile Include="League API\GameData\Wallet.cs" />
-    <Compile Include="League API\IApiCalls.cs" />
     <Compile Include="ProcessManager\IProcessManager.cs" />
     <Compile Include="ProcessManager\ProcessManager.cs" />
     <Compile Include="Program.cs" />

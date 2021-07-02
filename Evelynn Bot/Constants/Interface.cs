@@ -9,12 +9,16 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
+using EvelynnLCU.Plugins.LoL;
+using LCU.NET;
 using Leaf.xNet;
+using Wallet = Evelynn_Bot.League_API.GameData.Wallet;
 
 namespace Evelynn_Bot.Constants
 {
     public class Interface : IClass
     {
+        public NewQueue newQueue = new NewQueue();
         public License license = new License();
         public Logger logger = new Logger();
         public ClientKiller clientKiller = new ClientKiller();
@@ -23,8 +27,8 @@ namespace Evelynn_Bot.Constants
         public ChampionDatas championDatas = new ChampionDatas();
         public Dashboard dashboard = new Dashboard();
         public GameAi gameAi = new GameAi();
-        public Summoner summoner = new Summoner();
-        public Wallet wallet = new Wallet();
+        public LolSummonerSummoner summoner = new LolSummonerSummoner();
+        public LCU.NET.Wallet wallet = new LCU.NET.Wallet();
         public Player player = new Player();
         public JsonRead jsonRead = new JsonRead();
         public ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
@@ -39,6 +43,8 @@ namespace Evelynn_Bot.Constants
         public ImagePaths ImgPaths = new ImagePaths();
         public Matchmaking matchmaking = new Matchmaking();
         public GameflowSession gameflowSession = new GameflowSession();
+        public ILeagueClient lcuApi  = LeagueClient.CreateNew();
+        public Plugins lcuPlugins;
         public bool Result(bool succes, string message)
         {
             Message = message;

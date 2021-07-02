@@ -11,6 +11,5 @@ namespace Evelynn_Bot.League_API.GameData
     public struct LiveGameData
     {
         public CurrentSummoner activePlayer { get; set; }
-
     }
 }
