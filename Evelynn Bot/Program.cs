@@ -27,15 +27,21 @@ namespace Evelynn_Bot
 {
     class Program
     {
+
         static void Main(string[] args)
         {
             //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
             Interface itsInterface = new Interface();
+            Language.language = itsInterface.jsonRead.Language();
+            itsInterface.messages.SetLanguage();
             itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
-            //NewQueue.Test();
             Console.ReadLine();
         }
 
+    }
+    public static class Language
+    {
+        public static string language;
     }
 }

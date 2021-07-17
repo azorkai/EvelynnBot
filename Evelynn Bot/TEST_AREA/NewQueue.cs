@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using Evelynn_Bot.Constants;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.Struct;
@@ -19,6 +20,10 @@ namespace Evelynn_Bot
 {
     public class NewQueue
     {
+        public static System.Timers.Timer bugTimer = new System.Timers.Timer();
+        private static int BugTime;
+        private static bool BugBoolean;
+        
         private static event MessageHandlerDelegate<UxState> UxStateChanged;
         private static event MessageHandlerDelegate<GameFlow> StateChanged;
         private static event MessageHandlerDelegate<Search> OnSearchStateChanged;
@@ -28,52 +33,52 @@ namespace Evelynn_Bot
         public async Task<Task> Test(Interface itsInterface)
         {
             itsInterface2 = itsInterface;
-            Connect();
+            await Connect();
             return Task.CompletedTask;
         }
 
-        private static bool isDone = false;
+        public static bool isDone = false;
 
         private async Task Connect()
         {
+            bugTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            bugTimer.Interval = 1000;
+            bugTimer.Enabled = true;
+            bugTimer.Stop();
+
+
             isDone = false;
+
             EventExampleAsync();
-            Console.WriteLine("Creating Lobby!");
             CreateLobby();
-            //while (!isDone)
-            //{
-            //    //ignored
-            //}
-            // finished
+
+            while (!isDone)
+            {
+                //ignored
+            }
         }
 
-        async void CreateLobby()
+        public async void CreateLobby()
         {
             try
             {
                 await Task.Delay(1000);
-                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830}); 
-                //Console.WriteLine(json);
+                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830});
+                itsInterface2.logger.Log(true, itsInterface2.messages.SuccessCreateGame);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                itsInterface2.logger.Log(false,itsInterface2.messages.ErrorCreateGame + e);
             }
 
         }
-
-
 
         async static void PickChampion()
         {
             try
             {
-                //Get the Pickable Champions.
                 LolChampSelectChampSelectAction champSelectInfos = new LolChampSelectChampSelectAction();
-
-
                 int[] pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
-
                 List<int> champList = pickableChampions != null ? ((IEnumerable<int>)pickableChampions).ToList<int>() : (List<int>)null;
                 List<int> champList2 = new List<int>();
 
@@ -124,19 +129,19 @@ namespace Evelynn_Bot
                 {
                     PickChampion();
                 }
-
-
+                else
+                {
+                    itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
+                }
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
             }
         }
 
 
         public static async Task EventExampleAsync()
         {
-            // Register game flow event.
             UxStateChanged += OnUxStateChanged;
             StateChanged += OnStateChanged;
             OnSearchStateChanged += OnSearchChanged;
@@ -170,8 +175,6 @@ namespace Evelynn_Bot
                         break;
                 }
 
-                Console.ForegroundColor = ConsoleColor.Red;
-                //Console.WriteLine($"Search State: {state}.");
             }
             catch
             {
@@ -189,8 +192,6 @@ namespace Evelynn_Bot
                 case "ShowMain":
                     state = "show";
                     await Task.Delay(4000);
-                    //api.RequestHandler.ChangeSettings(port, auth);
-                    //Console.WriteLine("Port Set! " + port + " " + auth);
                     itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 case "Quit":
@@ -205,9 +206,29 @@ namespace Evelynn_Bot
                     state = $"unknown ux state: {result.State}";
                     break;
             }
+        }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            //Console.WriteLine($"UX update: {state}.");
+        private static void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            BugBoolean = true;
+            while (BugBoolean)
+            {
+                BugTime++;
+                itsInterface2.logger.Log(true, "Checking bugs");
+                Thread.Sleep(60000);
+                if (BugTime >= 6)
+                {
+                    BugBoolean = false;
+                    BugTime = 0;
+                    itsInterface2.logger.Log(false, "Error: Waiting for Stats, restarting");
+                    itsInterface2.processManager.StartAccountProcess(itsInterface2);
+                }
+            }
+
+            if (!BugBoolean)
+            {
+                itsInterface2.logger.Log(true, "No Bug!");
+            }
         }
 
         private static async void OnStateChanged(EventType sender, GameFlow result)
@@ -217,16 +238,16 @@ namespace Evelynn_Bot
             switch (result.Phase)
             {
                 case "None":
-                    state = "main menu";
+                    state = "Main Menu";
                     break;
                 case "Lobby":
-                    state = "lobby";
+                    state = "Lobby";
                     await Task.Delay(2500);
                     itsInterface2.lcuPlugins.PostMatchmakingSearch();
                     break;
                 case "ChampSelect":
-                    state = "champ select";
-                    await Task.Delay(3800);
+                    state = "Champ Select [Ignore this message if game is started!]";
+                    await Task.Delay(4000);
                     PickChampion();
                     break;
                 case "GameStart":
@@ -237,38 +258,37 @@ namespace Evelynn_Bot
                     itsInterface2.lcuPlugins.AcceptReadyCheck();
                     break;
                 case "InProgress":
-                    state = "game";
+                    state = "Game is Done";
                     await itsInterface2.processManager.GameAi(itsInterface2);
-                    isDone = true;
                     break;
                 case "WaitingForStats":
-                    state = "waiting for stats";
+                    state = "Waiting for Stats";
                     itsInterface2.lcuPlugins.KillUXAsync();
+
+                    bugTimer.Start();
+                    
                     break;
                 case "Matchmaking":
                     state = "Matchmaking";
                     break;
                 case "PreEndOfGame":
                     state = "Honor Screen";
-                    itsInterface2.lcuPlugins.KillUXAsync();
+                    BugBoolean = false;
+                    
+                    bugTimer.Stop();
+
+                    await itsInterface2.processManager.PlayAgain(itsInterface2);
                     break;
                 default:
                     state = $"unknown state: {result.Phase}";
                     break;
             }
-
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine($"Status update: Entered {state}.");
+            itsInterface2.logger.Log(true,itsInterface2.messages.InfoQueueStats + " " + state);
         }
-
-
-
-
     }
 
     public struct UxState
     {
-
         [JsonProperty("requestId", NullValueHandling = NullValueHandling.Ignore)]
         public string RequestId { get; set; }
 

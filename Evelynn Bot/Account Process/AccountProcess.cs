@@ -58,7 +58,7 @@ namespace Evelynn_Bot.Account_Process
                 info.WindowStyle = ProcessWindowStyle.Hidden;
 
                 Process lol = Process.Start(info);
-                lol.PriorityClass = ProcessPriorityClass.BelowNormal;
+                lol.PriorityClass = ProcessPriorityClass.AboveNormal;
                 lol.WaitForInputIdle();
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
 
@@ -77,6 +77,7 @@ namespace Evelynn_Bot.Account_Process
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
                 }
+
                 if (itsInterface.license.Lol_password == "")
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
@@ -145,13 +146,12 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.summoner = await itsInterface.lcuPlugins.GetCurrentSummoner();
                 itsInterface.wallet = await itsInterface.lcuPlugins.GetWalletDetails();
                 itsInterface.dashboardHelper.UpdateLolWallet(itsInterface.summoner.summonerLevel.ToString(), itsInterface.wallet.ip.ToString(), itsInterface);
-                return itsInterface.Result(true, "");
+                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"GET SET WALLET HATA | SRC: {e.Source} | SATIR {e.StackTrace}");
-                throw;
-                return itsInterface.Result(false, "");
+                return false;
             }
         }
         public async Task<Task> CheckNewAccount(Interface itsInterface)

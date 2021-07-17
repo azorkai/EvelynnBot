@@ -43,6 +43,15 @@ namespace Evelynn_Bot.ExternalCommands
                 return myDeserializedClass.location;
             }
         }
+        public string Language()
+        {
+            using (StreamReader r = new StreamReader(JsonPath))
+            {
+                string json = r.ReadToEnd();
+                Config myDeserializedClass = JsonConvert.DeserializeObject<Config>(json);
+                return myDeserializedClass.language;
+            }
+        }
     }
 
     public class Config
@@ -50,5 +59,6 @@ namespace Evelynn_Bot.ExternalCommands
         public string id { get; set; }
         public string pass { get; set; }
         public string location { get; set; }
+        public string language { get; set; }
     }
 }

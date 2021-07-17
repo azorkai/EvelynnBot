@@ -150,6 +150,7 @@ namespace bAUTH
                     case "NO_ACCOUNT":
                         itsInterface.logger.Log(false, itsInterface.messages.LookingForNewAccount);
                         itsInterface.dashboard.IsStop = true;
+                        Console.WriteLine("NO_ACCOUNT Stop geldi");
                         break;
                     default: itsInterface.license.Status = false; break;
                 }
@@ -173,9 +174,10 @@ namespace bAUTH
                 switch (p[1])
                 {
                     case "SUCCESS":
-                        if (Convert.ToBoolean(p[2])) // Stop Status
+                        if (Convert.ToBoolean(p[2]) == true) // Stop Status
                         {
                             itsInterface.dashboard.IsStop = true;
+                            Console.WriteLine("Action stop geldi");
                         } else if (Convert.ToBoolean(p[3])) // Start Status
                         {
                             itsInterface.dashboard.IsStart = true;

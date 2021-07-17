@@ -59,7 +59,7 @@ namespace Evelynn_Bot.ExternalCommands
                 job.JobDataMap["InterfaceClass"] = itsInterface;
 
 
-                // Trigger the job to run now, and then repeat every 10 seconds
+                // Trigger the job to run now, and then repeat every 60 seconds
                 ITrigger trigger = TriggerBuilder.Create()
                     .WithIdentity("TriggerActions", "DBLicenseAndAction")
                     .StartNow()
@@ -72,11 +72,14 @@ namespace Evelynn_Bot.ExternalCommands
                 // Tell quartz to schedule the job using our trigger
                 await scheduler.ScheduleJob(job, trigger);
 
-                itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart); 
+                itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart);
+                Console.WriteLine(itsInterface.dashboard.IsStop);
                 CHECKSTART:
                 if (itsInterface.dashboard.IsStart)
                 {
                     itsInterface.dashboard.IsStart = false;
+                    itsInterface.dashboard.IsStop = false; 
+                    itsInterface.dashboard.IsRestart = false; 
                     itsInterface.processManager.Start(itsInterface);
                 }
                 else
@@ -201,7 +204,6 @@ namespace Evelynn_Bot.ExternalCommands
 
     public class DashboardActionHelper : IJob
     {
-        
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
