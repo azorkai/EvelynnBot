@@ -22,7 +22,6 @@ namespace Evelynn_Bot
     {
         public static System.Timers.Timer bugTimer = new System.Timers.Timer();
         private static int BugTime;
-        private static bool BugBoolean;
         
         private static event MessageHandlerDelegate<UxState> UxStateChanged;
         private static event MessageHandlerDelegate<GameFlow> StateChanged;
@@ -42,7 +41,7 @@ namespace Evelynn_Bot
         private async Task Connect()
         {
             bugTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            bugTimer.Interval = 1000;
+            bugTimer.Interval = 60000;
             bugTimer.Enabled = true;
             bugTimer.Stop();
 
@@ -136,6 +135,7 @@ namespace Evelynn_Bot
             }
             catch
             {
+                
             }
         }
 
@@ -210,80 +210,77 @@ namespace Evelynn_Bot
 
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            BugBoolean = true;
-            while (BugBoolean)
+            Console.WriteLine("Bug Check!");
+            BugTime++;
+            if (BugTime>=6)
             {
-                BugTime++;
-                itsInterface2.logger.Log(true, "Checking bugs");
-                Thread.Sleep(60000);
-                if (BugTime >= 6)
-                {
-                    BugBoolean = false;
-                    BugTime = 0;
-                    itsInterface2.logger.Log(false, "Error: Waiting for Stats, restarting");
-                    itsInterface2.processManager.StartAccountProcess(itsInterface2);
-                }
-            }
-
-            if (!BugBoolean)
-            {
-                itsInterface2.logger.Log(true, "No Bug!");
+                BugTime = 0;
+                itsInterface2.processManager.Start(itsInterface2);
             }
         }
 
         private static async void OnStateChanged(EventType sender, GameFlow result)
         {
-            var state = string.Empty;
-
-            switch (result.Phase)
+            try
             {
-                case "None":
-                    state = "Main Menu";
-                    break;
-                case "Lobby":
-                    state = "Lobby";
-                    await Task.Delay(2500);
-                    itsInterface2.lcuPlugins.PostMatchmakingSearch();
-                    break;
-                case "ChampSelect":
-                    state = "Champ Select [Ignore this message if game is started!]";
-                    await Task.Delay(4000);
-                    PickChampion();
-                    break;
-                case "GameStart":
-                    state = "game started";
-                    break;
-                case "ReadyCheck":
-                    state = "Match Found";
-                    itsInterface2.lcuPlugins.AcceptReadyCheck();
-                    break;
-                case "InProgress":
-                    state = "Game is Done";
-                    await itsInterface2.processManager.GameAi(itsInterface2);
-                    break;
-                case "WaitingForStats":
-                    state = "Waiting for Stats";
-                    itsInterface2.lcuPlugins.KillUXAsync();
+                var state = string.Empty;
 
-                    bugTimer.Start();
-                    
-                    break;
-                case "Matchmaking":
-                    state = "Matchmaking";
-                    break;
-                case "PreEndOfGame":
-                    state = "Honor Screen";
-                    BugBoolean = false;
-                    
-                    bugTimer.Stop();
+                switch (result.Phase)
+                {
+                    case "None":
+                        state = "Main Menu";
+                        break;
+                    case "Lobby":
+                        state = "Lobby";
+                        await Task.Delay(2500);
+                        itsInterface2.lcuPlugins.PostMatchmakingSearch();
+                        break;
+                    case "ChampSelect":
+                        state = "Champ Select [Ignore this message if game is started!]";
+                        await Task.Delay(4000);
+                        PickChampion();
+                        break;
+                    case "GameStart":
+                        state = "game started";
+                        break;
+                    case "ReadyCheck":
+                        state = "Match Found";
+                        itsInterface2.lcuPlugins.AcceptReadyCheck();
+                        break;
+                    case "InProgress":
+                        state = "Game is Done";
+                        await itsInterface2.processManager.GameAi(itsInterface2);
+                        break;
+                    case "WaitingForStats":
+                        state = "Waiting for Stats";
+                        itsInterface2.lcuPlugins.KillUXAsync();
 
-                    await itsInterface2.processManager.PlayAgain(itsInterface2);
-                    break;
-                default:
-                    state = $"unknown state: {result.Phase}";
-                    break;
+                        bugTimer.Start();
+
+                        break;
+                    case "Matchmaking":
+                        state = "Matchmaking";
+                        break;
+                    case "PreEndOfGame":
+                        state = "Honor Screen";
+
+                        BugTime = 0;
+                        bugTimer.Stop();
+
+                        await itsInterface2.processManager.PlayAgain(itsInterface2);
+                        break;
+                    default:
+                        state = $"unknown state: {result.Phase}";
+                        break;
+                }
+                itsInterface2.logger.Log(true, itsInterface2.messages.InfoQueueStats + " " + state);
             }
-            itsInterface2.logger.Log(true,itsInterface2.messages.InfoQueueStats + " " + state);
+            catch (Exception e)
+            {
+                //Test-ReSubIfBug
+                itsInterface2.logger.Log(false, "Error State Checker: " + e);
+                EventExampleAsync();
+            }
         }
     }
 

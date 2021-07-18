@@ -41,3 +41,4 @@ F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot
 F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.csproj.CopyComplete
 F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.exe
 F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.pdb
+F:\Users\Azorkam\source\repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.csproj.AssemblyReference.cache

@@ -24,6 +24,9 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> Start(Interface itsInterface)
         {
+
+            Console.WriteLine("Starting :D");
+
             if (CheckInGame(itsInterface))
             {
                 return GameAi(itsInterface);
@@ -41,6 +44,7 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> StartAccountProcess(Interface itsInterface)
         {
+
             NewQueue.bugTimer.Stop();
 
             try
@@ -65,7 +69,9 @@ namespace Evelynn_Bot.ProcessManager
 
                     if (!await accountProcess.GetSetWallet(itsInterface))
                     {
-                        return StartAccountProcess(itsInterface);
+                        itsInterface.clientKiller.KillLeagueClient();
+                        await Task.Delay(5000);
+                        return Start(itsInterface);
                     }
 
                     Dispose(true);
@@ -344,8 +350,8 @@ namespace Evelynn_Bot.ProcessManager
                 //GetSetWallet Riot yüzünden patladığı oluyor (Client Yarım Yükleniyor)
                 if (!await accountProcess.GetSetWallet(itsInterface))
                 {
-                    //RestartBot
-                    return StartAccountProcess(itsInterface);
+                    itsInterface.clientKiller.KillLeagueClient();
+                    return Start(itsInterface);
                 }
 
                 accountProcess.PatchCheck(itsInterface);
