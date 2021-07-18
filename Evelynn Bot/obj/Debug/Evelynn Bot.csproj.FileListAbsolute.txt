@@ -1,0 +1,44 @@
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.csproj.CoreCompileInputs.cache
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\AutoItX3.dll
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\AutoItX3_x64.dll
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Evelynn Bot.exe.config
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Evelynn Bot.exe
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Evelynn Bot.pdb
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\AutoItX3.Assembly.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Leaf.xNet.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Bcl.HashCode.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.EntityFrameworkCore.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.EntityFrameworkCore.Abstractions.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Caching.Abstractions.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Caching.Memory.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Configuration.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Configuration.Abstractions.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Configuration.Binder.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.DependencyInjection.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.DependencyInjection.Abstractions.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Logging.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Logging.Abstractions.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Options.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Microsoft.Extensions.Primitives.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Newtonsoft.Json.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Ninject.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Quartz.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\RestSharp.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Buffers.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Collections.Immutable.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Diagnostics.DiagnosticSource.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Memory.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Numerics.Vectors.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Reactive.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Threading.Channels.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.Threading.Tasks.Extensions.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\System.ValueTuple.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\websocket-sharp.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\bin\Debug\Websocket.Client.xml
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.csproj.Fody.CopyLocal.cache
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.csproj.CopyComplete
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.exe
+F:\Users\Azorkam\Source\Repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.pdb
+F:\Users\Azorkam\source\repos\EvelynnBotSocket\Evelynn Bot\obj\Debug\Evelynn Bot.csproj.AssemblyReference.cache

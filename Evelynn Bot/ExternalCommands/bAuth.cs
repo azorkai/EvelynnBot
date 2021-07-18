@@ -17,7 +17,10 @@ namespace bAUTH
     public class bUtils
     {
         private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        public Random Random = new Random();
+
+
+        Random Random = new Random();
+
         public string GetRandomString(int length)
         {
             StringBuilder randomName = new StringBuilder(length);
@@ -42,8 +45,6 @@ namespace bAUTH
 
     public class bHTTP
     {
-
-        public Dashboard dashboardActions = new Dashboard();
 
         public string CreateRequest(string u, string[] p, string[] v, Method m)
         {
@@ -82,17 +83,14 @@ namespace bAUTH
             return r;
         }
 
-        public License VerifyLicense(string t)
+        public License VerifyLicense(string t, Interface itsInterface)
         {
-            License l = new License();
             try
             {
-                bSecurity sec = new bSecurity();
-                bUtils u = new bUtils();
                 t = t.Replace(" ", "");
-                string d = sec.DecryptString(t);
+                string d = itsInterface.sec.DecryptString(t);
                 string[] p = d.Split('|');
-                var epc = u.GetEpochTime();
+                var epc = itsInterface.u.GetEpochTime();
                 Console.WriteLine("Your Unix: " + epc);
                 Console.WriteLine("Server Unix: " + p[15]);
                 if (Convert.ToInt32(p[15]) > epc)
@@ -101,164 +99,106 @@ namespace bAUTH
                     switch (p[1])
                     {
                         case "SUCCESS":
-                            l.Status = true;
-                            l.ID = p[2];
-                            l.Username = p[3];
-                            l.Password = p[4];
-                            l.Register = p[5];
-                            l.Expire = p[6];
-                            l.Last = p[7];
-                            l.Lol_username = p[8];
-                            l.Lol_password = p[9];
-                            l.Lol_maxLevel = Convert.ToInt32(p[10]);
-                            l.Lol_maxBlueEssences = Convert.ToInt32(p[11]);
-                            l.Lol_disenchant =  Convert.ToBoolean(p[12] == "0" ? "false" : "true");
-                            l.Lol_doTutorial = Convert.ToBoolean(p[13] == "0" ? "false" : "true");
-                            l.Lol_isEmptyNick = Convert.ToBoolean(p[14] == "0" ? "false" : "true");
+                            itsInterface.license.Status = true;
+                            itsInterface.license.ID = p[2];
+                            itsInterface.license.Username = p[3];
+                            itsInterface.license.Password = p[4];
+                            itsInterface.license.Register = p[5];
+                            itsInterface.license.Expire = p[6];
+                            itsInterface.license.Last = p[7];
+                            itsInterface.license.Lol_username = p[8];
+                            itsInterface.license.Lol_password = p[9];
+                            itsInterface.license.Lol_maxLevel = Convert.ToInt32(p[10]);
+                            itsInterface.license.Lol_maxBlueEssences = Convert.ToInt32(p[11]);
+                            itsInterface.license.Lol_disenchant = Convert.ToBoolean(p[12] == "0" ? "false" : "true");
+                            itsInterface.license.Lol_doTutorial = Convert.ToBoolean(p[13] == "0" ? "false" : "true");
+                            itsInterface.license.Lol_isEmptyNick = Convert.ToBoolean(p[14] == "0" ? "false" : "true");
                             break;
-                        default: l.Status = false; break;
+                        default: itsInterface.license.Status = false; break;
                     }
                 }
-                else l.Status = false;
-                return l;
+                else itsInterface.license.Status = false;
+                return itsInterface.license;
             }
             catch(Exception e)
             {
                 //Console.WriteLine(e.Message);
-                l.Status = false;
-                return l;
+                itsInterface.license.Status = false;
+                return itsInterface.license;
             }
         }
 
-        public License GetNewLoLAccount(string t, License l)
+
+        public License GetNewLoLAccount(string t, Interface itsInterface)
         {
             try
             {
-                bSecurity sec = new bSecurity();
-                bUtils u = new bUtils();
                 t = t.Replace(" ", "");
-                string d = sec.DecryptString(t);
+                string d = itsInterface.sec.DecryptString(t);
                 string[] p = d.Split('|');
                 switch (p[1])
                 {
                     case "SUCCESS":
-                        l.Lol_username = p[2];
-                        l.Lol_password = p[3];
-                        l.Lol_maxLevel = Convert.ToInt32(p[4]);
-                        l.Lol_maxBlueEssences = Convert.ToInt32(p[5]);
-                        l.Lol_disenchant = Convert.ToBoolean(p[6] == "0" ? "false" : "true");
-                        l.Lol_doTutorial = Convert.ToBoolean(p[7] == "0" ? "false" : "true");
-                        l.Lol_isEmptyNick = Convert.ToBoolean(p[8] == "0" ? "false" : "true");
+                        itsInterface.license.Lol_username = p[2];
+                        itsInterface.license.Lol_password = p[3];
+                        itsInterface.license.Lol_maxLevel = Convert.ToInt32(p[4]);
+                        itsInterface.license.Lol_maxBlueEssences = Convert.ToInt32(p[5]);
+                        itsInterface.license.Lol_disenchant = Convert.ToBoolean(p[6] == "0" ? "false" : "true");
+                        itsInterface.license.Lol_doTutorial = Convert.ToBoolean(p[7] == "0" ? "false" : "true");
+                        itsInterface.license.Lol_isEmptyNick = Convert.ToBoolean(p[8] == "0" ? "false" : "true");
                         break;
                     case "NO_ACCOUNT":
-                        Logger.Log(false, Messages.LookingForNewAccount);
-                        //TODO: BURADA GLOBAL OLAN ISSTOPPED VARIABLE TRUE YAP
+                        itsInterface.logger.Log(false, itsInterface.messages.LookingForNewAccount);
+                        itsInterface.dashboard.IsStop = true;
+                        Console.WriteLine("NO_ACCOUNT Stop geldi");
                         break;
-                    default: l.Status = false; break;
+                    default: itsInterface.license.Status = false; break;
                 }
-                return l;
+                return itsInterface.license;
             }
             catch (Exception e)
             {
                 //Console.WriteLine(e.Message);
-                l.Status = false;
-                return l;
+                itsInterface.license.Status = false;
+                return itsInterface.license;
             }
         }
 
-        public async Task<Dashboard> GetActionStatus(string t)
+        public async Task<Interface> GetActionStatus(string t, Interface itsInterface)
         {
             try
             {
-                bSecurity sec = new bSecurity();
-                bUtils u = new bUtils();
                 t = t.Replace(" ", "");
-                string d = sec.DecryptString(t);
+                string d = itsInterface.sec.DecryptString(t);
                 string[] p = d.Split('|');
                 switch (p[1])
                 {
                     case "SUCCESS":
-                        if (Convert.ToBoolean(p[2])) // Stop Status
+                        if (Convert.ToBoolean(p[2]) == true) // Stop Status
                         {
-                            dashboardActions.IsStop = true;
+                            itsInterface.dashboard.IsStop = true;
+                            Console.WriteLine("Action stop geldi");
                         } else if (Convert.ToBoolean(p[3])) // Start Status
                         {
-                            dashboardActions.IsStart = true;
+                            itsInterface.dashboard.IsStart = true;
                         }
                         else if (Convert.ToBoolean(p[4])) // Restart Status
                         {
-                            dashboardActions.IsRestart = true;
+                            itsInterface.dashboard.IsRestart = true;
 
                         }
                         break;
                     case "NOT_FOUND":
-                        DashboardHelper.license.Status = false; // Close the bot when game is finished
+                        itsInterface.license.Status = false; // Close the bot when game is finished
                         break;
                 }
-                return dashboardActions;
+                return itsInterface;
             }
             catch (Exception e)
             {
                 //Console.WriteLine(e.Message);
-                return dashboardActions;
+                return itsInterface;
             }
-        }
-
-        public bool VerifyToken(string t)
-        {
-            bool r = false;
-            try
-            {
-                bSecurity sec = new bSecurity();
-                bUtils u = new bUtils();
-                t = t.Replace(" ", "");
-                string d = sec.DecryptString(t);
-                string[] p = d.Split('|');
-                if (Convert.ToInt32(p[2]) > u.GetEpochTime())
-                {
-                    switch (p[1])
-                    {
-                        case "SUCCESS": r = true; break;
-                        default: r = false; break;
-                    }
-                }
-                else r = false;
-                return r;
-            }
-            catch
-            {
-                r = false;
-                return r;
-            }
-        }
-
-        public int GetOnlineClients(string t)
-        {
-            int r = 0;
-            try
-            {
-                bSecurity sec = new bSecurity();
-                bUtils u = new bUtils();
-                t = t.Replace(" ", "");
-                string d = sec.DecryptString(t);
-                string[] p = d.Split('|');
-                if (Convert.ToInt32(p[2]) > u.GetEpochTime())
-                {
-                    switch (p[1])
-                    {
-                        case "SUCCESS": r = Convert.ToInt32(p[3]); break;
-                        default: r = 0; break;
-                    }
-                }
-                else r = 0;
-                return r;
-            }
-            catch
-            {
-                r = 0;
-                return r;
-            }
-            return r;
         }
     }
 
@@ -266,60 +206,79 @@ namespace bAUTH
     {
         public string EncryptString(string plainText)
         {
-            // KEY ve IV fonksiyon icin artik gerekli degil.
-            string password = "HnSdyBPo4I";
-            SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
-            byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
+            try
+            {
+                // KEY ve IV fonksiyon icin artik gerekli degil.
+                string password = "HnSdyBPo4I";
+                SHA256 mySHA256 = SHA256Managed.Create();
+                byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
+                byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
 
-            Aes encryptor = Aes.Create();
-            encryptor.Mode = CipherMode.CBC;
-            encryptor.Key = key;
-            encryptor.IV = iv;
-            MemoryStream memoryStream = new MemoryStream();
-            ICryptoTransform aesEncryptor = encryptor.CreateEncryptor();
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, aesEncryptor, CryptoStreamMode.Write);
-            byte[] plainBytes = Encoding.ASCII.GetBytes(plainText);
-            cryptoStream.Write(plainBytes, 0, plainBytes.Length);
-            cryptoStream.FlushFinalBlock();
-            byte[] cipherBytes = memoryStream.ToArray();
-            memoryStream.Close();
-            cryptoStream.Close();
-            string cipherText = Convert.ToBase64String(cipherBytes, 0, cipherBytes.Length);
-            //Console.WriteLine(cipherText);
-            return cipherText;
+                string cipherText = String.Empty;
+                using (Aes encryptor = Aes.Create())
+                {
+                    encryptor.Mode = CipherMode.CBC;
+                    encryptor.Key = key;
+                    encryptor.IV = iv;
+                    MemoryStream memoryStream = new MemoryStream();
+                    ICryptoTransform aesEncryptor = encryptor.CreateEncryptor();
+                    CryptoStream cryptoStream = new CryptoStream(memoryStream, aesEncryptor, CryptoStreamMode.Write);
+                    byte[] plainBytes = Encoding.ASCII.GetBytes(plainText);
+                    cryptoStream.Write(plainBytes, 0, plainBytes.Length);
+                    cryptoStream.FlushFinalBlock();
+                    byte[] cipherBytes = memoryStream.ToArray();
+                    memoryStream.Close();
+                    cryptoStream.Close();
+                    cipherText = Convert.ToBase64String(cipherBytes, 0, cipherBytes.Length);
+                    //Console.WriteLine(cipherText);
+                }
+
+                return cipherText;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"BAUTH ENCRYPT STRING HATA {e}");
+                return "";
+            }
         }
 
         public string DecryptString(string cipherText)
         {
-            // KEY ve IV fonksiyon icin artik gerekli degil.
-            string password = "HnSdyBPo4I";
-            SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
-            byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
-
-            Aes encryptor = Aes.Create();
-            encryptor.Mode = CipherMode.CBC;
-            encryptor.Key = key.Take(32).ToArray();
-            encryptor.IV = iv;
-            MemoryStream memoryStream = new MemoryStream();
-            ICryptoTransform aesDecryptor = encryptor.CreateDecryptor();
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write);
-            string plainText = String.Empty;
             try
             {
+                // KEY ve IV fonksiyon icin artik gerekli degil.
+                string password = "HnSdyBPo4I";
+                SHA256 mySHA256 = SHA256Managed.Create();
+                byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
+                byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
+
+                Aes encryptor = Aes.Create();
+                encryptor.Mode = CipherMode.CBC;
+                encryptor.Key = key.Take(32).ToArray();
+                encryptor.IV = iv;
+                MemoryStream memoryStream = new MemoryStream();
+                ICryptoTransform aesDecryptor = encryptor.CreateDecryptor();
+                CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write);
+                string plainText = String.Empty;
+                try
+                {
                     byte[] cipherBytes = Convert.FromBase64String(cipherText);
-                cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
-                cryptoStream.FlushFinalBlock();
-                byte[] plainBytes = memoryStream.ToArray();
-                plainText = Encoding.ASCII.GetString(plainBytes, 0, plainBytes.Length);
+                    cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
+                    cryptoStream.FlushFinalBlock();
+                    byte[] plainBytes = memoryStream.ToArray();
+                    plainText = Encoding.ASCII.GetString(plainBytes, 0, plainBytes.Length);
+                }
+                finally
+                {
+                    memoryStream.Close();
+                    cryptoStream.Close();
+                }
+                return plainText;
             }
-            finally
+            catch (Exception e)
             {
-                memoryStream.Close();
-                cryptoStream.Close();
+                return "";
             }
-            return plainText;
         }
     }
 }

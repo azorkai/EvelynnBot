@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -10,46 +11,42 @@ using System.Threading.Tasks;
 using bAUTH;
 using Evelynn_Bot.Constants;
 using Evelynn_Bot.Entities;
+using Evelynn_Bot.GameAI;
+using Evelynn_Bot.League_API.GameData;
 using Quartz;
 using Quartz.Impl;
 
 namespace Evelynn_Bot.ExternalCommands
 {
-    public static class DashboardHelper
+    public class DashboardHelper
     {
+
         public const string URI = "https://api.ytdtoken.space/v1/";
 
-        public static License license = new License();
-
-        public static bUtils help = new bUtils();
-        public static bHTTP req = new bHTTP();
-        public static bSecurity sec = new bSecurity();
-
-        public static bool whileLoop = true;
-        public static int onlineClient = 0;
-
-        public static async void LoginAndStartBot(string username, string password)
+        public bool whileLoop = true;
+        public int onlineClient = 0;
+        public async void LoginAndStartBot(string username, string password, Interface itsInterface)
         {
-            string r = req.CreateRequest(URI,
+            string r = itsInterface.req.CreateRequest(URI,
                 new string[] { "data" },
-                new string[] { sec.EncryptString(
+                new string[] { itsInterface.sec.EncryptString(
                     string.Format("{0}|{1}|{2}|{3}|{4}",
-                        help.GetRandomString(new Random().Next(100,128)),
+                        itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "LOGIN",
                         username,
                         password,
-                        help.GetRandomString(new Random().Next(100, 128))
+                        itsInterface.u.GetRandomString(new Random().Next(100, 128))
                     ))},
                 Method.POST);
 
-            license = req.VerifyLicense(r);
+            itsInterface.license = itsInterface.req.VerifyLicense(r, itsInterface);
 
-            if (license.Status)
+            if (itsInterface.license.Status)
             {
                 // Grab the Scheduler instance from the Factory
                 StdSchedulerFactory factory = new StdSchedulerFactory();
                 IScheduler scheduler = await factory.GetScheduler();
-
+                
                 // and start it off
                 await scheduler.Start();
 
@@ -58,7 +55,11 @@ namespace Evelynn_Bot.ExternalCommands
                     .WithIdentity("GetActions", "DBLicenseAndAction")
                     .Build();
 
-                // Trigger the job to run now, and then repeat every 10 seconds
+                
+                job.JobDataMap["InterfaceClass"] = itsInterface;
+
+
+                // Trigger the job to run now, and then repeat every 60 seconds
                 ITrigger trigger = TriggerBuilder.Create()
                     .WithIdentity("TriggerActions", "DBLicenseAndAction")
                     .StartNow()
@@ -66,16 +67,20 @@ namespace Evelynn_Bot.ExternalCommands
                         .WithIntervalInSeconds(60)
                         .RepeatForever())
                     .Build();
+                
 
                 // Tell quartz to schedule the job using our trigger
                 await scheduler.ScheduleJob(job, trigger);
-                Logger.Log(false, Messages.WaitingForStart); 
+
+                itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart);
+                Console.WriteLine(itsInterface.dashboard.IsStop);
                 CHECKSTART:
-                if (req.dashboardActions.IsStart)
+                if (itsInterface.dashboard.IsStart)
                 {
-                    req.dashboardActions.IsStart = false;
-                    ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();
-                    processManager.Start(license);
+                    itsInterface.dashboard.IsStart = false;
+                    itsInterface.dashboard.IsStop = false; 
+                    itsInterface.dashboard.IsRestart = false; 
+                    itsInterface.processManager.Start(itsInterface);
                 }
                 else
                 {
@@ -87,25 +92,25 @@ namespace Evelynn_Bot.ExternalCommands
             }
             else
             {
-                Logger.Log(false,Messages.ErrorLogin);
+                itsInterface.logger.Log(false,itsInterface.messages.ErrorLogin);
                 Console.ReadLine();
             }
 
 
         }
 
-        public static void UpdateLolWallet(string level, string be)
+        public void UpdateLolWallet(string level, string be, Interface itsInterface)
         {
-            string botRequest = req.CreateRequest(URI,
+            string botRequest = itsInterface.req.CreateRequest(URI,
                 new string[] { "data" },
-                new string[] { sec.EncryptString(
+                new string[] { itsInterface.sec.EncryptString(
                     string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}",
-                        help.GetRandomString(new Random().Next(100,128)),
+                        itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "UPDATE_LOL_WALLET",
-                        license.Username,
-                        license.Password,
-                        license.ID,
-                        license.Last,
+                        itsInterface.license.Username,
+                        itsInterface.license.Password,
+                        itsInterface.license.ID,
+                        itsInterface.license.Last,
                         level,
                         be
                     ))},
@@ -114,40 +119,40 @@ namespace Evelynn_Bot.ExternalCommands
             Console.WriteLine(DecryptString(botRequest));
         }
 
-        public static void UpdateLolStatus(string status, License l)
+        public void UpdateLolStatus(string status, Interface itsInterface)
         {
-            string botRequest = req.CreateRequest(URI,
+            string botRequest = itsInterface.req.CreateRequest(URI,
                 new string[] { "data" },
-                new string[] { sec.EncryptString(
+                new string[] { itsInterface.sec.EncryptString(
                     string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",
-                        help.GetRandomString(new Random().Next(100,128)),
+                        itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "CHANGE_LOL_STATUS",
-                        license.Username,
-                        license.Password,
-                        license.ID,
-                        license.Last,
+                        itsInterface.license.Username,
+                        itsInterface.license.Password,
+                        itsInterface.license.ID,
+                        itsInterface.license.Last,
                         status
                     ))},
                 Method.POST);
 
             if (status == "Finished")
             {
-                req.GetNewLoLAccount(botRequest, l);
+                itsInterface.req.GetNewLoLAccount(botRequest, itsInterface);
             }
         }
 
-        public static void UpdateLPQStatus(string tF)
+        public void UpdateLPQStatus(string tF, Interface itsInterface)
         {
-            string botRequest = req.CreateRequest(URI,
+            string botRequest = itsInterface.req.CreateRequest(URI,
                 new string[] { "data" },
-                new string[] { sec.EncryptString(
+                new string[] { itsInterface.sec.EncryptString(
                     string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",
-                        help.GetRandomString(new Random().Next(100,128)),
+                        itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "UPDATE_LPQ_STATUS",
-                        license.Username,
-                        license.Password,
-                        license.ID,
-                        license.Last,
+                        itsInterface.license.Username,
+                        itsInterface.license.Password,
+                        itsInterface.license.ID,
+                        itsInterface.license.Last,
                         tF
                     ))},
                 Method.POST);
@@ -155,100 +160,71 @@ namespace Evelynn_Bot.ExternalCommands
             Console.WriteLine(DecryptString(botRequest));
         }
 
-        public static void LicenceCheck()
+
+        public string DecryptString(string cipherText)
         {
             try
             {
-                bUtils help = new bUtils();
-                bHTTP req = new bHTTP();
-                bSecurity sec = new bSecurity();
-                if (license.Status == true)
-                {
-                    string rz = req.CreateRequest(URI,
-                        new string[] { "data" },
-                        new string[] { sec.EncryptString(
-                            string.Format("{0}|{1}|{2}|{3}|{4}",
-                                help.GetRandomString(new Random().Next(100,128)),
-                                "REFRESH",
-                                license.ID,
-                                45,
-                                help.GetRandomString(new Random().Next(100, 128))
-                            ))},
-                        Method.POST);
-                    var vt = req.VerifyToken(rz);
-                    license.Status = vt;
-                    Console.WriteLine($"VT: {vt}    LS: {license.Status}");
-                    onlineClient = req.GetOnlineClients(rz);
-                    Console.WriteLine("CHECK VERIFIED");
-                }
-                else
-                {
-                    whileLoop = false;
-                    Environment.Exit(0);
-                }
-            }
-            catch (Exception ex)
-            {
+                // KEY ve IV fonksiyon icin artik gerekli degil.
+                string password = "HnSdyBPo4I";
+                SHA256 mySHA256 = SHA256Managed.Create();
+                byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
+                byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
 
+                Aes encryptor = Aes.Create();
+                encryptor.Mode = CipherMode.CBC;
+                encryptor.Key = key.Take(32).ToArray();
+                encryptor.IV = iv;
+                MemoryStream memoryStream = new MemoryStream();
+                ICryptoTransform aesDecryptor = encryptor.CreateDecryptor();
+                CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write);
+                string plainText = String.Empty;
+                try
+                {
+                    byte[] cipherBytes = Convert.FromBase64String(cipherText);
+                    cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
+                    cryptoStream.FlushFinalBlock();
+                    byte[] plainBytes = memoryStream.ToArray();
+                    plainText = Encoding.ASCII.GetString(plainBytes, 0, plainBytes.Length);
+                }
+                finally
+                {
+                    memoryStream.Close();
+                    cryptoStream.Close();
+                }
+                return plainText;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"DECRYPT STRING HATA {e}");
+                return "";
             }
         }
-
-        public static string DecryptString(string cipherText)
-        {
-            // KEY ve IV fonksiyon icin artik gerekli degil.
-            string password = "HnSdyBPo4I";
-            SHA256 mySHA256 = SHA256Managed.Create();
-            byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
-            byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
-
-            Aes encryptor = Aes.Create();
-            encryptor.Mode = CipherMode.CBC;
-            encryptor.Key = key.Take(32).ToArray();
-            encryptor.IV = iv;
-            MemoryStream memoryStream = new MemoryStream();
-            ICryptoTransform aesDecryptor = encryptor.CreateDecryptor();
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write);
-            string plainText = String.Empty;
-            try
-            {
-                byte[] cipherBytes = Convert.FromBase64String(cipherText);
-                cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
-                cryptoStream.FlushFinalBlock();
-                byte[] plainBytes = memoryStream.ToArray();
-                plainText = Encoding.ASCII.GetString(plainBytes, 0, plainBytes.Length);
-            }
-            finally
-            {
-                memoryStream.Close();
-                cryptoStream.Close();
-            }
-            return plainText;
-        }
-
-
-
     }
 
     public class DashboardActionHelper : IJob
     {
         public async Task Execute(IJobExecutionContext context)
         {
-            //ClientKiller.SuspendLeagueClient(); // Her dakikada hide ve suspend eder clienti \\ Gerekli mi bilmiyorum
+            JobDataMap dataMap = context.JobDetail.JobDataMap;
+            Interface itsInterface = (Interface)dataMap["InterfaceClass"];
 
-            string r = DashboardHelper.req.CreateRequest(DashboardHelper.URI,
+            //ClientKiller.SuspendLeagueClient(); // Her dakikada hide ve suspend eder clienti \\ Gerekli mi bilmiyorum
+            
+            string r = itsInterface.req.CreateRequest(DashboardHelper.URI,
                 new string[] { "data" },
-                new string[] { DashboardHelper.sec.EncryptString(
+                new string[] { itsInterface.sec.EncryptString(
                     string.Format("{0}|{1}|{2}|{3}|{4}|{5}",
-                        DashboardHelper.help.GetRandomString(new Random().Next(100,128)),
+                        itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "ACTION",
-                        DashboardHelper.license.Username,
-                        DashboardHelper.license.Password,
-                        DashboardHelper.license.ID,
-                        DashboardHelper.license.Last
+                        itsInterface.license.Username,
+                        itsInterface.license.Password,
+                        itsInterface.license.ID,
+                        itsInterface.license.Last
                     ))},
                 Method.POST);
 
-            await DashboardHelper.req.GetActionStatus(r);
+            await itsInterface.req.GetActionStatus(r, itsInterface);
         }
     }
 

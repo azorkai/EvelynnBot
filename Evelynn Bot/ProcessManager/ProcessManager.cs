@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml;
 using AutoIt;
 using bAUTH;
@@ -14,363 +13,411 @@ using Evelynn_Bot.Entities;
 using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API.GameData;
+using Evelynn_Bot.ProcessManager;
 
 namespace Evelynn_Bot.ProcessManager
 {
-    public class ProcessManager
+    public class ProcessManager : IProcessManager
     {
-        JsonRead jsonRead = new JsonRead();
+        
         private bool randomController;
 
-        public void Start(License license)
-        {
-            if (CheckInGame())
-            {
-                Player player = new Player();
-                GameAi(player, license);
-            }
-            else
-            {
-                StartAccountProcess(license);
-
-                while (IsGameStarted() == false)
-                {
-                    Thread.Sleep(15000);
-                    IsGameStarted();
-                }
-
-                Player player = new Player();
-                GameAi(player, license);
-            }
-        }
-
-        public void StartAccountProcess(License license)
+        public async Task<Task> Start(Interface itsInterface)
         {
 
-            Logger.Log(true, "ID: " + license.Lol_username);
-            Logger.Log(true, "Password: " + license.Lol_password);
-            Logger.Log(true, "Max Level: " + license.Lol_maxLevel.ToString());
-            Logger.Log(true, "Max BE: " + license.Lol_maxBlueEssences);
-            Logger.Log(true, "Tutorial: " + license.Lol_doTutorial);
-            Logger.Log(true, "Disenchant: " + license.Lol_disenchant.ToString());
-            Logger.Log(true, "Empty Nick: " + license.Lol_isEmptyNick);
+            Console.WriteLine("Starting :D");
 
-            license.LeaguePath = jsonRead.Location() + "LeagueClient.exe";
-
-            using (AccountProcess accountProcess = new AccountProcess())
+            if (CheckInGame(itsInterface))
             {
-                accountProcess.StartLeague(license);
-                accountProcess.LoginAccount(license);
-                accountProcess.Initialize();
-                accountProcess.KillUxRender();
-                accountProcess.SelectChampion();
-                accountProcess.GetSetWallet();
-                //ClientKiller.SuspendLeagueClient();
-
-                if (license.Lol_maxLevel != 0 && AccountProcess.summoner.summonerLevel >= license.Lol_maxLevel)
-                {
-                    Logger.Log(true, Messages.AccountDoneXP);
-                    ClientKiller.KillLeagueClient();
-                    DashboardHelper.UpdateLolStatus("Finished", license);
-                    Thread.Sleep(15000);
-                    Start(license);
-                }
-
-                if (license.Lol_maxBlueEssences != 0 && AccountProcess.wallet.ip >= license.Lol_maxBlueEssences)
-                {
-                    Logger.Log(true, Messages.AccountDoneBE);
-                    ClientKiller.KillLeagueClient();
-                    DashboardHelper.UpdateLolStatus("Finished", license);
-                    Thread.Sleep(15000);
-                    Start(license);
-                }
-
-                else
-                {
-                    if (license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
-                    {
-                        accountProcess.CheckNewAccount(license);
-                    }
-
-                    accountProcess.PatchCheck();
-
-                    if (license.Lol_disenchant)
-                    {
-                        accountProcess.Disenchant();
-                    }
-
-                    if (license.Lol_doTutorial)
-                    {
-                        accountProcess.TutorialMissions(license);
-                    }
-
-                    Thread.Sleep(15000);
-
-                    if(CheckInGame())
-                    {
-                        
-                    }
-                    else
-                    {
-                        accountProcess.CreateGame(license);
-                        accountProcess.KillUxRender();
-                        accountProcess.StartQueue(license);
-                    }
-                }
+                return GameAi(itsInterface);
             }
+
+            await StartAccountProcess(itsInterface);
+
+            while (IsGameStarted(itsInterface) == false)
+            {
+                Thread.Sleep(15000);
+                IsGameStarted(itsInterface);
+            }
+            return Task.CompletedTask;
         }
 
-        public bool IsGameStarted()
+        public async Task<Task> StartAccountProcess(Interface itsInterface)
+        {
+
+            NewQueue.bugTimer.Stop();
+
+            try
+            {
+                itsInterface.logger.Log(true, "ID: " + itsInterface.license.Lol_username);
+                itsInterface.logger.Log(true, "Password: " + itsInterface.license.Lol_password);
+                itsInterface.logger.Log(true, "Max Level: " + itsInterface.license.Lol_maxLevel.ToString());
+                itsInterface.logger.Log(true, "Max BE: " + itsInterface.license.Lol_maxBlueEssences);
+                itsInterface.logger.Log(true, "Tutorial: " + itsInterface.license.Lol_doTutorial);
+                itsInterface.logger.Log(true, "Disenchant: " + itsInterface.license.Lol_disenchant.ToString());
+                itsInterface.logger.Log(true, "Empty Nick: " + itsInterface.license.Lol_isEmptyNick);
+                itsInterface.license.LeaguePath = itsInterface.jsonRead.Location() + "LeagueClient.exe";
+
+                using (AccountProcess accountProcess = new AccountProcess())
+                {
+                    itsInterface.clientKiller.KillLeagueClient();
+                    accountProcess.StartLeague(itsInterface);
+                    await accountProcess.LoginAccount(itsInterface);
+                    accountProcess.Initialize(itsInterface);
+
+                    itsInterface.lcuPlugins.KillUXAsync();
+
+                    if (!await accountProcess.GetSetWallet(itsInterface))
+                    {
+                        itsInterface.clientKiller.KillLeagueClient();
+                        await Task.Delay(5000);
+                        return Start(itsInterface);
+                    }
+
+                    Dispose(true);
+
+                    if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
+                    {
+                        itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
+                        itsInterface.clientKiller.KillLeagueClient();
+                        itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
+                        Thread.Sleep(15000);
+                        Dispose(true);
+                        return Start(itsInterface);
+                    }
+
+                    if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
+                    {
+                        itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
+                        itsInterface.clientKiller.KillLeagueClient();
+                        itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
+                        Thread.Sleep(15000);
+                        Dispose(true);
+                        return Start(itsInterface);
+                    }
+
+                    if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
+                    {
+                        Dispose(true);
+                        await accountProcess.CheckNewAccount(itsInterface);
+                    }
+
+                    accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak
+
+                    if (itsInterface.license.Lol_disenchant)
+                    {
+                        await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
+                    }
+
+                    if (itsInterface.license.Lol_doTutorial)
+                    {
+                        accountProcess.TutorialMissions(itsInterface);
+                    }
+
+                    if (CheckInGame(itsInterface))
+                    {
+                        Console.WriteLine(itsInterface.messages.GameFound);
+                        return GameAi(itsInterface);
+                    }
+
+                    await Task.Delay(15000);
+
+                    itsInterface.lcuPlugins.KillUXAsync();
+
+                    Dispose(true);
+                    return itsInterface.newQueue.Test(itsInterface);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"START ACCOUNT PROCESS HATA {e}");
+                Dispose(true);
+                itsInterface.Result(false, "");
+            }
+            return Task.CompletedTask;
+        }
+
+        public bool IsGameStarted(Interface itsInterface)
         {
             using (GameAi gameAi = new GameAi())
             {
-                if (gameAi.ImageSearchForGameStart(ImagePaths.game_started, "7", Messages.GameStarted).Success)
+                if (gameAi.ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "7", itsInterface.messages.GameStarted, itsInterface))
                 {
-                    return true;
+                    Dispose(true);
+                    return itsInterface.Result(true, "");
                 }
-
-                return false;
+                Dispose(true);
+                return itsInterface.Result(false, "");
             }
         }
 
-        public bool CheckInGame()
+        public bool CheckInGame(Interface itsInterface)
         {
-            while (winExist("League of Legends.exe"))
+            while (processExist("League of Legends.exe", itsInterface))
             {
-                return true;
+                return itsInterface.Result(true, "");
             }
-            return false;
+            return itsInterface.Result(false, "");
         }
 
-        public bool winExist(string win)
+        public bool processExist(string win, Interface itsInterface)
         {
             int a = AutoItX.ProcessExists(win);
-            return Convert.ToBoolean(a);
+            return itsInterface.Result(Convert.ToBoolean(a), "");
+        }
+        public bool winExist(string win, Interface itsInterface)
+        {
+            int a = AutoItX.WinExists(win);
+            return itsInterface.Result(Convert.ToBoolean(a), "");
         }
 
-        public void GameAi(Player player, License license)
+        public async Task<Task> GameAi(Interface itsInterface)
         {
-            Thread aiThread = new Thread(() => GameAi2(player));
-            aiThread.Start();
-            DashboardHelper.UpdateLolStatus("In Game", license);
+            itsInterface.dashboardHelper.UpdateLolStatus("In Game", itsInterface);
             Thread.Sleep(15000);
             randomController = true;
 
-            using (GameAi gameAi = new GameAi())
+            while(processExist("League of Legends.exe", itsInterface))
             {
-                while (gameAi.ImageSearchForGameStart(ImagePaths.game_started, "2", Messages.GameStarted).Success)
+                using (GameAi gameAi = new GameAi())
                 {
-
-                    if (randomController)
+                    while (gameAi.ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
                     {
-                        gameAi.RandomLaner();
-
-                        Thread.Sleep(9000);
-                        randomController = false;
-                    }
-                    else
-                    {
-                        gameAi.GoMid();
-                    }
-
-                    while (gameAi.ImageSearch(ImagePaths.minions, "2", Messages.SuccessMinion).Success)
-                    {
-                        gameAi.CurrentPlayerStats(player);
-                        Console.WriteLine("Can: " + player.CurrentHealth);
-                        Console.WriteLine("Altın: " + player.CurrentGold);
-                        Console.WriteLine("Level: " + player.Level);
-
-
-                        gameAi.HitMove(gameAi.X, gameAi.Y);
-                        Thread.Sleep(500);
-
-                        if (gameAi.ImageSearch(ImagePaths.enemy_minions, "2", Messages.SuccessEnemyMinion).Success)
+                        if (randomController)
                         {
-                            AutoItX.MouseClick("RIGHT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
-                            AutoItX.Send("q");
+                            gameAi.RandomLaner();
+
+                            Thread.Sleep(9000);
+                            randomController = false;
+                        }
+                        else
+                        {
+                            gameAi.GoMid();
                         }
 
-                        if (gameAi.ImageSearch(ImagePaths.enemy_health, "2", Messages.SuccessEnemyChampion).Success)
+                        gameAi.CurrentPlayerStats(itsInterface);
+
+                        if (itsInterface.player.CurrentHealth < 15)
                         {
-                            AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                            Dispose(true);
+                        }
+
+                        while (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                        {
+                            if (itsInterface.player.CurrentHealth < 15)
+                            {
+                                Dispose(true);
+                            }
+                            gameAi.CurrentPlayerStats(itsInterface);
                             gameAi.HitMove(gameAi.X, gameAi.Y);
-                            gameAi.Combo(gameAi.X, gameAi.Y);
-                            Thread.Sleep(1500);
+                            Thread.Sleep(500);
+
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_minions, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                            {
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
+                                AutoItX.Send("q");
+                            }
+
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                            {
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
+                                gameAi.Combo(gameAi.X, gameAi.Y);
+                                Thread.Sleep(1500);
+                            }
+
+                            switch (itsInterface.player.Level)
+                            {
+                                case 1:
+                                    gameAi.SkillUp("q", "j");
+                                    break;
+                                case 2:
+                                    gameAi.SkillUp("w", "k");
+                                    break;
+                                case 3:
+                                    gameAi.SkillUp("e", "m");
+                                    break;
+                                case 4:
+                                    gameAi.SkillUp("q", "j");
+                                    break;
+                                case 5:
+                                    gameAi.SkillUp("q", "j");
+                                    break;
+                                case 6:
+                                    gameAi.SkillUp("r", "l");
+                                    break;
+                                case 7:
+                                    gameAi.SkillUp("q", "j");
+                                    break;
+                                case 8:
+                                    gameAi.SkillUp("w", "k");
+                                    break;
+                                case 9:
+                                    gameAi.SkillUp("q", "j");
+                                    break;
+                                case 10:
+                                    gameAi.SkillUp("w", "k");
+                                    break;
+                                case 11:
+                                    gameAi.SkillUp("r", "l");
+                                    break;
+                                case 12:
+                                    gameAi.SkillUp("w", "k");
+                                    break;
+                                case 13:
+                                    gameAi.SkillUp("w", "k");
+                                    break;
+                                case 14:
+                                    gameAi.SkillUp("e", "m");
+                                    break;
+                                case 15:
+                                    gameAi.SkillUp("e", "m");
+                                    break;
+                                case 16:
+                                    gameAi.SkillUp("r", "l");
+                                    break;
+                                case 17:
+                                    gameAi.SkillUp("e", "m");
+                                    break;
+                                case 18:
+                                    gameAi.SkillUp("e", "m");
+                                    break;
+
+                                default:
+                                    gameAi.SkillUp("q", "j");
+                                    gameAi.SkillUp("w", "k");
+                                    gameAi.SkillUp("e", "m");
+                                    gameAi.SkillUp("r", "l");
+                                    break;
+                            }
+
+                            Thread.Sleep(1000);
                         }
 
-                        switch (player.Level)
-                        {
-                            case 1:
-                                gameAi.SkillUp("q", "j");
-                                break;
-                            case 2:
-                                gameAi.SkillUp("w", "k");
-                                break;
-                            case 3:
-                                gameAi.SkillUp("e", "m");
-                                break;
-                            case 4:
-                                gameAi.SkillUp("q", "j");
-                                break;
-                            case 5:
-                                gameAi.SkillUp("e", "m");
-                                break;
-                            case 6:
-                                gameAi.SkillUp("r", "l");
-                                break;
-                            default:
-                                gameAi.SkillUp("q", "j");
-                                gameAi.SkillUp("w", "k");
-                                gameAi.SkillUp("e", "m");
-                                gameAi.SkillUp("r", "l");
-                                break;
-                        }
-
-                        Thread.Sleep(1000);
+                        gameAi.GoMid();
+                        Thread.Sleep(1500);
                     }
-
-                    gameAi.GoMid();
-                    Thread.Sleep(1500);
                 }
-
             }
+            Dispose(true);
+            return Task.CompletedTask;
+        }
 
-            Console.WriteLine("Oyun bitti!");
-
-            aiThread.Abort();
-
-            using (AccountProcess accountProcess = new AccountProcess())
-            {
-                accountProcess.Initialize();
-                accountProcess.KillUxRender();
-            }
-
-            Thread.Sleep(70000);
-            
+        public async Task<Task> PlayAgain(Interface itsInterface)
+        {
+            int pnC = 0;
             CHECKACTIONS:
-            if (DashboardHelper.req.dashboardActions.IsStart) // Dashboard Action Start
+            if (itsInterface.dashboard.IsStart) // Dashboard Action Start
             {
+
                 /*
                  * Burda olmasının sebebi eğer Stop olduktan sonra Start gelirse
                  * İlk start gelmiş mi diye kontrol edecek. Sonra Stop u false edecek.
                  */
-                DashboardHelper.req.dashboardActions.IsStop = false;
-                DashboardHelper.req.dashboardActions.IsStart = false;
-                Console.WriteLine("Panelden Start Geldi!");
-                PlayAgain(license);
+                itsInterface.dashboard.IsStop = false;
+                itsInterface.dashboard.IsStart = false;
+                itsInterface.dashboard.IsRestart = false;
+                if (pnC == 0){ Console.WriteLine("Panelden Start Geldi!");}
+                Dispose(true);
             }
 
-            else if (DashboardHelper.req.dashboardActions.IsStop) // Dashboard Action Stop
+            if (itsInterface.dashboard.IsRestart) // Dashboard Action Restart
             {
-                Console.WriteLine("Panelden Stop Geldi!");
+                itsInterface.dashboard.IsRestart = false;
+                itsInterface.dashboard.IsStop = false;
+                if (pnC == 0) { Console.WriteLine("Panelden Restart Geldi!"); }
+                itsInterface.clientKiller.KillLeagueClient();
+                Dispose(true);
+                return Start(itsInterface);
+            }
+
+            if (itsInterface.dashboard.IsStop) // Dashboard Action Stop
+            {
+                if(pnC==0) { Console.WriteLine("Panelden Stop Geldi!") ; }
+                pnC++;
                 goto CHECKACTIONS;
-            } 
-
-            else if (DashboardHelper.req.dashboardActions.IsRestart) // Dashboard Action Restart
-            {
-                DashboardHelper.req.dashboardActions.IsRestart = false;
-                Console.WriteLine("Panelde Restart Geldi!");
-                ClientKiller.KillLeagueClient();
-                Start(license);
             }
 
-            else
-            {
-                PlayAgain(license);
-            }
-            
+            Dispose(true);
 
-        }
-
-        public void GameAi2(Player player)
-        {
-            Console.WriteLine("Thread 2 Test!");
-            using (GameAi gameAi = new GameAi())
-            {
-                float attackPercentage = ((player.MaxHealth - player.CurrentHealth) * 100) / player.CurrentHealth;
-                if ((int)attackPercentage >= 55 && player.CurrentHealth != 0) // Eğer gelen saldırıdaki can yüzde 30 dan fazla olursa base'e git.
-                {
-                    Console.WriteLine("Can çok azaldı, bir tık geri çekilme zamanı!");
-                    AutoItX.Send("f");
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    AutoItX.Send("d");
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    AutoItX.MouseClick("RIGHT", gameAi.game_X + 31, gameAi.game_Y - 19, 1, 0);
-                    Thread.Sleep(6000);
-                }
-
-                var maxHealth = player.MaxHealth;
-                var baseHealth = maxHealth / 2.7f;
-                var currentHealth = player.CurrentHealth;
-
-                if (player.CurrentGold > 3000)
-                {
-                    Console.WriteLine("Gold sınırı, base!");
-                    gameAi.GoBase();
-                }
-
-                if (currentHealth <= baseHealth)
-                {
-                    Console.WriteLine("Can sınırı, base!");
-                    gameAi.GoBase();
-                }
-            }
-
-            Thread.Sleep(1000);
-
-        }
-
-        public void PlayAgain(License license)
-        {
             using (AccountProcess accountProcess = new AccountProcess())
             {
-                Console.WriteLine("Yeni oyun başlatılıyor!");
-                accountProcess.Initialize();
-                accountProcess.SelectChampion();
-                accountProcess.GetSetWallet();
-                accountProcess.PatchCheck();
-                accountProcess.KillUxRender();
+                itsInterface.logger.Log(true, itsInterface.messages.InfoStartingAgain);
+                //accountProcess.Initialize(itsInterface);
+                await itsInterface.lcuPlugins.GetSetMissions();
 
-                if (license.Lol_maxLevel != 0 && AccountProcess.summoner.summonerLevel >= license.Lol_maxLevel)
+                //GetSetWallet Riot yüzünden patladığı oluyor (Client Yarım Yükleniyor)
+                if (!await accountProcess.GetSetWallet(itsInterface))
                 {
-                    Logger.Log(true, Messages.AccountDoneXP);
-                    ClientKiller.KillLeagueClient();
-                    DashboardHelper.UpdateLolStatus("Finished", license);
+                    itsInterface.clientKiller.KillLeagueClient();
+                    return Start(itsInterface);
+                }
+
+                accountProcess.PatchCheck(itsInterface);
+                itsInterface.lcuPlugins.KillUXAsync();
+
+                Dispose(true);
+
+                if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
+                {
+                    itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
+                    itsInterface.clientKiller.KillLeagueClient();
+                    itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     Thread.Sleep(15000);
-                    Start(license);
+                    Dispose(true);
+                    return Start(itsInterface);
                 }
 
-                if (license.Lol_maxBlueEssences != 0 && AccountProcess.wallet.ip >= license.Lol_maxBlueEssences)
+                if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
                 {
-                    Logger.Log(true, Messages.AccountDoneBE);
-                    ClientKiller.KillLeagueClient();
-                    DashboardHelper.UpdateLolStatus("Finished", license);
+                    itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
+                    itsInterface.clientKiller.KillLeagueClient();
+                    itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     Thread.Sleep(15000);
-                    Start(license);
+                    Dispose(true);
+                    return Start(itsInterface);
                 }
-                else
+
+                if (itsInterface.license.Lol_disenchant)
                 {
-                    if (license.Lol_disenchant)
-                    {
-                        accountProcess.Disenchant();
-                    }
-
-                    accountProcess.CreateGame(license);
-                    accountProcess.StartQueue(license);
-
-                    while (IsGameStarted() == false)
-                    {
-                        Thread.Sleep(15000);
-                        IsGameStarted();
-                    }
-
-                    Player player = new Player();
-                    GameAi(player, license);
+                    await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
                 }
 
+                itsInterface.newQueue.CreateLobby();
+
+                Dispose(true);
+                return Task.CompletedTask;
             }
         }
+
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+                GC.Collect();
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~ProcessManager()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            //GC.SuppressFinalize(this);
+
+        }
+        #endregion
+
 
     }
 }

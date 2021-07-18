@@ -8,12 +8,8 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class Tutorial
+    public struct Tutorial
     {
         public bool isViewed { get; set; }
-
-        [CompilerGenerated]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private bool bool_0;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -19,19 +20,28 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
+using EvelynnLCU.Plugins.LoL;
 using Console = System.Console;
 
 namespace Evelynn_Bot
 {
     class Program
     {
+
         static void Main(string[] args)
         {
-            JsonRead jsonRead = new JsonRead();
-            DashboardHelper.LoginAndStartBot(jsonRead.Id(), jsonRead.Password());
-
+            //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
+            Interface itsInterface = new Interface();
+            Language.language = itsInterface.jsonRead.Language();
+            itsInterface.messages.SetLanguage();
+            itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
             Console.ReadLine();
         }
 
+    }
+    public static class Language
+    {
+        public static string language;
     }
 }

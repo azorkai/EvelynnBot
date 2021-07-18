@@ -8,12 +8,8 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class LiveGameData
+    public struct LiveGameData
     {
         public CurrentSummoner activePlayer { get; set; }
-
-        [CompilerGenerated]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private CurrentSummoner activePlayer_0;
     }
 }

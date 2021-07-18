@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class CurrentSummoner
+    public struct CurrentSummoner
     {
         public ChampionStats championStats { get; set; }
 

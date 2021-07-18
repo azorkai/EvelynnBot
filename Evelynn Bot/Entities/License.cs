@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.Entities
 {
-    public class License
+    public struct License
     {
         public bool Status { get; set; }
 

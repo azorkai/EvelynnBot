@@ -19,7 +19,7 @@ namespace Evelynn_Bot.ExternalCommands
         [DllImport("User32.dll")]
         public static extern bool EnableWindow(IntPtr hwnd, bool enabled);
 
-        public static void KillLeagueClient()
+        public void KillLeagueClient()
         {
             AutoItX.ProcessClose("LeagueClient.exe");
             AutoItX.ProcessClose("LeagueClientUx.exe");
@@ -31,7 +31,7 @@ namespace Evelynn_Bot.ExternalCommands
             AutoItX.ProcessClose("RiotClientUxRender.exe");
         }
 
-        public static void SuspendLeagueClient()
+        public void SuspendLeagueClient()
         {
             try
             {
@@ -75,7 +75,7 @@ namespace Evelynn_Bot.ExternalCommands
         static extern bool CloseHandle(IntPtr handle);
 
 
-        private static void SuspendProcess(int pid)
+        private void SuspendProcess(int pid)
         {
             var process = Process.GetProcessById(pid); // throws exception if process does not exist
 
@@ -94,7 +94,7 @@ namespace Evelynn_Bot.ExternalCommands
             }
         }
 
-        public static void ResumeProcess(int pid)
+        public void ResumeProcess(int pid)
         {
             var process = Process.GetProcessById(pid);
 

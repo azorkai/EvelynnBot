@@ -9,7 +9,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Evelynn_Bot.League_API.GameData
 {
-    public class Lobby
+    public struct Lobby
     {
         public string gameMode
         {
@@ -40,7 +40,7 @@ namespace Evelynn_Bot.League_API.GameData
         private int int_0;
     }
 
-    public partial class LobbyHelper
+    public struct LobbyHelper
     {
         [JsonProperty("eligible")]
         public bool Eligible { get; set; }
@@ -52,7 +52,7 @@ namespace Evelynn_Bot.League_API.GameData
         public Restriction[] Restrictions { get; set; }
     }
 
-    public partial class Restriction
+    public struct Restriction
     {
         [JsonProperty("expiredTimestamp")]
         public long ExpiredTimestamp { get; set; }
@@ -70,7 +70,7 @@ namespace Evelynn_Bot.League_API.GameData
         public string SummonerIdsString { get; set; }
     }
 
-    public partial class RestrictionArgs
+    public struct RestrictionArgs
     {
         [JsonProperty("teamSizeRestriction", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(ParseStringConverter))]
@@ -78,20 +78,6 @@ namespace Evelynn_Bot.League_API.GameData
     }
 
     public enum RestrictionCode { PlayerBannedRestriction, QueueDisabled, TeamSizeRestriction };
-
-    internal static class Converter
-    {
-        public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-        {
-            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-            DateParseHandling = DateParseHandling.None,
-            Converters =
-            {
-                RestrictionCodeConverter.Singleton,
-                new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-            },
-        };
-    }
 
     internal class ParseStringConverter : JsonConverter
     {
@@ -120,53 +106,5 @@ namespace Evelynn_Bot.League_API.GameData
             serializer.Serialize(writer, value.ToString());
             return;
         }
-
-        public static readonly ParseStringConverter Singleton = new ParseStringConverter();
-    }
-
-    internal class RestrictionCodeConverter : JsonConverter
-    {
-        public override bool CanConvert(Type t) => t == typeof(RestrictionCode) || t == typeof(RestrictionCode?);
-
-        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.Null) return null;
-            var value = serializer.Deserialize<string>(reader);
-            switch (value)
-            {
-                case "PlayerBannedRestriction":
-                    return RestrictionCode.PlayerBannedRestriction;
-                case "QueueDisabled":
-                    return RestrictionCode.QueueDisabled;
-                case "TeamSizeRestriction":
-                    return RestrictionCode.TeamSizeRestriction;
-            }
-            throw new Exception("Cannot unmarshal type RestrictionCode");
-        }
-
-        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
-        {
-            if (untypedValue == null)
-            {
-                serializer.Serialize(writer, null);
-                return;
-            }
-            var value = (RestrictionCode)untypedValue;
-            switch (value)
-            {
-                case RestrictionCode.PlayerBannedRestriction:
-                    serializer.Serialize(writer, "PlayerBannedRestriction");
-                    return;
-                case RestrictionCode.QueueDisabled:
-                    serializer.Serialize(writer, "QueueDisabled");
-                    return;
-                case RestrictionCode.TeamSizeRestriction:
-                    serializer.Serialize(writer, "TeamSizeRestriction");
-                    return;
-            }
-            throw new Exception("Cannot marshal type RestrictionCode");
-        }
-
-        public static readonly RestrictionCodeConverter Singleton = new RestrictionCodeConverter();
     }
 }

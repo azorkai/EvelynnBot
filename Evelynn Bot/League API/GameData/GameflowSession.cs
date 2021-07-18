@@ -37,7 +37,7 @@ namespace Evelynn_Bot.League_API.GameData
             WAITINGFORSTATS,
             PREENDOFGAME,
             ENDOFGAME,
-            TERMINATEDINERROR
+            TERMINATEDINERROR,
         }
     }
 }

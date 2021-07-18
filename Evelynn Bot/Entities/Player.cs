@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Evelynn_Bot.Entities
 {
-    public class Player
+    public struct Player
     {
         public float MaxHealth { get; set; }
         public float CurrentHealth { get; set; }
