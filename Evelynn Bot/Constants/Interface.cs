@@ -10,7 +10,7 @@ using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
 using EvelynnLCU.Plugins.LoL;
-using LCU.NET;
+using EvelynnLCU;
 using Leaf.xNet;
 using Wallet = Evelynn_Bot.League_API.GameData.Wallet;
 
@@ -20,7 +20,7 @@ namespace Evelynn_Bot.Constants
     {
         public NewQueue newQueue = new NewQueue();
         public License license = new License();
-        public Logger logger = new Logger();
+        public Logger logger = new Logger();    
         public ClientKiller clientKiller = new ClientKiller();
         public DashboardHelper dashboardHelper = new DashboardHelper();
         public Messages messages = new Messages();
@@ -28,7 +28,7 @@ namespace Evelynn_Bot.Constants
         public Dashboard dashboard = new Dashboard();
         public GameAi gameAi = new GameAi();
         public LolSummonerSummoner summoner = new LolSummonerSummoner();
-        public LCU.NET.Wallet wallet = new LCU.NET.Wallet();
+        public EvelynnLCU.Wallet wallet = new EvelynnLCU.Wallet();
         public Player player = new Player();
         public JsonRead jsonRead = new JsonRead();
         public ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();

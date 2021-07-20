@@ -12,9 +12,9 @@ using Evelynn_Bot.Constants;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.Struct;
 using Newtonsoft.Json;
-using LCU.NET;
-using LCU.NET.API_Models;
-using LCU.NET.Utils;
+using EvelynnLCU;
+using EvelynnLCU.API_Models;
+using EvelynnLCU.Utils;
 
 namespace Evelynn_Bot
 {

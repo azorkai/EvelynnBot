@@ -21,8 +21,8 @@ using bAUTH;
 using Evelynn_Bot.GameAI;
 using EvelynnLCU.API_Models;
 using EvelynnLCU.Plugins.LoL;
-using LCU.NET;
-using LCU.NET.API_Models;
+using EvelynnLCU;
+using EvelynnLCU.API_Models;
 
 namespace Evelynn_Bot.Account_Process
 {
