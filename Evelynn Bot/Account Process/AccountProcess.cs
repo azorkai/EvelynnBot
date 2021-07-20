@@ -51,21 +51,17 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-                Process.Start(itsInterface.license.LeaguePath);
+                ProcessStartInfo info = new ProcessStartInfo();
+                info.FileName = itsInterface.license.LeaguePath;
+                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
 
-                //ProcessStartInfo info = new ProcessStartInfo();
-                //info.FileName = itsInterface.license.LeaguePath;
-                //info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                ////info.UseShellExecute = true;
-                ////info.CreateNoWindow = true;
-                ////info.WindowStyle = ProcessWindowStyle.Hidden;
-
-                //Process lol = Process.Start(info);
-                //lol.PriorityClass = ProcessPriorityClass.Normal;
+                Process lol = Process.Start(info);
+                lol.PriorityClass = ProcessPriorityClass.Normal;
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
             {
+                Console.WriteLine($"LOL ACMA HATA: {ex6}");
                 return itsInterface.Result(false, itsInterface.messages.ErrorStartLeague);
             }
         }
@@ -130,7 +126,7 @@ namespace Evelynn_Bot.Account_Process
             try
             {
                 itsInterface.lcuApi.Init(InitializeMethod.Lockfile);
-                itsInterface.lcuApi.Socket.DumpToDebug = true;
+                itsInterface.lcuApi.Socket.DumpToDebug = false;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
             }
             catch (Exception e)

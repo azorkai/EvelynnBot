@@ -22,14 +22,19 @@ namespace Evelynn_Bot.ExternalCommands
 
         public void KillLeagueClient(Interface itsInterface)
         {
+            itsInterface.newQueue.SetWorkDone();
+            itsInterface.lcuApi.Socket.Unsubscribe("/lol-lobby/v2/lobby/matchmaking/search-state");
+            itsInterface.lcuApi.Socket.Unsubscribe("/riotclient/ux-state/request");
+            itsInterface.lcuApi.Socket.Unsubscribe("/lol-gameflow/v1/session");
             itsInterface.lcuPlugins.QuitLeague();
             itsInterface.lcuApi.Socket.Close();
+            itsInterface.lcuApi.Close();
         }
 
         public void KillLeagueClientNormally(Interface itsInterface)
         {
             AutoItX.ProcessClose("LeagueClient.exe");
-            AutoItX.ProcessClose("LeagueClientUx.exe");
+            AutoItX.ProcessClose("LeagueClientUx.exe"); 
             AutoItX.ProcessClose("LeagueClientUxRender.exe");
             AutoItX.ProcessClose("LeagueClientUxRender.exe");
             AutoItX.ProcessClose("RiotClientServices.exe");
