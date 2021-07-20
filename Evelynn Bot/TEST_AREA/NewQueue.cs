@@ -38,6 +38,11 @@ namespace Evelynn_Bot
 
         public static bool isDone = false;
 
+        public void SetWorkDone()
+        {
+            _work.SetResult(true);
+        }
+
         private async Task Connect()
         {
             bugTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);

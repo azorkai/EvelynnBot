@@ -25,8 +25,6 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> Start(Interface itsInterface)
         {
 
-            Console.WriteLine("Starting :D");
-
             if (CheckInGame(itsInterface))
             {
                 return GameAi(itsInterface);
