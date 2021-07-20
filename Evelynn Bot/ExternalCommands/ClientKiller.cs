@@ -24,15 +24,18 @@ namespace Evelynn_Bot.ExternalCommands
         {
             itsInterface.lcuPlugins.QuitLeague();
             itsInterface.lcuApi.Socket.Close();
+        }
 
-            //AutoItX.ProcessClose("LeagueClient.exe");
-            //AutoItX.ProcessClose("LeagueClientUx.exe");
-            //AutoItX.ProcessClose("LeagueClientUxRender.exe");
-            //AutoItX.ProcessClose("LeagueClientUxRender.exe");
-            //AutoItX.ProcessClose("RiotClientServices.exe");
-            //AutoItX.ProcessClose("RiotClientUx.exe");
-            //AutoItX.ProcessClose("RiotClientUxRender.exe");
-            //AutoItX.ProcessClose("RiotClientUxRender.exe");
+        public void KillLeagueClientNormally(Interface itsInterface)
+        {
+            AutoItX.ProcessClose("LeagueClient.exe");
+            AutoItX.ProcessClose("LeagueClientUx.exe");
+            AutoItX.ProcessClose("LeagueClientUxRender.exe");
+            AutoItX.ProcessClose("LeagueClientUxRender.exe");
+            AutoItX.ProcessClose("RiotClientServices.exe");
+            AutoItX.ProcessClose("RiotClientUx.exe");
+            AutoItX.ProcessClose("RiotClientUxRender.exe");
+            AutoItX.ProcessClose("RiotClientUxRender.exe");
         }
 
         [Flags]

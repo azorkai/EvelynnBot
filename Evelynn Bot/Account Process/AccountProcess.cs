@@ -51,18 +51,18 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = itsInterface.license.LeaguePath;
-                info.UseShellExecute = true;
-                info.CreateNoWindow = true;
-                info.WindowStyle = ProcessWindowStyle.Hidden;
+                Process.Start(itsInterface.license.LeaguePath);
 
-                Process lol = Process.Start(info);
-                lol.PriorityClass = ProcessPriorityClass.AboveNormal;
-                lol.WaitForInputIdle();
+                //ProcessStartInfo info = new ProcessStartInfo();
+                //info.FileName = itsInterface.license.LeaguePath;
+                //info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+                ////info.UseShellExecute = true;
+                ////info.CreateNoWindow = true;
+                ////info.WindowStyle = ProcessWindowStyle.Hidden;
+
+                //Process lol = Process.Start(info);
+                //lol.PriorityClass = ProcessPriorityClass.Normal;
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
-
-
             }
             catch (Exception ex6)
             {

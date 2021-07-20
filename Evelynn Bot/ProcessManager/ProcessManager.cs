@@ -60,8 +60,9 @@ namespace Evelynn_Bot.ProcessManager
 
                 using (AccountProcess accountProcess = new AccountProcess())
                 {
-                    itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                    itsInterface.clientKiller.KillLeagueClientNormally(itsInterface);
                     accountProcess.StartLeague(itsInterface);
+                    await Task.Delay(10000);
                     await accountProcess.LoginAccount(itsInterface);
                     accountProcess.Initialize(itsInterface);
 
@@ -70,7 +71,7 @@ namespace Evelynn_Bot.ProcessManager
                     if (!await accountProcess.GetSetWallet(itsInterface))
                     {
                         itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                        await Task.Delay(5000);
+                        await Task.Delay(10000);
                         return Start(itsInterface);
                     }
 
@@ -329,6 +330,7 @@ namespace Evelynn_Bot.ProcessManager
                 if (pnC == 0) { Console.WriteLine("Panelden Restart Geldi!"); }
                 itsInterface.clientKiller.KillLeagueClient(itsInterface);
                 Dispose(true);
+                await Task.Delay(10000);
                 return Start(itsInterface);
             }
 
