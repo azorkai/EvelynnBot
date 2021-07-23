@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoIt;
+using Evelynn_Bot.Account_Process;
 using Evelynn_Bot.Constants;
 
 namespace Evelynn_Bot.ExternalCommands
@@ -16,31 +19,53 @@ namespace Evelynn_Bot.ExternalCommands
         public static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
         [DllImport("User32.dll", SetLastError = true)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
         [DllImport("User32.dll")]
         public static extern bool EnableWindow(IntPtr hwnd, bool enabled);
 
         public void KillLeagueClient(Interface itsInterface)
         {
-            itsInterface.newQueue.SetWorkDone();
-            itsInterface.lcuApi.Socket.Unsubscribe("/lol-lobby/v2/lobby/matchmaking/search-state");
-            itsInterface.lcuApi.Socket.Unsubscribe("/riotclient/ux-state/request");
-            itsInterface.lcuApi.Socket.Unsubscribe("/lol-gameflow/v1/session");
-            itsInterface.lcuPlugins.QuitLeague();
-            itsInterface.lcuApi.Socket.Close();
-            itsInterface.lcuApi.Close();
+            try
+            {
+                itsInterface.lcuApi.Socket.Close();
+                itsInterface.lcuApi.Close();
+                KillLeagueClientNormally(itsInterface);
+                Thread.Sleep(3000);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Kill Process Hata: " + e);
+            }
         }
+
 
         public void KillLeagueClientNormally(Interface itsInterface)
         {
-            AutoItX.ProcessClose("LeagueClient.exe");
-            AutoItX.ProcessClose("LeagueClientUx.exe"); 
-            AutoItX.ProcessClose("LeagueClientUxRender.exe");
-            AutoItX.ProcessClose("LeagueClientUxRender.exe");
-            AutoItX.ProcessClose("RiotClientServices.exe");
-            AutoItX.ProcessClose("RiotClientUx.exe");
-            AutoItX.ProcessClose("RiotClientUxRender.exe");
-            AutoItX.ProcessClose("RiotClientUxRender.exe");
+            for (int i = 0; i < 2; i++)
+            {
+                try
+                {
+                    AutoItX.ProcessSetPriority("LeagueClientUx.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("LeagueClient.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("LeagueClientUxRender.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("LeagueClientUxRender.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("RiotClientServices.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("RiotClientUx.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("RiotClientUxRender.exe", 0); // Idle/Low
+                    AutoItX.ProcessSetPriority("RiotClientUxRender.exe", 0); // Idle/Low
+                    AutoItX.ProcessClose("LeagueClientUx.exe"); 
+                    AutoItX.ProcessClose("LeagueClient.exe");
+                    AutoItX.ProcessClose("LeagueClientUxRender.exe");
+                    AutoItX.ProcessClose("LeagueClientUxRender.exe");
+                    AutoItX.ProcessClose("RiotClientServices.exe");
+                    AutoItX.ProcessClose("RiotClientUx.exe");
+                    AutoItX.ProcessClose("RiotClientUxRender.exe");
+                    AutoItX.ProcessClose("RiotClientUxRender.exe");
+                }
+                catch
+                {
+                    //ignored
+                }
+            }
         }
 
         [Flags]

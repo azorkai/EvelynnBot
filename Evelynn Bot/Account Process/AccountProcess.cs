@@ -51,12 +51,17 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = itsInterface.license.LeaguePath;
-                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
 
-                Process lol = Process.Start(info);
-                lol.PriorityClass = ProcessPriorityClass.Normal;
+                AutoItX.Run($"\"{itsInterface.license.LeaguePath}\" --launch-product=league_of_legends --launch-patchline=live", Path.GetDirectoryName(itsInterface.license.LeaguePath));
+
+                //ProcessStartInfo info = new ProcessStartInfo();
+                //info.FileName = itsInterface.license.LeaguePath;
+                //info.Arguments = "--launch-product=league_of_legends --launch-patchline=live";
+
+                //Process lol = new Process();
+                //lol.StartInfo = info;
+                //lol.Start();
+                //lol.WaitForInputIdle();
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -107,9 +112,7 @@ namespace Evelynn_Bot.Account_Process
                     Thread.Sleep(25000);
                 }
 
-                Thread.Sleep(15000);
-                //KillUxRender(itsInterface);
-                Thread.Sleep(15000);
+                Thread.Sleep(30000);
                 Dispose(true);
                 itsInterface.lcuPlugins = null;
                 return itsInterface.Result(true, itsInterface.messages.SuccessLogin);

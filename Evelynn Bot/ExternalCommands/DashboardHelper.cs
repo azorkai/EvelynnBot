@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -25,21 +26,41 @@ namespace Evelynn_Bot.ExternalCommands
 
         public bool whileLoop = true;
         public int onlineClient = 0;
-        public async void LoginAndStartBot(string username, string password, Interface itsInterface)
+        public async void LoginAndStartBot(string username, string password, Interface itsInterface, bool method = false)
         {
-            string r = itsInterface.req.CreateRequest(URI,
-                new string[] { "data" },
-                new string[] { itsInterface.sec.EncryptString(
-                    string.Format("{0}|{1}|{2}|{3}|{4}",
-                        itsInterface.u.GetRandomString(new Random().Next(100,128)),
-                        "LOGIN",
-                        username,
-                        password,
-                        itsInterface.u.GetRandomString(new Random().Next(100, 128))
-                    ))},
-                Method.POST);
+            if (method)
+            {
+                string r = itsInterface.req.CreateRequest(URI,
+                    new string[] { "data" },
+                    new string[] { itsInterface.sec.EncryptString(
+                        string.Format("{0}|{1}|{2}|{3}|{4}",
+                            itsInterface.u.GetRandomString(new Random().Next(100,128)),
+                            "RESTART_LOGIN",
+                            username,
+                            password,
+                            itsInterface.license.ID,
+                            itsInterface.u.GetRandomString(new Random().Next(100, 128))
+                        ))},
+                    Method.POST);
 
-            itsInterface.license = itsInterface.req.VerifyLicense(r, itsInterface);
+                itsInterface.license = itsInterface.req.VerifyLicense(r, itsInterface);
+            }
+            else
+            {
+                string r = itsInterface.req.CreateRequest(URI,
+                    new string[] { "data" },
+                    new string[] { itsInterface.sec.EncryptString(
+                        string.Format("{0}|{1}|{2}|{3}|{4}",
+                            itsInterface.u.GetRandomString(new Random().Next(100,128)),
+                            "LOGIN",
+                            username,
+                            password,
+                            itsInterface.u.GetRandomString(new Random().Next(100, 128))
+                        ))},
+                    Method.POST);
+
+                itsInterface.license = itsInterface.req.VerifyLicense(r, itsInterface);
+            }
 
             if (itsInterface.license.Status)
             {
@@ -74,18 +95,26 @@ namespace Evelynn_Bot.ExternalCommands
 
                 itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart);
                 Console.WriteLine(itsInterface.dashboard.IsStop);
-                CHECKSTART:
-                if (itsInterface.dashboard.IsStart)
+                if (method)
                 {
-                    itsInterface.dashboard.IsStart = false;
-                    itsInterface.dashboard.IsStop = false; 
-                    itsInterface.dashboard.IsRestart = false; 
                     itsInterface.processManager.Start(itsInterface);
                 }
                 else
                 {
-                    goto CHECKSTART;
+                    CHECKSTART:
+                    if (itsInterface.dashboard.IsStart)
+                    {
+                        itsInterface.dashboard.IsStart = false;
+                        itsInterface.dashboard.IsStop = false;
+                        itsInterface.dashboard.IsRestart = false;
+                        itsInterface.processManager.Start(itsInterface);
+                    }
+                    else
+                    {
+                        goto CHECKSTART;
+                    }
                 }
+
 
 
                 Console.ReadLine();
@@ -98,6 +127,8 @@ namespace Evelynn_Bot.ExternalCommands
 
 
         }
+
+        #region Website API
 
         public void UpdateLolWallet(string level, string be, Interface itsInterface)
         {
@@ -160,7 +191,6 @@ namespace Evelynn_Bot.ExternalCommands
             Console.WriteLine(DecryptString(botRequest));
         }
 
-
         public string DecryptString(string cipherText)
         {
             try
@@ -200,10 +230,38 @@ namespace Evelynn_Bot.ExternalCommands
                 return "";
             }
         }
+
+
+        #endregion
     }
+
 
     public class DashboardActionHelper : IJob
     {
+        #region Security
+        string[] musicList = ReadAllResourceLines("Evelynn_Bot.Constants.mn.txt");
+        public static string[] ReadAllResourceLines(string resourceName)
+        {
+            using (Stream stream = Assembly.GetEntryAssembly()
+                .GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return EnumerateLines(reader).ToArray();
+            }
+        }
+
+        public static IEnumerable<string> EnumerateLines(TextReader reader)
+        {
+            string line;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                yield return line;
+            }
+        }
+
+        #endregion
+
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
@@ -214,17 +272,28 @@ namespace Evelynn_Bot.ExternalCommands
             string r = itsInterface.req.CreateRequest(DashboardHelper.URI,
                 new string[] { "data" },
                 new string[] { itsInterface.sec.EncryptString(
-                    string.Format("{0}|{1}|{2}|{3}|{4}|{5}",
+                    string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",
                         itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "ACTION",
                         itsInterface.license.Username,
                         itsInterface.license.Password,
                         itsInterface.license.ID,
-                        itsInterface.license.Last
+                        itsInterface.license.Last,
+                        itsInterface.uptime.Millisec.ToString()
                     ))},
                 Method.POST);
 
             await itsInterface.req.GetActionStatus(r, itsInterface);
+
+            // Change Title
+            
+            var rand = new Random();
+            int randomNumber = rand.Next(0, musicList.Length);
+
+            // Read the random line
+            string line = musicList.Skip(randomNumber - 1).Take(1).First();
+            Program.SetWindowText(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, line);
+
         }
     }
 

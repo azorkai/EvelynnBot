@@ -20,6 +20,7 @@ namespace Evelynn_Bot.Constants
     {
         public NewQueue newQueue = new NewQueue();
         public License license = new License();
+        public UpTimer uptime = new UpTimer();
         public Logger logger = new Logger();    
         public ClientKiller clientKiller = new ClientKiller();
         public DashboardHelper dashboardHelper = new DashboardHelper();

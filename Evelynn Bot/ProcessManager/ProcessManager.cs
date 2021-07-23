@@ -1,6 +1,8 @@
 using Evelynn_Bot.Account_Process;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,6 +16,7 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.ProcessManager;
+using Newtonsoft.Json;
 
 namespace Evelynn_Bot.ProcessManager
 {
@@ -27,7 +30,7 @@ namespace Evelynn_Bot.ProcessManager
 
             if (CheckInGame(itsInterface))
             {
-                return GameAi(itsInterface);
+                return GameAi(itsInterface, true);
             }
 
             await StartAccountProcess(itsInterface);
@@ -40,7 +43,7 @@ namespace Evelynn_Bot.ProcessManager
             return Task.CompletedTask;
         }
 
-        public async Task<Task> StartAccountProcess(Interface itsInterface)
+        public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
 
             NewQueue.bugTimer.Stop();
@@ -54,78 +57,108 @@ namespace Evelynn_Bot.ProcessManager
                 itsInterface.logger.Log(true, "Tutorial: " + itsInterface.license.Lol_doTutorial);
                 itsInterface.logger.Log(true, "Disenchant: " + itsInterface.license.Lol_disenchant.ToString());
                 itsInterface.logger.Log(true, "Empty Nick: " + itsInterface.license.Lol_isEmptyNick);
-                itsInterface.license.LeaguePath = itsInterface.jsonRead.Location() + "LeagueClient.exe";
+
+                //itsInterface.license.LeaguePath = itsInterface.jsonRead.Location() + "LeagueClient.exe";
+
+                itsInterface.license.LeaguePath = itsInterface.jsonRead.Location();
+
 
                 using (AccountProcess accountProcess = new AccountProcess())
                 {
-                    itsInterface.clientKiller.KillLeagueClientNormally(itsInterface);
-                    accountProcess.StartLeague(itsInterface);
-                    await Task.Delay(10000);
-                    await accountProcess.LoginAccount(itsInterface);
-                    accountProcess.Initialize(itsInterface);
-
-                    itsInterface.lcuPlugins.KillUXAsync();
-
-                    if (!await accountProcess.GetSetWallet(itsInterface))
+                    if (isFromGame == false)
                     {
-                        itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                        itsInterface.clientKiller.KillLeagueClientNormally(itsInterface);
+                        await Task.Delay(3000);
+                        accountProcess.StartLeague(itsInterface);
                         await Task.Delay(10000);
-                        return Start(itsInterface);
                     }
-
-                    Dispose(true);
-
-                    if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
+                    if (processExist("RiotClientUx.exe" , itsInterface))
                     {
-                        itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
-                        itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                        itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
-                        Thread.Sleep(15000);
+                        if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
+                        accountProcess.Initialize(itsInterface);
+
+                        itsInterface.lcuPlugins.KillUXAsync();
+
+                        if (!await accountProcess.GetSetWallet(itsInterface))
+                        {
+                            itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                            await Task.Delay(10000);
+                            return Start(itsInterface);
+                        }
+
                         Dispose(true);
-                        return Start(itsInterface);
-                    }
 
-                    if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
-                    {
-                        itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
-                        itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                        itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
-                        Thread.Sleep(15000);
+                        if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
+                        {
+                            itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
+                            itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                            itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
+                            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                            Process eBot = new Process();
+                            eBot.StartInfo.FileName = exeDir;
+                            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                            eBot.StartInfo.Arguments = licenseBase64String;
+                            eBot.StartInfo.Verb = "runas";
+                            eBot.Start();
+                            Environment.Exit(0);
+                            return Start(itsInterface);
+                        }
+
+                        if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
+                        {
+                            itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
+                            itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                            itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
+                            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                            Process eBot = new Process();
+                            eBot.StartInfo.FileName = exeDir;
+                            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                            eBot.StartInfo.Arguments = licenseBase64String;
+                            eBot.StartInfo.Verb = "runas";
+                            eBot.Start();
+                            Environment.Exit(0);
+                            return Start(itsInterface);
+                        }
+
+                        if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
+                        {
+                            Dispose(true);
+                            await accountProcess.CheckNewAccount(itsInterface);
+                        }
+
+                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak
+
+                        if (itsInterface.license.Lol_disenchant)
+                        {
+                            await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
+                        }
+
+                        if (itsInterface.license.Lol_doTutorial)
+                        {
+                            accountProcess.TutorialMissions(itsInterface);
+                        }
+
+                        if (CheckInGame(itsInterface))
+                        {
+                            Console.WriteLine(itsInterface.messages.GameFound);
+                            return GameAi(itsInterface, true);
+                        }
+
+                        await Task.Delay(15000);
+
+                        itsInterface.lcuPlugins.KillUXAsync();
+
                         Dispose(true);
-                        return Start(itsInterface);
+                        return itsInterface.newQueue.Test(itsInterface);
                     }
-
-                    if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
+                    else
                     {
-                        Dispose(true);
-                        await accountProcess.CheckNewAccount(itsInterface);
+                        return StartAccountProcess(itsInterface);
                     }
-
-                    accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak
-
-                    if (itsInterface.license.Lol_disenchant)
-                    {
-                        await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
-                    }
-
-                    if (itsInterface.license.Lol_doTutorial)
-                    {
-                        accountProcess.TutorialMissions(itsInterface);
-                    }
-
-                    if (CheckInGame(itsInterface))
-                    {
-                        Console.WriteLine(itsInterface.messages.GameFound);
-                        return GameAi(itsInterface);
-                    }
-
-                    await Task.Delay(15000);
-
-                    itsInterface.lcuPlugins.KillUXAsync();
-
-                    Dispose(true);
-                    return itsInterface.newQueue.Test(itsInterface);
                 }
+                    
 
             }
             catch (Exception e)
@@ -171,7 +204,7 @@ namespace Evelynn_Bot.ProcessManager
             return itsInterface.Result(Convert.ToBoolean(a), "");
         }
 
-        public async Task<Task> GameAi(Interface itsInterface)
+        public async Task<Task> GameAi(Interface itsInterface, bool isFromDetect = false)
         {
             itsInterface.dashboardHelper.UpdateLolStatus("In Game", itsInterface);
             Thread.Sleep(15000);
@@ -299,7 +332,17 @@ namespace Evelynn_Bot.ProcessManager
                     }
                 }
             }
+
             Dispose(true);
+
+            Console.WriteLine("Oyun Bitti:D");
+
+            if (isFromDetect)
+            {
+                Console.WriteLine("Sockete bağlanmak için bu yapılır");
+                return StartAccountProcess(itsInterface, true);
+            }
+
             return Task.CompletedTask;
         }
 
@@ -325,11 +368,18 @@ namespace Evelynn_Bot.ProcessManager
             {
                 itsInterface.dashboard.IsRestart = false;
                 itsInterface.dashboard.IsStop = false;
+                itsInterface.dashboard.IsStart = true;
                 if (pnC == 0) { Console.WriteLine("Panelden Restart Geldi!"); }
-                itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                Dispose(true);
-                await Task.Delay(10000);
-                return Start(itsInterface);
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
+                return Task.CompletedTask;
             }
 
             if (itsInterface.dashboard.IsStop) // Dashboard Action Stop
@@ -354,6 +404,8 @@ namespace Evelynn_Bot.ProcessManager
                     return Start(itsInterface);
                 }
 
+                Console.WriteLine(itsInterface.summoner.summonerLevel);
+
                 accountProcess.PatchCheck(itsInterface);
                 itsInterface.lcuPlugins.KillUXAsync();
 
@@ -364,8 +416,15 @@ namespace Evelynn_Bot.ProcessManager
                     itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
                     itsInterface.clientKiller.KillLeagueClient(itsInterface);
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
-                    Thread.Sleep(15000);
-                    Dispose(true);
+                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    Process eBot = new Process();
+                    eBot.StartInfo.FileName = exeDir;
+                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                    eBot.StartInfo.Arguments = licenseBase64String;
+                    eBot.StartInfo.Verb = "runas";
+                    eBot.Start();
+                    Environment.Exit(0);
                     return Start(itsInterface);
                 }
 
@@ -374,8 +433,15 @@ namespace Evelynn_Bot.ProcessManager
                     itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
                     itsInterface.clientKiller.KillLeagueClient(itsInterface);
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
-                    Thread.Sleep(15000);
-                    Dispose(true);
+                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    Process eBot = new Process();
+                    eBot.StartInfo.FileName = exeDir;
+                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                    eBot.StartInfo.Arguments = licenseBase64String;
+                    eBot.StartInfo.Verb = "runas";
+                    eBot.Start();
+                    Environment.Exit(0);
                     return Start(itsInterface);
                 }
 
