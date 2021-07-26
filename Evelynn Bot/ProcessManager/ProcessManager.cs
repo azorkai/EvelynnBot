@@ -77,8 +77,6 @@ namespace Evelynn_Bot.ProcessManager
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
                         accountProcess.Initialize(itsInterface);
 
-                        itsInterface.lcuPlugins.KillUXAsync();
-
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
                             itsInterface.clientKiller.KillLeagueClient(itsInterface);
@@ -145,6 +143,8 @@ namespace Evelynn_Bot.ProcessManager
                             Console.WriteLine(itsInterface.messages.GameFound);
                             return GameAi(itsInterface, true);
                         }
+
+                        itsInterface.lcuPlugins.KillUXAsync();
 
                         await Task.Delay(15000);
 

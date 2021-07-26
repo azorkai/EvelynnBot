@@ -158,27 +158,29 @@ namespace Evelynn_Bot.Account_Process
             if (string.IsNullOrEmpty(itsInterface.summoner.displayName))
             {
                 itsInterface.logger.Log(true, "New account!");
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 AutoItX.ControlClick("Riot Client", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 647, 355);
-                Thread.Sleep(25000);
+                await Task.Delay(25000);
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 865, 219);
-                Thread.Sleep(1250);
+                await Task.Delay(1250);
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 862, 316);
-                Thread.Sleep(1250);
+                await Task.Delay(1250);
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 819, 430);
-                Thread.Sleep(1250);
+                await Task.Delay(1250);
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 834, 551);
-                Thread.Sleep(1250);
+                await Task.Delay(1250);
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 639, 664);
 
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 640, 400); //This is for config bug.
 
-                itsInterface.newLeaguePlayer.name = RandomNameGenerator();
+                var name = RandomNameGenerator();
+                Console.WriteLine(name);
+                Console.WriteLine("ABU DELIRME BI");
 
-                itsInterface.lcuPlugins.SetSummonerName(itsInterface.newLeaguePlayer.name);
+                itsInterface.lcuPlugins.SetSummonerName(name);
                 itsInterface.logger.Log(true, "Successfully used name!");
                 itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                Thread.Sleep(7000);
+                await Task.Delay(7000);
                 Dispose(true);
                 return itsInterface.processManager.Start(itsInterface);
 
