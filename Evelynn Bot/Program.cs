@@ -18,6 +18,7 @@ using System.Timers;
 using System.Windows.Forms;
 using AutoIt;
 using bAUTH;
+using Evelynn_Bot.Account_Process;
 using Evelynn_Bot.Constants;
 using EvelynnLCU;
 using EvelynnLCU.Plugins.LoL;
@@ -74,11 +75,12 @@ namespace Evelynn_Bot
 
             //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
+
             Interface itsInterface = new Interface();
             Language.language = itsInterface.jsonRead.Language();
             itsInterface.messages.SetLanguage();
             string botArg = "";
-            try {  botArg = args[0]; } catch{ }
+            try { botArg = args[0]; } catch { }
             if (!String.IsNullOrEmpty(botArg))
             {
                 try
@@ -93,7 +95,8 @@ namespace Evelynn_Bot
                     {
                         Environment.Exit(0);
                     }
-                } catch { Environment.Exit(0); }
+                }
+                catch { Environment.Exit(0); }
             }
             else
             {

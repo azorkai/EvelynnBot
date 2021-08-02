@@ -8,6 +8,7 @@ namespace Evelynn_Bot.Constants
 {
     public class Messages
     {
+        public string Patch = "Yama yapılıyor...";
         public string InfoQueueStats = "Sıra durumu:";
         public string InfoStartingAgain = "Bir sonraki oyuna geçiliyor.";
         public string ErrorNullUsername = "Kullanıcı adı boş kalamaz!";
@@ -46,6 +47,7 @@ namespace Evelynn_Bot.Constants
             //İngilizce
             if (Language.language == "en")
             {
+                Patch = "Patching...";
                 InfoQueueStats = "Queue Status:";
                 InfoStartingAgain = "Starting the next game";
                 ErrorNullUsername = "Username must be filled!";
@@ -95,6 +97,7 @@ namespace Evelynn_Bot.Constants
             //Fransızca
             if (Language.language == "fr")
             {
+                Patch = "Patcher...";
                 InfoQueueStats = "Statut de la file d'attente:";
                 InfoStartingAgain = "Commencer le prochain jeu";
                 ErrorNullUsername = "Le nom d'utilisateur doit être renseigné!";

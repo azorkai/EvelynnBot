@@ -14,9 +14,11 @@ namespace Evelynn_Bot.GameAI
         string[] UseImageSearch(string imgPath, string tolerance);
         bool ImageSearch(string path, string tolerance, string message, Interface itInterface);
         void CurrentPlayerStats(Interface itInterface);
-        void GoMid();
+        Task Combo(int x, int y);
+        Task GoSafeArea();
+        Task GoMid();
         void GoTop();
         void GoBot();
-        void GoBase();
+        Task GoBase();
     }
 }

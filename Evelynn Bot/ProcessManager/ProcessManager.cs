@@ -1,5 +1,6 @@
 using Evelynn_Bot.Account_Process;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Xml;
 using AutoIt;
 using bAUTH;
@@ -17,12 +19,23 @@ using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.ProcessManager;
 using Newtonsoft.Json;
+using Timer = System.Threading.Timer;
 
 namespace Evelynn_Bot.ProcessManager
 {
     public class ProcessManager : IProcessManager
     {
+        private Random random = new Random();
         
+        private bool danger;
+        private float lastHealth;
+        private float currentHealth;
+
+        public static System.Timers.Timer DamageCheckerTimer = new System.Timers.Timer();
+        public static System.Timers.Timer ExtremeGameTimer = new System.Timers.Timer();
+
+        private int ExtremeGameTime;
+
         private bool randomController;
 
         public async Task<Task> Start(Interface itsInterface)
@@ -76,7 +89,7 @@ namespace Evelynn_Bot.ProcessManager
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
                         accountProcess.Initialize(itsInterface);
-
+                        await itsInterface.lcuPlugins.GetSetMissions();
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
                             itsInterface.clientKiller.KillLeagueClient(itsInterface);
@@ -120,6 +133,12 @@ namespace Evelynn_Bot.ProcessManager
                             return Start(itsInterface);
                         }
 
+                        if (CheckInGame(itsInterface))
+                        {
+                            Console.WriteLine(itsInterface.messages.GameFound);
+                            return GameAi(itsInterface, true);
+                        }
+
                         if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
                         {
                             Dispose(true);
@@ -138,11 +157,6 @@ namespace Evelynn_Bot.ProcessManager
                             accountProcess.TutorialMissions(itsInterface);
                         }
 
-                        if (CheckInGame(itsInterface))
-                        {
-                            Console.WriteLine(itsInterface.messages.GameFound);
-                            return GameAi(itsInterface, true);
-                        }
 
                         itsInterface.lcuPlugins.KillUXAsync();
 
@@ -207,56 +221,279 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> GameAi(Interface itsInterface, bool isFromDetect = false)
         {
             itsInterface.dashboardHelper.UpdateLolStatus("In Game", itsInterface);
-            Thread.Sleep(15000);
-            randomController = true;
+            await Task.Delay(15000);
 
-            while(processExist("League of Legends.exe", itsInterface))
+            ExtremeGameTimer.Elapsed += (sender, e) => VoidExtremeGameTime(sender, e, itsInterface);
+            //1 Saat
+            ExtremeGameTimer.Interval = 3600000;
+            ExtremeGameTimer.Enabled = true;
+            ExtremeGameTimer.Start();
+
+            while (processExist("League of Legends.exe", itsInterface))
             {
                 using (GameAi gameAi = new GameAi())
                 {
+                    //Hasar Kontrolcüsü
+                    //DamageCheckerTimer.Elapsed += (sender, e) => DamageChecker(sender, e, itsInterface, gameAi);
+                    //DamageCheckerTimer.Interval = 1000;
+                    //DamageCheckerTimer.Enabled = true;
+                    //DamageCheckerTimer.Start();                    
+                    //Hasar Kontrolcüsü
+
                     while (gameAi.ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
                     {
-                        if (randomController)
-                        {
-                            gameAi.RandomLaner();
+                        await gameAi.GoMid();
 
-                            Thread.Sleep(9000);
-                            randomController = false;
-                        }
-                        else
+                        if (gameAi.ImageSearch(itsInterface.ImgPaths.shop, "1", "", itsInterface))
                         {
-                            gameAi.GoMid();
+                            AutoItX.Send("p");
                         }
 
                         gameAi.CurrentPlayerStats(itsInterface);
-
-                        if (itsInterface.player.CurrentHealth < 15)
+                        if (itsInterface.player.CurrentHealth < 250)
                         {
-                            Dispose(true);
+                            await gameAi.GoBase();
                         }
 
-                        while (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                        if (itsInterface.player.CurrentHealth < 300)
                         {
-                            if (itsInterface.player.CurrentHealth < 15)
-                            {
-                                Dispose(true);
-                            }
+                            gameAi.Heal();
+                        }
+
+                        //Rakip varsa, dost minyon yoksa geri çekil!
+                        if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface)
+                            && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface))
+                        {
+                            await gameAi.GoSafeArea();
+                        }
+
+
+                        gameAi.CurrentPlayerStats(itsInterface);
+                        while (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) && 
+                               itsInterface.player.CurrentHealth > 250)
+                        {
+
                             gameAi.CurrentPlayerStats(itsInterface);
-                            gameAi.HitMove(gameAi.X, gameAi.Y);
-                            Thread.Sleep(500);
-
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_minions, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                                itsInterface.player.CurrentHealth > 250)
                             {
-                                AutoItX.MouseClick("RIGHT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
-                                AutoItX.Send("q");
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
                             }
 
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface) && itsInterface.player.CurrentHealth > 0)
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            if (itsInterface.player.CurrentHealth < 250)
                             {
+                                await gameAi.GoBase();
+                            }
+
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            if (itsInterface.player.CurrentHealth < 300)
+                            {
+                                gameAi.Heal();
+                            }
+
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                                itsInterface.player.CurrentHealth > 250)
+                            {
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
+                            }
+
+                            await Task.Delay(700);
+
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                                itsInterface.player.CurrentHealth > 250)
+                            {
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
+                            }
+
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            //Basit şampiyona 2.3 saniye düz vuruş.
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface) 
+                                && itsInterface.player.CurrentHealth > 350)
+                            {
+                                //Kule varsa, rakip varsa geri çekil
+                                if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface)
+                                    && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                                {
+                                    await gameAi.GoMid();
+                                }
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                await Task.Delay(2300);
+                                await gameAi.GoMid();
+                            }
+
+                            //Kule varsa, dost minyon yoksa geri çekil
+                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface)
+                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface))
+                            {
+                                await gameAi.GoMid();
+                            }
+
+                            //Kule varsa, rakip varsa geri çekil
+                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface)
+                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                            {
+                                await gameAi.GoMid();
+                            }
+
+                            //Rakip varsa, dost minyon yoksa geri çekil!
+                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface)
+                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface))
+                            {
+                                AutoItX.Send("a");
+                                await gameAi.GoSafeArea();
+                            }
+
+                            //Rakip varsa, rakip minyon varsa, dost minyon yoksa güvenli alana çekil.
+                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface)
+                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface)
+                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_minions, "2", "", itsInterface))
+                            {
+                                AutoItX.Send("a");
+                                await gameAi.GoSafeArea();
+                            }
+
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            //Düşman minyona oto atak.
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_minions, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) 
+                                && itsInterface.player.CurrentHealth > 250)
+                            {
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 27, gameAi.Y + 20, 1, 0);
+                                await Task.Delay(500);
+                                AutoItX.Send("q");
+
+                                //Kule varsa, rakip varsa geri çekil.
+                                if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface)
+                                    && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface))
+                                {
+                                    await gameAi.GoMid();
+                                }
+
+                                //Kule yoksa, rakip varsa atak.
+                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) 
+                                    && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface))
+                                {
+                                    await gameAi.Combo(gameAi.X, gameAi.Y);
+                                }
+                            }
+
+                            gameAi.CurrentPlayerStats(itsInterface);
+
+                            //Kule yoksa, can yüksekse, dost minyon varsa -> All In
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface) 
+                                && itsInterface.player.CurrentHealth > 400 
+                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface) 
+                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "3", "", itsInterface))
+                            {
+                                //Kule varsa, rakip varsa geri çekil
+                                if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface)
+                                    && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                                {
+                                    await gameAi.GoMid();
+                                }
+
                                 AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
-                                gameAi.Combo(gameAi.X, gameAi.Y);
-                                Thread.Sleep(1500);
+                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health,"3", "", itsInterface) 
+                                    && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface))
+                                {
+                                    AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                    AutoItX.Send("q");
+                                    AutoItX.Send("q");
+                                    AutoItX.Send("a");
+
+                                    gameAi.CurrentPlayerStats(itsInterface);
+                                    if (itsInterface.player.CurrentHealth < 300)
+                                    {
+                                        await gameAi.GoMid();
+                                    }
+                                }
+                                
+                                await Task.Delay(1000);
+                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface)
+                                    && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface))
+                                {
+                                    AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                    AutoItX.Send("w");
+                                    AutoItX.Send("w");
+                                    AutoItX.Send("a");
+
+                                    gameAi.CurrentPlayerStats(itsInterface);
+                                    if (itsInterface.player.CurrentHealth < 300)
+                                    {
+                                        await gameAi.GoMid();
+                                    }
+                                }
+                                await Task.Delay(1000);
+                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface)
+                                    && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface))
+                                {
+                                    AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                    AutoItX.Send("e");
+                                    AutoItX.Send("e");
+                                    AutoItX.Send("a");
+
+                                    gameAi.CurrentPlayerStats(itsInterface);
+                                    if (itsInterface.player.CurrentHealth < 300)
+                                    {
+                                        await gameAi.GoMid();
+                                    }
+                                }
+                                await Task.Delay(1000);
+                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface)
+                                    && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface))
+                                {
+                                    AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                    AutoItX.Send("r");
+                                    AutoItX.Send("r");
+                                    AutoItX.Send("a");
+
+                                    gameAi.CurrentPlayerStats(itsInterface);
+                                    if (itsInterface.player.CurrentHealth < 300)
+                                    {
+                                        await gameAi.GoMid();
+                                    }
+                                }
+
+
+                                gameAi.CurrentPlayerStats(itsInterface);
+                                if (itsInterface.player.CurrentHealth < 300)
+                                {
+                                    gameAi.Heal();
+                                }
+
+                                gameAi.CurrentPlayerStats(itsInterface);
+                                while (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface) && 
+                                       itsInterface.player.CurrentHealth > 300 && 
+                                       !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface)
+                                       && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface))
+                                {
+                                    gameAi.CurrentPlayerStats(itsInterface);
+                                    if (!gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "3", "", itsInterface) &&
+                                        itsInterface.player.CurrentHealth > 250)
+                                    {
+                                        gameAi.CurrentPlayerStats(itsInterface);
+                                        gameAi.HitMove(gameAi.X, gameAi.Y);
+                                        await gameAi.Combo(gameAi.X, gameAi.Y);
+                                    }
+                                }
+                            }
+
+                            //Kule varsa, rakip varsa geri çekil
+                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface)
+                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                            {
+                                await gameAi.GoMid();
+                            }
+
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                                itsInterface.player.CurrentHealth > 250)
+                            {
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
                             }
 
                             switch (itsInterface.player.Level)
@@ -324,27 +561,81 @@ namespace Evelynn_Bot.ProcessManager
                                     break;
                             }
 
-                            Thread.Sleep(1000);
-                        }
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                                itsInterface.player.CurrentHealth > 250)
+                            {
+                                gameAi.HitMove(gameAi.X, gameAi.Y);
+                            }
 
-                        gameAi.GoMid();
-                        Thread.Sleep(1500);
+                            gameAi.CurrentPlayerStats(itsInterface);
+                            //Basit şampiyona 2.3 saniye düz vuruş.
+                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface) 
+                                && itsInterface.player.CurrentHealth > 350)
+                            {
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
+                                await Task.Delay(2300);
+                                await gameAi.GoMid();
+                            }
+                        }
+                        await gameAi.GoMid();
                     }
                 }
             }
 
+            ExtremeGameTime = 0;
+            ExtremeGameTimer.Stop();
             Dispose(true);
-
-            Console.WriteLine("Oyun Bitti:D");
 
             if (isFromDetect)
             {
-                Console.WriteLine("Sockete bağlanmak için bu yapılır");
                 return StartAccountProcess(itsInterface, true);
             }
-
             return Task.CompletedTask;
         }
+
+        private void VoidExtremeGameTime(object source, ElapsedEventArgs e, Interface itsInterface)
+        {
+            ExtremeGameTime++;
+            if (ExtremeGameTime >= 2)
+            {
+                itsInterface.logger.Log(false, "Extreme Game Time! Restarting...");
+                ExtremeGameTime = 0;
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
+            }
+        }
+
+        //private void DamageChecker(object source, ElapsedEventArgs e, Interface itsInterface, GameAi gameAi)
+        //{
+        //    danger = false;
+        //    gameAi.CurrentPlayerStats(itsInterface);
+        //    lastHealth = itsInterface.player.CurrentHealth;
+
+        //    Thread.Sleep(2500);
+
+        //    gameAi.CurrentPlayerStats(itsInterface);
+        //    currentHealth = itsInterface.player.CurrentHealth;
+
+        //    if (lastHealth - currentHealth > 180)
+        //    {
+        //        Console.WriteLine("Tehlikeli Durum! Büyük Can Kaybı Yaşandı!");
+        //        danger = true;
+        //        Dispose(true);
+        //        Thread.Sleep(1000);
+        //    }
+        //    else
+        //    {
+        //        danger = false;
+        //    }
+        //}
 
         public async Task<Task> PlayAgain(Interface itsInterface)
         {
@@ -450,7 +741,7 @@ namespace Evelynn_Bot.ProcessManager
                     await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
                 }
 
-                itsInterface.newQueue.CreateLobby();
+                NewQueue.CreateLobby();
 
                 Dispose(true);
                 return Task.CompletedTask;

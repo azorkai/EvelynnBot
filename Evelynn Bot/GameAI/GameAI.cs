@@ -95,6 +95,23 @@ namespace Evelynn_Bot.GameAI
             }
         }
 
+        public bool ImageSearchOnlyForControl(string path, string tolerance, string message, Interface itsInterface)
+        {
+            try
+            {
+                string[] results = UseImageSearch(path, tolerance);
+                if (results != null)
+                {
+                    return itsInterface.Result(true, message);
+                }
+                return itsInterface.Result(false, "");
+            }
+            catch (Exception e)
+            {
+                return itsInterface.Result(false, "ERROR!");
+            }
+        }
+
         public void SkillUp(string skill, string skill2)
         {
             AutoItX.Send("{CTRLDOWN}");
@@ -105,31 +122,48 @@ namespace Evelynn_Bot.GameAI
 
         public void HitMove(int x, int y)
         {
-            AutoItX.MouseClick("RIGHT", x - 20, y + 40, 1, 1);
+            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
             AutoItX.Send("a");
             Thread.Sleep(700);
-            AutoItX.MouseClick("LEFT", x - 20, y + 40, 1, 1);
+            AutoItX.MouseClick("LEFT", x - 17, y + 35, 1, 1);
             AutoItX.Send("a");
             AutoItX.Send("a");
+            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
+            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
+            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
+
         }
 
-        public void Combo(int x, int y)
+        public async Task Combo(int x, int y)
         {
             AutoItX.MouseClick("LEFT", x + 65, y + 75, 1, 0);
-            Thread.Sleep(200);
+            await Task.Delay(200);
             AutoItX.Send("q");
             AutoItX.Send("w");
             AutoItX.Send("e");
-            Thread.Sleep(200);
+            await Task.Delay(200);
             AutoItX.Send("r");
-            Thread.Sleep(500);
+            await Task.Delay(1000);
             AutoItX.Send("a");
         }
 
-        public void GoMid()
+        public void Heal()
         {
-            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 43, game_Y - 33, 1, 0);
+            AutoItX.Send("f");
+        }
+
+        public async Task GoSafeArea()
+        {
+            AutoItX.MouseClick("RIGHT", game_X + 30, game_Y - 20, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 30, game_Y - 20, 1, 0);
+            await Task.Delay(1000);
+        }
+
+        public async Task GoMid()
+        {
+            AutoItX.MouseClick("RIGHT", game_X + 42, game_Y - 30, 1, 0);
+            AutoItX.MouseClick("RIGHT", game_X + 42, game_Y - 30, 1, 0);
+            await Task.Delay(1000);
         }
 
         public void GoTop()
@@ -144,14 +178,15 @@ namespace Evelynn_Bot.GameAI
             AutoItX.MouseClick("RIGHT", game_X + 73, game_Y, 1, 0);
         }
 
-        public void GoBase()
+        public async Task GoBase()
         {
-            Thread.Sleep(1500);
             AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
             AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
-            Thread.Sleep(13000);
+            await Task.Delay(14000);
             AutoItX.Send("b");
-            Thread.Sleep(19000);
+            AutoItX.Send("b");
+            AutoItX.Send("b");
+            await Task.Delay(14000);
             AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
             AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
         }
@@ -172,13 +207,24 @@ namespace Evelynn_Bot.GameAI
             Thread.Sleep(500);
             AutoItX.MouseUp();
             Thread.Sleep(700);
-            AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
-            Thread.Sleep(1500);
-            AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
-            AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 1, 0);
-            AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5,1);
-            Thread.Sleep(200);
-            AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5, 1);
+            for (int i = 0; i < 10; i++)
+            {
+                AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
+                Thread.Sleep(1500);
+                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
+                Thread.Sleep(500);
+                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
+                Thread.Sleep(200);
+                AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
+                Thread.Sleep(200);
+                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
+                Thread.Sleep(200);
+                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
+                AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 1, 0);
+                AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5, 1);
+                Thread.Sleep(200);
+                AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5, 1);
+            }
             AutoItX.Send("p");
         }
 
@@ -204,6 +250,11 @@ namespace Evelynn_Bot.GameAI
             }
         }
 
+        public bool processExist(string win, Interface itsInterface)
+        {
+            int a = AutoItX.ProcessExists(win);
+            return itsInterface.Result(Convert.ToBoolean(a), "");
+        }
 
         #region TutorialAI
         public void TutorialAI_1(Interface itsInterface)
@@ -214,38 +265,15 @@ namespace Evelynn_Bot.GameAI
                 IsGameStarted(itsInterface);
             }
 
-            while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
+            while (processExist("League of Legends.exe", itsInterface))
             {
-                GoMid();
-
-                if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
                 {
-                    AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                    HitMove(X, Y);
-                    Combo(X, Y);
-                    AutoItX.Send("d");
-                    AutoItX.Send("f");
-                    Thread.Sleep(1500);
-                }
+                    GoMid();
 
-                while (ImageSearch(itsInterface.ImgPaths.minions_tutorial, "3", itsInterface.messages.SuccessMinion, itsInterface))
-                {
-                    HitMove(X, Y);
-                    Thread.Sleep(500);
-
-                    if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                    if (ImageSearch(itsInterface.ImgPaths.shop, "1", "", itsInterface))
                     {
-                        AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
-                        AutoItX.Send("q");
-                        Thread.Sleep(1500);
-                        AutoItX.Send("w");
-                        Thread.Sleep(1500);
-                        AutoItX.Send("e");
-                        Thread.Sleep(1500);
-                        AutoItX.Send("r");
-                        AutoItX.Send("d");
-                        AutoItX.Send("f");
-                        Thread.Sleep(1500);
+                        AutoItX.Send("p");
                     }
 
                     if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
@@ -258,22 +286,51 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(1500);
                     }
 
-                    if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                    while (ImageSearch(itsInterface.ImgPaths.minions_tutorial, "3", itsInterface.messages.SuccessMinion, itsInterface))
                     {
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        Thread.Sleep(3000);
+                        HitMove(X, Y);
+                        Thread.Sleep(500);
+
+                        if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        {
+                            AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
+                            AutoItX.Send("q");
+                            Thread.Sleep(1500);
+                            AutoItX.Send("w");
+                            Thread.Sleep(1500);
+                            AutoItX.Send("e");
+                            Thread.Sleep(1500);
+                            AutoItX.Send("r");
+                            AutoItX.Send("d");
+                            AutoItX.Send("f");
+                            Thread.Sleep(1500);
+                        }
+
+                        if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        {
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            HitMove(X, Y);
+                            Combo(X, Y);
+                            AutoItX.Send("d");
+                            AutoItX.Send("f");
+                            Thread.Sleep(1500);
+                        }
+
+                        if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        {
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            Thread.Sleep(3000);
+                        }
+                        GoMid();
                     }
 
-                    GoMid();
+                    Thread.Sleep(6000);
+                    PickTutorialChampionAI();
                 }
 
-
-                Thread.Sleep(6000);
-                PickTutorialChampionAI();
             }
-
 
         }
 
@@ -286,51 +343,20 @@ namespace Evelynn_Bot.GameAI
             }
 
             Thread.Sleep(5000);
-
             SkillUp("q", "j");
-
             Thread.Sleep(5000);
-
-            BuyItem();
-
-            while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
+            for (int i = 0; i < 2; i++)
             {
-                GoMid();
-                Thread.Sleep(4000);
+                BuyItem();
+            }
 
-                if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                {
-                    AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                    HitMove(X, Y);
-                    Combo(X, Y);
-                    AutoItX.Send("d");
-                    AutoItX.Send("f");
-                    Thread.Sleep(1500);
-                }
-
-                while (ImageSearch(itsInterface.ImgPaths.minions, "3", itsInterface.messages.SuccessMinion, itsInterface))
+            while (processExist("League of Legends.exe", itsInterface))
+            {
+                while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
                 {
                     SkillUp("q", "j");
-                    SkillUp("w", "k");
-                    SkillUp("e", "m");
-                    SkillUp("r", "l");
-                    HitMove(X, Y);
-                    Thread.Sleep(500);
-
-                    if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                    {
-                        AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
-                        AutoItX.Send("q");
-                        Thread.Sleep(1500);
-                        AutoItX.Send("w");
-                        Thread.Sleep(1500);
-                        AutoItX.Send("e");
-                        Thread.Sleep(1500);
-                        AutoItX.Send("r");
-                        AutoItX.Send("d");
-                        AutoItX.Send("f");
-                        Thread.Sleep(1500);
-                    }
+                    GoMid();
+                    Thread.Sleep(4000);
 
                     if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
                     {
@@ -342,16 +368,51 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(1500);
                     }
 
-                    if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                    while (ImageSearch(itsInterface.ImgPaths.minions, "3", itsInterface.messages.SuccessMinion, itsInterface))
                     {
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        Thread.Sleep(3000);
-                    }
+                        SkillUp("q", "j");
+                        SkillUp("w", "k");
+                        SkillUp("e", "m");
+                        SkillUp("r", "l");
+                        HitMove(X, Y);
+                        Thread.Sleep(500);
 
+                        if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        {
+                            AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
+                            AutoItX.Send("q");
+                            Thread.Sleep(1500);
+                            AutoItX.Send("w");
+                            Thread.Sleep(1500);
+                            AutoItX.Send("e");
+                            Thread.Sleep(1500);
+                            AutoItX.Send("r");
+                            AutoItX.Send("d");
+                            AutoItX.Send("f");
+                            Thread.Sleep(1500);
+                        }
+
+                        if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        {
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            HitMove(X, Y);
+                            Combo(X, Y);
+                            AutoItX.Send("d");
+                            AutoItX.Send("f");
+                            Thread.Sleep(1500);
+                        }
+
+                        if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
+                        {
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
+                            Thread.Sleep(3000);
+                        }
+                    }
                 }
             }
+            Thread.Sleep(10000);
         }
 
         public bool IsGameStarted(Interface itsInterface)

@@ -174,18 +174,21 @@ namespace Evelynn_Bot.Account_Process
                 AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 640, 400); //This is for config bug.
 
                 var name = RandomNameGenerator();
-                Console.WriteLine(name);
-                Console.WriteLine("ABU DELIRME BI");
 
-                itsInterface.lcuPlugins.SetSummonerName(name);
-                itsInterface.logger.Log(true, "Successfully used name!");
-                itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                await Task.Delay(7000);
-                Dispose(true);
-                return itsInterface.processManager.Start(itsInterface);
-
+                if (await itsInterface.lcuPlugins.SetSummonerName(name))
+                {
+                    itsInterface.logger.Log(true, "Successfully used name!");
+                    itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                    await Task.Delay(7000);
+                    Dispose(true);
+                    return itsInterface.processManager.Start(itsInterface);
+                }
+                else
+                {
+                    itsInterface.logger.Log(true, "Error on creating nickname. Trying again!");
+                    return CheckNewAccount(itsInterface);
+                }
             }
-
             return Task.CompletedTask;
         }
         public string RandomName(int len, bool two)
@@ -255,10 +258,8 @@ namespace Evelynn_Bot.Account_Process
         {
             itsInterface.dashboardHelper.UpdateLolStatus("Playing Tutorial", itsInterface);
             itsInterface.summoner = itsInterface.lcuPlugins.GetCurrentSummoner().Result;
-            itsInterface.logger.Log(true, itsInterface.summoner.summonerLevel.ToString());
             if (itsInterface.summoner.summonerLevel < 11)
             {
-
                 Tutorial[] objectArray = itsInterface.lcuPlugins.GetTutorials().Result;
                 try
                 {
@@ -341,7 +342,7 @@ namespace Evelynn_Bot.Account_Process
                 int tryNum = 1;
                 while (LeagueIsPatchAvailable(itsInterface))
                 {
-                    itsInterface.logger.Log(true, "Patch bulundu!");
+                    itsInterface.logger.Log(true, itsInterface.messages.Patch);
                     Thread.Sleep(60000);
                     Dispose(true);
                     tryNum++;

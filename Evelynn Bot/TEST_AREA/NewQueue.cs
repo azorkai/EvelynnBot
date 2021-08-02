@@ -24,7 +24,9 @@ namespace Evelynn_Bot
     {
         public static System.Timers.Timer bugTimer = new System.Timers.Timer();
         private static int BugTime;
-        
+        public static bool GameAiBool;
+
+
         private static event MessageHandlerDelegate<UxState> UxStateChanged;
         private static event MessageHandlerDelegate<GameFlow> StateChanged;
         private static event MessageHandlerDelegate<Search> OnSearchStateChanged;
@@ -64,7 +66,7 @@ namespace Evelynn_Bot
             }
         }
 
-        public async void CreateLobby()
+        public async static void CreateLobby()
         {
             try
             {
@@ -219,8 +221,9 @@ namespace Evelynn_Bot
         {
             Console.WriteLine("Bug Check!");
             BugTime++;
-            if (BugTime>=6)
+            if (BugTime>=8)
             {
+                Console.WriteLine("Bug!Fix!");
                 BugTime = 0;
                 var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface2.license)));
                 var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -244,27 +247,51 @@ namespace Evelynn_Bot
                 {
                     case "None":
                         state = "Main Menu";
+                        CreateLobby();
                         break;
+
                     case "Lobby":
                         state = "Lobby";
                         await Task.Delay(2500);
+
+                        GameAiBool = true;
+                        bugTimer.Start();
+
                         itsInterface2.lcuPlugins.PostMatchmakingSearch();
                         break;
                     case "ChampSelect":
                         state = "Champ Select [Ignore this message if game is started!]";
-                        await Task.Delay(4000);
+
+                        BugTime = 0;
+
+                        await Task.Delay(1500);
                         PickChampion();
                         break;
+
                     case "GameStart":
-                        state = "game started";
+                        state = "Game Started";
                         break;
+
                     case "ReadyCheck":
                         state = "Match Found";
+
+                        BugTime = 0;
+
                         itsInterface2.lcuPlugins.AcceptReadyCheck();
                         break;
+
                     case "InProgress":
                         state = "Game is Done";
-                        await itsInterface2.processManager.GameAi(itsInterface2);
+
+                        bugTimer.Stop();
+                        BugTime = 0;
+
+                        if (GameAiBool)
+                        {
+                            GameAiBool = false;
+                            await itsInterface2.processManager.GameAi(itsInterface2);
+                        }
+
                         break;
                     case "WaitingForStats":
                         state = "Waiting for Stats";
@@ -275,15 +302,19 @@ namespace Evelynn_Bot
                         break;
                     case "Matchmaking":
                         state = "Matchmaking";
+
+                        bugTimer.Stop();
+                        BugTime = 0;
                         break;
+
                     case "PreEndOfGame":
                         state = "Honor Screen";
 
-                        BugTime = 0;
                         bugTimer.Stop();
-
+                        BugTime = 0;
                         await itsInterface2.processManager.PlayAgain(itsInterface2);
                         break;
+
                     default:
                         state = $"unknown state: {result.Phase}";
                         break;
