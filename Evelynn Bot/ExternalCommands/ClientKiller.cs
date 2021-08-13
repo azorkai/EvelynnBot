@@ -40,7 +40,7 @@ namespace Evelynn_Bot.ExternalCommands
 
         public void KillLeagueClientNormally(Interface itsInterface)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
                 try
                 {

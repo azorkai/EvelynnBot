@@ -112,6 +112,16 @@ namespace Evelynn_Bot.GameAI
             }
         }
 
+        public bool TowerCheck(Interface itsInterface)
+        {
+            if (ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface) || 
+                ImageSearchOnlyForControl(itsInterface.ImgPaths.tower2, "2", "", itsInterface))
+            {
+                return true;
+            }
+            return false;
+        }
+
         public void SkillUp(string skill, string skill2)
         {
             AutoItX.Send("{CTRLDOWN}");
@@ -156,14 +166,14 @@ namespace Evelynn_Bot.GameAI
         {
             AutoItX.MouseClick("RIGHT", game_X + 30, game_Y - 20, 1, 0);
             AutoItX.MouseClick("RIGHT", game_X + 30, game_Y - 20, 1, 0);
-            await Task.Delay(1000);
+            await Task.Delay(1500);
         }
 
         public async Task GoMid()
         {
             AutoItX.MouseClick("RIGHT", game_X + 42, game_Y - 30, 1, 0);
             AutoItX.MouseClick("RIGHT", game_X + 42, game_Y - 30, 1, 0);
-            await Task.Delay(1000);
+            await Task.Delay(1900);
         }
 
         public void GoTop()

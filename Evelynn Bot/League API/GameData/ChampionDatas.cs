@@ -39,10 +39,6 @@ namespace Evelynn_Bot.League_API.GameData
             429,
             119,
             498,
-            103, //Ahri 
-            22, //Ashe
-            63, //Brand
-            45, //Veigar
         };
 
 

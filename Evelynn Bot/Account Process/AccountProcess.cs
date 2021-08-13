@@ -51,9 +51,8 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-
                 AutoItX.Run($"\"{itsInterface.license.LeaguePath}\" --launch-product=league_of_legends --launch-patchline=live", Path.GetDirectoryName(itsInterface.license.LeaguePath));
-
+                AutoItX.ProcessWait("RiotClientUx.exe", 0);
                 //ProcessStartInfo info = new ProcessStartInfo();
                 //info.FileName = itsInterface.license.LeaguePath;
                 //info.Arguments = "--launch-product=league_of_legends --launch-patchline=live";
