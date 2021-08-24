@@ -87,7 +87,7 @@ namespace Evelynn_Bot
                 {
                     var jsonStr = Encoding.UTF8.GetString(Convert.FromBase64String(args[0]));
                     itsInterface.license = JsonConvert.DeserializeObject<License>(jsonStr);
-                    if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password))
+                    if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password) && !String.IsNullOrEmpty(itsInterface.license.Last))
                     {
                         itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.license.Username, itsInterface.license.Password, itsInterface, true);
                     }
