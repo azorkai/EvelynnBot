@@ -93,14 +93,16 @@ namespace Evelynn_Bot.ExternalCommands
                 // Tell quartz to schedule the job using our trigger
                 await scheduler.ScheduleJob(job, trigger);
 
-                itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart);
-                Console.WriteLine(itsInterface.dashboard.IsStop);
                 if (method)
                 {
+                    itsInterface.dashboard.IsStart = false;
+                    itsInterface.dashboard.IsStop = false;
+                    itsInterface.dashboard.IsRestart = false;
                     itsInterface.processManager.Start(itsInterface);
                 }
                 else
                 {
+                    itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart);
                     CHECKSTART:
                     if (itsInterface.dashboard.IsStart)
                     {
