@@ -156,24 +156,26 @@ namespace Evelynn_Bot.Account_Process
         {
             if (string.IsNullOrEmpty(itsInterface.summoner.displayName))
             {
-                itsInterface.logger.Log(true, "New account!");
-                await Task.Delay(5000);
-                AutoItX.ControlClick("Riot Client", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 647, 355);
-                await Task.Delay(25000);
-                AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 865, 219);
-                await Task.Delay(1250);
-                AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 862, 316);
-                await Task.Delay(1250);
-                AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 819, 430);
-                await Task.Delay(1250);
-                AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 834, 551);
-                await Task.Delay(1250);
-                AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 639, 664);
+                itsInterface.lcuPlugins.KillUXAsync();
 
-                AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 640, 400); //This is for config bug.
+                itsInterface.logger.Log(true, "New account!");
+
+                await Task.Delay(5000);
+                //AutoItX.ControlClick("Riot Client", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 647, 355);
+                //await Task.Delay(25000);
+                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 865, 219);
+                //await Task.Delay(1250);
+                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 862, 316);
+                //await Task.Delay(1250);
+                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 819, 430);
+                //await Task.Delay(1250);
+                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 834, 551);
+                //await Task.Delay(1250);
+                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 639, 664);
+                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 640, 400); //This is for config bug.
 
                 var name = RandomNameGenerator();
-
+                itsInterface.lcuPlugins.KillUXAsync();
                 if (await itsInterface.lcuPlugins.SetSummonerName(name))
                 {
                     itsInterface.logger.Log(true, "Successfully used name!");
@@ -192,7 +194,6 @@ namespace Evelynn_Bot.Account_Process
         }
         public string RandomName(int len, bool two)
         {
-
                 Random r = new Random();
 
                 string[] consonants = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "l", "n", "p", "q", "r", "s", "t", "v", "w", "x"};

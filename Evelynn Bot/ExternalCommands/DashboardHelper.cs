@@ -114,9 +114,6 @@ namespace Evelynn_Bot.ExternalCommands
                         goto CHECKSTART;
                     }
                 }
-
-
-
                 Console.ReadLine();
             }
             else

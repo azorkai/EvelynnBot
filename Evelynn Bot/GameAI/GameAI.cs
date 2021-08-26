@@ -1,6 +1,8 @@
 ﻿using AutoIt;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -27,6 +29,7 @@ namespace Evelynn_Bot.GameAI
         public int X;
         public int Y;
 
+
         public string[] UseImageSearch(string imgPath, string tolerance)
         {
             try
@@ -48,7 +51,6 @@ namespace Evelynn_Bot.GameAI
                 Console.WriteLine(e);
                 return null;
             }
-
         }
         public bool ImageSearchForGameStart(string path, string tolerance, string message, Interface itsInterface)
         {
@@ -112,10 +114,111 @@ namespace Evelynn_Bot.GameAI
             }
         }
 
+        public bool RGBPixel(Color color)
+        {
+            var lol = AutoItX.WinGetPos("League of Legends (TM) Client");
+            if (PixelSearch(lol, color.ToArgb(), 0).X <= 1 || PixelSearch(lol, color.ToArgb(), 0).Y <= 1)
+            {
+                return false;
+            }
+            else
+            {
+                X = PixelSearch(lol, color.ToArgb(), 0).X;
+                Y = PixelSearch(lol, color.ToArgb(), 0).Y;
+                return true;
+            }
+        }
+
+        public bool RGBPixelOnlyForControl(Color color)
+        {
+            var lol = AutoItX.WinGetPos("League of Legends (TM) Client");
+            if (PixelSearch(lol, color.ToArgb(), 0).X <= 1 || PixelSearch(lol, color.ToArgb(), 0).Y <= 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public Point PixelSearch(Rectangle rect, int PixelColor, int Shade_Variation)
+        {
+            try
+            {
+                Color Pixel_Color = Color.FromArgb(PixelColor);
+                Point Pixel_Coords = new Point(-1, -1);
+                Bitmap RegionIn_Bitmap = CaptureScreenRegion(rect);
+                BitmapData RegionIn_BitmapData = RegionIn_Bitmap.LockBits(new Rectangle(0, 0, RegionIn_Bitmap.Width, RegionIn_Bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                int[] Formatted_Color = new int[3] { Pixel_Color.B, Pixel_Color.G, Pixel_Color.R }; //bgr
+
+                unsafe
+                {
+                    for (int y = 0; y < RegionIn_BitmapData.Height; y++)
+                    {
+                        byte* row = (byte*)RegionIn_BitmapData.Scan0 + (y * RegionIn_BitmapData.Stride);
+
+                        for (int x = 0; x < RegionIn_BitmapData.Width; x++)
+                        {
+                            if (row[x * 3] >= (Formatted_Color[0] - Shade_Variation) & row[x * 3] <= (Formatted_Color[0] + Shade_Variation)) //blue
+                            {
+                                if (row[(x * 3) + 1] >= (Formatted_Color[1] - Shade_Variation) & row[(x * 3) + 1] <= (Formatted_Color[1] + Shade_Variation)) //green
+                                {
+                                    if (row[(x * 3) + 2] >= (Formatted_Color[2] - Shade_Variation) & row[(x * 3) + 2] <= (Formatted_Color[2] + Shade_Variation)) //red
+                                    {
+                                        Pixel_Coords = new Point(x + rect.X, y + rect.Y);
+                                        goto end;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                end:
+                Dispose(true);
+                return Pixel_Coords;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Dispose(true);
+                return new Point();
+            }
+        }
+        private Bitmap CaptureScreenRegion(Rectangle rect)
+        {
+            try
+            {
+                Bitmap BMP = new Bitmap(rect.Width, rect.Height, PixelFormat.Format24bppRgb);
+                Graphics GFX = Graphics.FromImage(BMP);
+                GFX.CopyFromScreen(rect.X, rect.Y, 0, 0, rect.Size, CopyPixelOperation.SourceCopy);
+                Dispose(true);
+                return BMP;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Dispose(true);
+                return null;
+            }
+        }
+
+
         public bool TowerCheck(Interface itsInterface)
         {
-            if (ImageSearchOnlyForControl(itsInterface.ImgPaths.tower, "2", "", itsInterface) || 
-                ImageSearchOnlyForControl(itsInterface.ImgPaths.tower2, "2", "", itsInterface))
+            if (RGBPixelOnlyForControl(itsInterface.ImgPaths.TowerColor))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool AllyMinionCheck(Interface itsInterface)
+        {
+            if (RGBPixel(itsInterface.ImgPaths.AllyMinionColor) || RGBPixel(itsInterface.ImgPaths.AllyMinionColor2) || RGBPixel(itsInterface.ImgPaths.AllyMinionColor3)
+                || RGBPixel(itsInterface.ImgPaths.AllyMinionColor4))
             {
                 return true;
             }

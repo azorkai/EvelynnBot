@@ -234,7 +234,6 @@ namespace Evelynn_Bot.ProcessManager
 
 
             //Burası çok güzel refactor edilecek...
-
             while (processExist("League of Legends.exe", itsInterface))
             {
                 using (GameAi gameAi = new GameAi())
@@ -260,20 +259,20 @@ namespace Evelynn_Bot.ProcessManager
                         }
 
                         //Rakip varsa, dost minyon yoksa geri çekil!
-                        if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface)
-                            && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface))
+                        if (gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor)
+                            && !gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.AllyMinionColor))
                         {
                             await gameAi.GoSafeArea();
                         }
 
 
                         gameAi.CurrentPlayerStats(itsInterface);
-                        while (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) && 
+                        while (gameAi.AllyMinionCheck(itsInterface) && 
                                itsInterface.player.CurrentHealth > 250)
                         {
 
                             gameAi.CurrentPlayerStats(itsInterface);
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                            if (gameAi.AllyMinionCheck(itsInterface) &&
                                 itsInterface.player.CurrentHealth > 250)
                             {
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
@@ -292,24 +291,24 @@ namespace Evelynn_Bot.ProcessManager
                             }
 
                             gameAi.CurrentPlayerStats(itsInterface);
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                            if (gameAi.AllyMinionCheck(itsInterface) &&
                                 itsInterface.player.CurrentHealth > 250)
                             {
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
                             }
 
                             gameAi.CurrentPlayerStats(itsInterface);
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                            if (gameAi.AllyMinionCheck(itsInterface) &&
                                 itsInterface.player.CurrentHealth > 250)
                             {
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
                             }
 
                             //Rakibi Sert Dürtme
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface) && itsInterface.player.CurrentHealth > 350)
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) && itsInterface.player.CurrentHealth > 350)
                             {
                                 gameAi.CurrentPlayerStats(itsInterface);
-                                while (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface) && itsInterface.player.CurrentHealth > 350)
+                                while (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) && itsInterface.player.CurrentHealth > 350)
                                 {
                                     if (gameAi.TowerCheck(itsInterface))
                                     {
@@ -352,12 +351,12 @@ namespace Evelynn_Bot.ProcessManager
 
                             gameAi.CurrentPlayerStats(itsInterface);
                             //Basit şampiyona 2.3 saniye düz vuruş.
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface) 
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) 
                                 && itsInterface.player.CurrentHealth > 350)
                             {
                                 //Kule varsa, rakip varsa geri çekil
                                 if (gameAi.TowerCheck(itsInterface)
-                                    && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                                    && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor))
                                 {
                                     await gameAi.GoMid();
                                 }
@@ -369,30 +368,30 @@ namespace Evelynn_Bot.ProcessManager
 
                             //Kule varsa, dost minyon yoksa geri çekil
                             if (gameAi.TowerCheck(itsInterface)
-                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface))
+                                && !gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.AllyMinionColor))
                             {
                                 await gameAi.GoMid();
                             }
 
                             //Kule varsa, rakip varsa geri çekil
                             if (gameAi.TowerCheck(itsInterface)
-                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                                && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor))
                             {
                                 await gameAi.GoMid();
                             }
 
                             //Rakip varsa, dost minyon yoksa geri çekil!
-                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface)
-                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface))
+                            if (gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor)
+                                && !gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.AllyMinionColor))
                             {
                                 AutoItX.Send("a");
                                 await gameAi.GoSafeArea();
                             }
 
                             //Rakip varsa, rakip minyon varsa, dost minyon yoksa güvenli alana çekil.
-                            if (gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface)
-                                && !gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "2", "", itsInterface)
-                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_minions, "2", "", itsInterface))
+                            if (gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor)
+                                && !gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.AllyMinionColor)
+                                && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyMinionColor))
                             {
                                 AutoItX.Send("a");
                                 await gameAi.GoSafeArea();
@@ -400,7 +399,7 @@ namespace Evelynn_Bot.ProcessManager
 
                             gameAi.CurrentPlayerStats(itsInterface);
                             //Düşman minyona oto atak.
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_minions, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) 
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyMinionColor) 
                                 && itsInterface.player.CurrentHealth > 250)
                             {
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
@@ -410,13 +409,13 @@ namespace Evelynn_Bot.ProcessManager
 
                                 //Kule varsa, rakip varsa geri çekil.
                                 if (gameAi.TowerCheck(itsInterface)
-                                    && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface))
+                                    && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor))
                                 {
                                     await gameAi.GoMid();
                                 }
 
                                 //Kule yoksa, rakip varsa atak.
-                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyMinion, itsInterface) 
+                                if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) 
                                     && !gameAi.TowerCheck(itsInterface))
                                 {
                                     AutoItX.Send("a");
@@ -426,14 +425,14 @@ namespace Evelynn_Bot.ProcessManager
 
                             gameAi.CurrentPlayerStats(itsInterface);
                             //Kule yoksa, can yüksekse, dost minyon varsa -> All In
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface) 
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) 
                                 && itsInterface.player.CurrentHealth > 350 
                                 && !gameAi.TowerCheck(itsInterface)
-                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.minions, "3", "", itsInterface))
+                                && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.AllyMinionColor))
                             {
                                 //Kule varsa, rakip varsa geri çekil
                                 if (gameAi.TowerCheck(itsInterface)
-                                    && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                                    && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor))
                                 {
                                     await gameAi.GoMid();
                                 }
@@ -442,7 +441,7 @@ namespace Evelynn_Bot.ProcessManager
 
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
 
-                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health,"3", "", itsInterface) 
+                                if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) 
                                     && !gameAi.TowerCheck(itsInterface))
                                 {
                                     AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
@@ -464,7 +463,7 @@ namespace Evelynn_Bot.ProcessManager
                                 }
                                 
                                 await Task.Delay(1000);
-                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface)
+                                if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor)
                                     && !gameAi.TowerCheck(itsInterface))
                                 {
                                     AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
@@ -484,7 +483,7 @@ namespace Evelynn_Bot.ProcessManager
                                     }
                                 }
                                 await Task.Delay(1000);
-                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface)
+                                if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor)
                                     && !gameAi.TowerCheck(itsInterface))
                                 {
                                     AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
@@ -504,7 +503,7 @@ namespace Evelynn_Bot.ProcessManager
                                     }
                                 }
                                 await Task.Delay(1000);
-                                if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface)
+                                if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor)
                                     && !gameAi.TowerCheck(itsInterface))
                                 {
                                     AutoItX.MouseClick("LEFT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
@@ -531,7 +530,7 @@ namespace Evelynn_Bot.ProcessManager
                                 }
 
                                 gameAi.CurrentPlayerStats(itsInterface);
-                                while (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "3", "", itsInterface) && 
+                                while (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) && 
                                        itsInterface.player.CurrentHealth > 300 && 
                                        !gameAi.TowerCheck(itsInterface))
                                 {
@@ -561,12 +560,12 @@ namespace Evelynn_Bot.ProcessManager
 
                             //Kule varsa, rakip varsa geri çekil
                             if (gameAi.TowerCheck(itsInterface)
-                                && gameAi.ImageSearchOnlyForControl(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface))
+                                && gameAi.RGBPixelOnlyForControl(itsInterface.ImgPaths.EnemyColor))
                             {
                                 await gameAi.GoMid();
                             }
 
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.AllyMinionColor) &&
                                 itsInterface.player.CurrentHealth > 250)
                             {
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
@@ -637,7 +636,7 @@ namespace Evelynn_Bot.ProcessManager
                                     break;
                             }
 
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.minions, "2", itsInterface.messages.SuccessMinion, itsInterface) &&
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.AllyMinionColor) &&
                                 itsInterface.player.CurrentHealth > 250)
                             {
                                 gameAi.HitMove(gameAi.X, gameAi.Y);
@@ -645,7 +644,7 @@ namespace Evelynn_Bot.ProcessManager
 
                             gameAi.CurrentPlayerStats(itsInterface);
                             //Basit şampiyona 2.3 saniye düz vuruş.
-                            if (gameAi.ImageSearch(itsInterface.ImgPaths.enemy_health, "2", "", itsInterface) 
+                            if (gameAi.RGBPixel(itsInterface.ImgPaths.EnemyColor) 
                                 && itsInterface.player.CurrentHealth > 380)
                             {
                                 AutoItX.MouseClick("RIGHT", gameAi.X + 65, gameAi.Y + 75, 1, 0);
@@ -663,6 +662,8 @@ namespace Evelynn_Bot.ProcessManager
             ExtremeGameTime = 0;
             ExtremeGameTimer.Stop();
             Dispose(true);
+
+            UpdateBot.CheckUpdate();
 
             if (isFromDetect)
             {

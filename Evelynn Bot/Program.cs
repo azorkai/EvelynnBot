@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,6 +21,7 @@ using AutoIt;
 using bAUTH;
 using Evelynn_Bot.Account_Process;
 using Evelynn_Bot.Constants;
+using Evelynn_Bot.ExternalCommands;
 using EvelynnLCU;
 using EvelynnLCU.Plugins.LoL;
 using Newtonsoft.Json;
@@ -62,6 +64,8 @@ namespace Evelynn_Bot
 
         static void Main(string[] args)
         {
+            UpdateBot.CheckUpdate();
+            
             #region Resize Console
             //Console.WindowWidth = 80;
             //Console.WindowHeight = 15;
