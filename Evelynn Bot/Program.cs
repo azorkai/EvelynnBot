@@ -88,12 +88,25 @@ namespace Evelynn_Bot
                 Thread.Sleep(2000);
                 if (itsInterface.gameAi.AllyMinionCheck(itsInterface))
                 {
+<<<<<<< HEAD
                     Console.WriteLine("Minyon");
                     //AutoItX.MouseClick("RIGHT", itsInterface.gameAi.X, itsInterface.gameAi.Y, 1, 1);
                 }
                 else
                 {
                     Console.WriteLine("No Minion");
+=======
+                    var jsonStr = Encoding.UTF8.GetString(Convert.FromBase64String(args[0]));
+                    itsInterface.license = JsonConvert.DeserializeObject<License>(jsonStr);
+                    if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password) && !String.IsNullOrEmpty(itsInterface.license.Last))
+                    {
+                        itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.license.Username, itsInterface.license.Password, itsInterface, true);
+                    }
+                    else
+                    {
+                        Environment.Exit(0);
+                    }
+>>>>>>> a9894b9e6cb5e3ae3c1d4ed95e1c65f0bfcedc25
                 }
             }
             //Language.language = itsInterface.jsonRead.Language();
