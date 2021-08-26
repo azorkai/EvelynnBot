@@ -64,7 +64,7 @@ namespace Evelynn_Bot
 
         static void Main(string[] args)
         {
-            UpdateBot.CheckUpdate();
+            //UpdateBot.CheckUpdate();
             
             #region Resize Console
             //Console.WindowWidth = 80;
@@ -81,31 +81,46 @@ namespace Evelynn_Bot
             //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
 
             Interface itsInterface = new Interface();
-            Language.language = itsInterface.jsonRead.Language();
-            itsInterface.messages.SetLanguage();
-            string botArg = "";
-            try { botArg = args[0]; } catch { }
-            if (!String.IsNullOrEmpty(botArg))
+            bool a;
+            a = true;
+            while (a)
             {
-                try
+                Thread.Sleep(2000);
+                if (itsInterface.gameAi.AllyMinionCheck(itsInterface))
                 {
-                    var jsonStr = Encoding.UTF8.GetString(Convert.FromBase64String(args[0]));
-                    itsInterface.license = JsonConvert.DeserializeObject<License>(jsonStr);
-                    if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password))
-                    {
-                        itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.license.Username, itsInterface.license.Password, itsInterface, true);
-                    }
-                    else
-                    {
-                        Environment.Exit(0);
-                    }
+                    Console.WriteLine("Minyon");
+                    //AutoItX.MouseClick("RIGHT", itsInterface.gameAi.X, itsInterface.gameAi.Y, 1, 1);
                 }
-                catch { Environment.Exit(0); }
+                else
+                {
+                    Console.WriteLine("No Minion");
+                }
             }
-            else
-            {
-                itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
-            }
+            //Language.language = itsInterface.jsonRead.Language();
+            //itsInterface.messages.SetLanguage();
+            //string botArg = "";
+            //try { botArg = args[0]; } catch { }
+            //if (!String.IsNullOrEmpty(botArg))
+            //{
+            //    try
+            //    {
+            //        var jsonStr = Encoding.UTF8.GetString(Convert.FromBase64String(args[0]));
+            //        itsInterface.license = JsonConvert.DeserializeObject<License>(jsonStr);
+            //        if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password))
+            //        {
+            //            itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.license.Username, itsInterface.license.Password, itsInterface, true);
+            //        }
+            //        else
+            //        {
+            //            Environment.Exit(0);
+            //        }
+            //    }
+            //    catch { Environment.Exit(0); }
+            //}
+            //else
+            //{
+            //    itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
+            //}
 
             Console.ReadLine();
         }
