@@ -40,11 +40,15 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> Start(Interface itsInterface)
         {
-
-            if (CheckInGame(itsInterface))
+            // Burası var dayı checkingame falan onları kaldırmamız lazım, hmm dur düşünem
+            if ((Process.GetProcessesByName("League of Legends").Length != 0))
             {
+                //if (itsInterface.lcuApi.IsConnected == false)
+                //{
+
+                //}
+                itsInterface.gameAi.YeniAIBaslat(itsInterface);
                 return Task.CompletedTask;
-                //return GameAi(itsInterface, true);
             }
 
             await StartAccountProcess(itsInterface);
@@ -63,7 +67,7 @@ namespace Evelynn_Bot.ProcessManager
         {
 
             NewQueue.bugTimer.Stop();
-
+            // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)
             try
             {
                 itsInterface.logger.Log(true, "ID: " + itsInterface.license.Lol_username);
@@ -141,7 +145,7 @@ namespace Evelynn_Bot.ProcessManager
                         if (CheckInGame(itsInterface))
                         {
                             Console.WriteLine(itsInterface.messages.GameFound);
-                            return GameAi(itsInterface, true);
+                            itsInterface.gameAi.YeniAIBaslat(itsInterface);
                         }
 
                         if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
@@ -778,7 +782,6 @@ namespace Evelynn_Bot.ProcessManager
 
                 Console.WriteLine(itsInterface.summoner.summonerLevel);
 
-                accountProcess.PatchCheck(itsInterface);
                 itsInterface.lcuPlugins.KillUXAsync();
 
                 Dispose(true);

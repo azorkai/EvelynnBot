@@ -63,8 +63,7 @@ namespace Evelynn_Bot
 
         static void Main(string[] args)
         {
-
-            //UpdateBot.CheckUpdate();
+            UpdateBot.CheckUpdate();
 
             #region Resize Console
             //Console.WindowWidth = 80;

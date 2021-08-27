@@ -1,6 +1,7 @@
 ﻿using AutoIt;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -1223,7 +1224,7 @@ namespace Evelynn_Bot.GameAI
                     bool flag3 = BirseyHesapla(point2);
                     if (point2.X != -1 || flag)
                     {
-                        goto IL_03e7;
+                        goto IL_03e7; //Item Aldırmaca
                         //if (queueId != 2000 || !bool_2) // Tutorial 1 değil ya da Miss Fortune ile 1 kill almadıysa
                         //{
                         //    goto IL_03e7;
@@ -1233,14 +1234,15 @@ namespace Evelynn_Bot.GameAI
                         //{
                         //    goto IL_03e7;
                         //}
+
                         //EkraniAyarla(AnaPointAl(list7[0]));
                         //SagTikla();
                         //Thread.Sleep(5000);
                     }
                     else
                     {
-                        Console.WriteLine("Can't fetch hero position");
-                        Thread.Sleep(400);
+                        Console.WriteLine("Game is not started yet!");
+                        Thread.Sleep(5000);
                     }
                     goto end_IL_0035;
                 IL_051e:
@@ -1335,6 +1337,7 @@ namespace Evelynn_Bot.GameAI
                                     {
                                         EkraniAyarla(AnaPointAl(point_));
                                         TusuAyarla(GEnum8.KEY_A);
+                                        isItemHasBought = 0;
                                     }
                                 }
                                 else
@@ -1417,7 +1420,7 @@ namespace Evelynn_Bot.GameAI
                             SagTikla();
                         }
                     }
-                    else
+                    else // Can 35den düşük TODO: Bizim algoritmayı koy
                     {
                         TusuAyarla(GEnum8.KEY_F);
                         //if (spell1ID != 7)
@@ -1439,6 +1442,7 @@ namespace Evelynn_Bot.GameAI
                         }
                         else*/ if (point_.X == -1 && point_3.X == -1)
                         {
+                            isItemHasBought = 0;
                             TusuAyarla(GEnum8.KEY_B);
                             Thread.Sleep(2000);
                         }
@@ -1459,7 +1463,7 @@ namespace Evelynn_Bot.GameAI
                     }
                     goto IL_0964;
                 IL_03e7:
-                    if (flag2 /*&& queueId != 2000*/) // Eğer Basedeysek ve tutorial'da değilsek
+                    if (flag2 /*&& queueId != 2000*/ && isItemHasBought < 2) // Eğer Basedeysek ve tutorial'da değilsek
                     {
                         Console.WriteLine("Mağaza Bulundu");
                         if (summonerItemCount != 0) // Şu anki şampiyonun eşyası varsa
@@ -1468,6 +1472,7 @@ namespace Evelynn_Bot.GameAI
                             {
                                 EsyaAl(flag);
                                 Thread.Sleep(random_0.Next(1000, 1300));
+                                isItemHasBought++;
                                 continue;
                             }
                             if (flag)
@@ -1486,13 +1491,14 @@ namespace Evelynn_Bot.GameAI
                         {
                             BaslangicEsyaAl(flag); // TODO: BUNLARI REFACTOR ET! TEK KODA AL
                             Thread.Sleep(random_0.Next(1000, 1300));
+                            isItemHasBought++;
                         }
                     }
-                    else
+                    else //Basede Değilsek
                     {
                         if (!(!flag2 && flag))
                         {
-                            goto IL_051e;
+                            goto IL_051e; //Combo Yap
                         }
                         TusuAyarla(GEnum8.KEY_P);
                         Thread.Sleep(3000);
@@ -1524,12 +1530,16 @@ namespace Evelynn_Bot.GameAI
                 Thread thread3 = new Thread(AraliEndGonder);
                 thread3.Start();
                 list.Add(thread3);
+
                 foreach (Thread item in list)
                 {
                     item.Join();
                 }
                 Console.WriteLine("YENI AI: GAME END");
+                Console.Clear();
+                Dispose(true);
                 Thread.Sleep(20000);
+
             }
             catch (Exception ex)
             {
@@ -1540,50 +1550,66 @@ namespace Evelynn_Bot.GameAI
         private void GetInGameStats(object Interface)
         {
             Interface itsInterface = (Interface)Interface;
-            CurrentPlayerStats(itsInterface);
-            string cGame_championName = itsInterface.player.CurrentGame_ChampName;
-            var inGameData = itsInterface.player.Data;
-            gameTime = inGameData.gameData.gameTime.Value;
-            isGameEnd = inGameData.events.Events.Count((EvelynnLCU.API_Models.GameEventDetails details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
-            summonerItemCount = inGameData.allPlayers.FirstOrDefault((EvelynnLCU.API_Models.AllSummoners liveData) => liveData.championName == cGame_championName).items.Count;
-            prevHealthPercentage = healthPercentage;
-            healthPercentage = itsInterface.player.CurrentHealth * 100.0 / itsInterface.player.MaxHealth;
-            canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
-            isTutorialAndMF =
-                inGameData.allPlayers
-                    .FirstOrDefault((EvelynnLCU.API_Models.AllSummoners liveData) => liveData.championName == cGame_championName).scores
-                    .kills == 1 && inGameData.allPlayers
-                    .FirstOrDefault((EvelynnLCU.API_Models.AllSummoners liveData) => liveData.championName == cGame_championName)
-                    .championName.Length == 12;
-            // Check Towers
-
-            foreach (EvelynnLCU.API_Models.GameEventDetails item in inGameData.events.Events)
+            while (!isGameEnd)
             {
-                if (item.TurretKilled == "Turret_T2_C_05_A")
+                try
                 {
-                    pointsLists[0].Boolean_0 = true;
-                }
-                else if (!(item.TurretKilled == "Turret_T2_C_04_A"))
-                {
-                    if (item.TurretKilled == "Turret_T2_C_03_A")
-                    {
-                        pointsLists[2].Boolean_0 = true;
-                    }
-                    else if (item.TurretKilled == "Turret_T2_C_02_A")
-                    {
-                        pointsLists[3].Boolean_0 = true;
-                    }
-                    else if (item.TurretKilled == "Turret_T2_C_01_A")
-                    {
-                        pointsLists[4].Boolean_0 = true;
-                    }
-                }
-                else
-                {
-                    pointsLists[1].Boolean_0 = true;
-                }
-            }
+                    CurrentPlayerStats(itsInterface);
+                    string cGame_championName = itsInterface.player.CurrentGame_ChampName;
+                    var inGameData = itsInterface.player.Data;
+                    gameTime = inGameData.GameData.GameTime.Value;
+                    isGameEnd = inGameData.Events.EventsEvents.Count((EvelynnLCU.API_Models.Event details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
+                    summonerItemCount = inGameData.AllPlayers.FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName).Items.Length;
+                    prevHealthPercentage = healthPercentage;
+                    healthPercentage = itsInterface.player.CurrentHealth * 100.0 / itsInterface.player.MaxHealth;
+                    canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
+                    isTutorialAndMF =
+                        inGameData.AllPlayers
+                            .FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName).Scores
+                            .Kills == 1 && inGameData.AllPlayers
+                            .FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName)
+                            .ChampionName.Length == 12;
+                    // Check Towers
 
+                    foreach (EvelynnLCU.API_Models.Event item in inGameData.Events.EventsEvents)
+                    {
+                        if (item.EventName == "Turret_T2_C_05_A")
+                        {
+                            pointsLists[0].Boolean_0 = true;
+                        }
+                        else if (!(item.EventName == "Turret_T2_C_04_A"))
+                        {
+                            if (item.EventName == "Turret_T2_C_03_A")
+                            {
+                                pointsLists[2].Boolean_0 = true;
+                            }
+                            else if (item.EventName == "Turret_T2_C_02_A")
+                            {
+                                pointsLists[3].Boolean_0 = true;
+                            }
+                            else if (item.EventName == "Turret_T2_C_01_A")
+                            {
+                                pointsLists[4].Boolean_0 = true;
+                            }
+                        }
+                        else
+                        {
+                            pointsLists[1].Boolean_0 = true;
+                        }
+                    }
+
+                }
+                catch (Exception)
+                {
+                    isGameEnd = isGameEnd || !(Process.GetProcessesByName("League of Legends").Length != 0);
+                }
+                if (DateTime.Now.Subtract(dateTime_1).TotalMinutes > 90.0)
+                {
+                    Console.WriteLine("Overtime playing");
+                    isGameEnd = true;
+                }
+                Thread.Sleep(random_0.Next(400, 800));
+            }
         }
         public void AraliEndGonder()
         {
@@ -1595,6 +1621,8 @@ namespace Evelynn_Bot.GameAI
         }
 
         #region Constants
+
+        private int isItemHasBought;
 
         private bool isGameEnd;
 
@@ -1744,6 +1772,7 @@ namespace Evelynn_Bot.GameAI
 
         public void YeniAIBaslat(Interface itsInterface)
         {
+            isGameEnd = false;
             dateTime_1 = DateTime.Now;
             scrX = PointAl(true).X;
             scrY = PointAl(true).Y;
@@ -1801,7 +1830,7 @@ namespace Evelynn_Bot.GameAI
             }
             catch (Exception)
             {
-                Console.WriteLine("Error while creating bitmap");
+                //Console.WriteLine("Error while creating bitmap");
             }
 
             List<Point> aMList = rgbLists.First((RGBClass.PointerClass PointerClass_0) => PointerClass_0.mode == "AllyMinion").pointerList;
@@ -2139,14 +2168,14 @@ namespace Evelynn_Bot.GameAI
         public void CurrentPlayerStats(Interface itsInterface)
         {
             var liveData = itsInterface.lcuPlugins.GetLiveGameData();
-            itsInterface.player.MaxHealth = liveData.Result.activePlayer.championStats.maxHealth;
-            itsInterface.player.CurrentHealth = liveData.Result.activePlayer.championStats.currentHealth;
-            itsInterface.player.CurrentGold = liveData.Result.activePlayer.currentGold;
-            itsInterface.player.Level = liveData.Result.activePlayer.level;
-            itsInterface.player.Level_Q = liveData.Result.activePlayer.abilities.Q.abilityLevel.Value;
-            itsInterface.player.Level_W = liveData.Result.activePlayer.abilities.W.abilityLevel.Value;
-            itsInterface.player.Level_E = liveData.Result.activePlayer.abilities.E.abilityLevel.Value;
-            itsInterface.player.Level_R = liveData.Result.activePlayer.abilities.R.abilityLevel.Value;
+            itsInterface.player.MaxHealth = liveData.Result.ActivePlayer.ChampionStats.MaxHealth.Value;
+            itsInterface.player.CurrentHealth = liveData.Result.ActivePlayer.ChampionStats.CurrentHealth.Value;
+            itsInterface.player.CurrentGold = liveData.Result.ActivePlayer.CurrentGold.Value;
+            itsInterface.player.Level = Convert.ToInt32(liveData.Result.ActivePlayer.Level.Value);
+            itsInterface.player.Level_Q = liveData.Result.ActivePlayer.Abilities.Q.AbilityLevel.Value;
+            itsInterface.player.Level_W = liveData.Result.ActivePlayer.Abilities.W.AbilityLevel.Value;
+            itsInterface.player.Level_E = liveData.Result.ActivePlayer.Abilities.E.AbilityLevel.Value;
+            itsInterface.player.Level_R = liveData.Result.ActivePlayer.Abilities.R.AbilityLevel.Value;
             itsInterface.player.Data = liveData.Result;
         }
 

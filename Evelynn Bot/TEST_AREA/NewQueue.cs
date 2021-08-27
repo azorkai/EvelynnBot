@@ -294,7 +294,6 @@ namespace Evelynn_Bot
                             GameAiBool = false;
                             //await itsInterface2.processManager.GameAi(itsInterface2);
                             itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
-
                         }
 
                         break;
