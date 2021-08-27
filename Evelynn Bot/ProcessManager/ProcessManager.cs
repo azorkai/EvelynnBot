@@ -43,16 +43,19 @@ namespace Evelynn_Bot.ProcessManager
 
             if (CheckInGame(itsInterface))
             {
-                return GameAi(itsInterface, true);
+                return Task.CompletedTask;
+                //return GameAi(itsInterface, true);
             }
 
             await StartAccountProcess(itsInterface);
 
-            while (IsGameStarted(itsInterface) == false)
-            {
-                Thread.Sleep(15000);
-                IsGameStarted(itsInterface);
-            }
+            //itsInterface.gameAi.YeniAIBaslat(itsInterface);
+
+            //while (IsGameStarted(itsInterface) == false)
+            //{
+            //    Thread.Sleep(15000);
+            //    IsGameStarted(itsInterface);
+            //}
             return Task.CompletedTask;
         }
 

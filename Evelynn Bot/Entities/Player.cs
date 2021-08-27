@@ -12,6 +12,12 @@ namespace Evelynn_Bot.Entities
         public float CurrentHealth { get; set; }
         public double CurrentGold { get; set; }
         public int Level { get; set; }
+        public long Level_Q { get; set; }
+        public long Level_W { get; set; }
+        public long Level_E { get; set; }
+        public long Level_R { get; set; }
+        public EvelynnLCU.API_Models.InGameData Data { get; set; }
+        public string CurrentGame_ChampName { get; set; }
 
     }
 }

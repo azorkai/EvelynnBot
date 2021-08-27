@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -64,8 +63,9 @@ namespace Evelynn_Bot
 
         static void Main(string[] args)
         {
+
             //UpdateBot.CheckUpdate();
-            
+
             #region Resize Console
             //Console.WindowWidth = 80;
             //Console.WindowHeight = 15;
@@ -81,21 +81,14 @@ namespace Evelynn_Bot
             //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
 
             Interface itsInterface = new Interface();
-            bool a;
-            a = true;
-            while (a)
+            Language.language = itsInterface.jsonRead.Language();
+            itsInterface.messages.SetLanguage();
+            string botArg = "";
+            try { botArg = args[0]; } catch { }
+            if (!String.IsNullOrEmpty(botArg))
             {
-                Thread.Sleep(2000);
-                if (itsInterface.gameAi.AllyMinionCheck(itsInterface))
+                try
                 {
-<<<<<<< HEAD
-                    Console.WriteLine("Minyon");
-                    //AutoItX.MouseClick("RIGHT", itsInterface.gameAi.X, itsInterface.gameAi.Y, 1, 1);
-                }
-                else
-                {
-                    Console.WriteLine("No Minion");
-=======
                     var jsonStr = Encoding.UTF8.GetString(Convert.FromBase64String(args[0]));
                     itsInterface.license = JsonConvert.DeserializeObject<License>(jsonStr);
                     if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password) && !String.IsNullOrEmpty(itsInterface.license.Last))
@@ -106,34 +99,13 @@ namespace Evelynn_Bot
                     {
                         Environment.Exit(0);
                     }
->>>>>>> a9894b9e6cb5e3ae3c1d4ed95e1c65f0bfcedc25
                 }
+                catch { Environment.Exit(0); }
             }
-            //Language.language = itsInterface.jsonRead.Language();
-            //itsInterface.messages.SetLanguage();
-            //string botArg = "";
-            //try { botArg = args[0]; } catch { }
-            //if (!String.IsNullOrEmpty(botArg))
-            //{
-            //    try
-            //    {
-            //        var jsonStr = Encoding.UTF8.GetString(Convert.FromBase64String(args[0]));
-            //        itsInterface.license = JsonConvert.DeserializeObject<License>(jsonStr);
-            //        if (itsInterface.license.Status && !String.IsNullOrEmpty(itsInterface.license.Username) && !String.IsNullOrEmpty(itsInterface.license.Password))
-            //        {
-            //            itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.license.Username, itsInterface.license.Password, itsInterface, true);
-            //        }
-            //        else
-            //        {
-            //            Environment.Exit(0);
-            //        }
-            //    }
-            //    catch { Environment.Exit(0); }
-            //}
-            //else
-            //{
-            //    itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
-            //}
+            else
+            {
+                itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
+            }
 
             Console.ReadLine();
         }

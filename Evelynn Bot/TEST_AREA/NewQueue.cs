@@ -139,6 +139,9 @@ namespace Evelynn_Bot
                 }
                 else
                 {
+                    long summonerId = itsInterface2.summoner.summonerId;
+                    var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
+                    itsInterface2.player.CurrentGame_ChampName = champDetails.name;
                     itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
                 }
             }
@@ -281,7 +284,7 @@ namespace Evelynn_Bot
                         break;
 
                     case "InProgress":
-                        state = "Game is Done";
+                        state = "Game in Progress";
 
                         bugTimer.Stop();
                         BugTime = 0;
@@ -289,7 +292,9 @@ namespace Evelynn_Bot
                         if (GameAiBool)
                         {
                             GameAiBool = false;
-                            await itsInterface2.processManager.GameAi(itsInterface2);
+                            //await itsInterface2.processManager.GameAi(itsInterface2);
+                            itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
+
                         }
 
                         break;

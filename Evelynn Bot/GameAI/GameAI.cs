@@ -218,333 +218,59 @@ namespace Evelynn_Bot.GameAI
 
         #region TEST
 
-        public static class Class28
+        public static class RGBClass
         {
-            public class Class29
+            public class SetRGB
             {
-                private int int_0;
+                public int R { get; set; }
 
-                private int int_1;
+                public int G { get; set; }
 
-                private int int_2;
+                public int B { get; set; }
 
-                public int Int32_0
+                public SetRGB(int red, int green, int blue)
                 {
-                    get
-                    {
-                        return int_0;
-                    }
-                    set
-                    {
-                        int_0 = value;
-                    }
-                }
-
-                public int Int32_1
-                {
-                    get
-                    {
-                        return int_1;
-                    }
-                    set
-                    {
-                        int_1 = value;
-                    }
-                }
-
-                public int Int32_2
-                {
-                    get
-                    {
-                        return int_2;
-                    }
-                    set
-                    {
-                        int_2 = value;
-                    }
-                }
-
-                public Class29(int int_3, int int_4, int int_5)
-                {
-                    Int32_0 = int_3;
-                    Int32_1 = int_4;
-                    Int32_2 = int_5;
+                    R = red;
+                    G = green;
+                    B = blue;
                 }
             }
 
-            public class Class30
+            public class PointerClass
             {
-                private List<Class29> list_0;
+                public List<SetRGB> rgbLists { get; set; }
 
-                private List<Point> list_1;
+                public List<Point> pointerList { get; set; }
 
-                private int int_0;
+                public int tmpB { get; set; }
 
-                private string string_0;
-
-                public List<Class29> List_0
+                public string mode { get; set; }
+                public PointerClass(List<SetRGB> rgbPList, string whichMode)
                 {
-                    get
-                    {
-                        return list_0;
-                    }
-                    set
-                    {
-                        list_0 = value;
-                    }
-                }
-
-                public List<Point> List_1
-                {
-                    get
-                    {
-                        return list_1;
-                    }
-                    set
-                    {
-                        list_1 = value;
-                    }
-                }
-
-                public int Int32_0
-                {
-                    get
-                    {
-                        return int_0;
-                    }
-                    set
-                    {
-                        int_0 = value;
-                    }
-                }
-
-                public string String_0
-                {
-                    get
-                    {
-                        return string_0;
-                    }
-                    set
-                    {
-                        string_0 = value;
-                    }
-                }
-
-                public Class30(List<Class29> list_2, string string_1)
-                {
-                    List_0 = list_2;
-                    Int32_0 = 0;
-                    List_1 = new List<Point>();
-                    String_0 = string_1;
+                    rgbLists = rgbPList;
+                    tmpB = 0;
+                    pointerList = new List<Point>();
+                    mode = whichMode;
                 }
             }
 
-            public class Class31
+            public class PointlerClass
             {
-                private Point point_0;
+                public Point Point_0 { get; set; }
 
-                private bool bool_0;
+                public bool Boolean_0 { get; set; }
 
-                public Point Point_0
+                public PointlerClass(Point point_1)
                 {
-                    get
-                    {
-                        return point_0;
-                    }
-                    set
-                    {
-                        point_0 = value;
-                    }
-                }
-
-                public bool Boolean_0
-                {
-                    get
-                    {
-                        return bool_0;
-                    }
-                    set
-                    {
-                        bool_0 = value;
-                    }
-                }
-
-                public Class31(Point point_1)
-                {
-                    Point_0 = point_1;
-                    Boolean_0 = false;
+                    this.Point_0 = point_1;
+                    this.Boolean_0 = false;
                 }
             }
 
-            public class Class32
-            {
-                private bool bool_0;
-
-                private bool bool_1;
-
-                private double double_0;
-
-                private bool bool_2;
-
-                private double double_1;
-
-                private double double_2;
-
-                private double double_3;
-
-                private int int_0;
-
-                public bool Boolean_0
-                {
-                    get
-                    {
-                        return bool_0;
-                    }
-                    set
-                    {
-                        bool_0 = value;
-                    }
-                }
-
-                public bool Boolean_1
-                {
-                    get
-                    {
-                        return bool_1;
-                    }
-                    set
-                    {
-                        bool_1 = value;
-                    }
-                }
-
-                public double Double_0
-                {
-                    get
-                    {
-                        return double_0;
-                    }
-                    set
-                    {
-                        double_0 = value;
-                    }
-                }
-
-                public bool Boolean_2
-                {
-                    get
-                    {
-                        return bool_2;
-                    }
-                    set
-                    {
-                        bool_2 = value;
-                    }
-                }
-
-                public double Double_1
-                {
-                    get
-                    {
-                        return double_1;
-                    }
-                    set
-                    {
-                        double_1 = value;
-                    }
-                }
-
-                public double Double_2
-                {
-                    get
-                    {
-                        return double_2;
-                    }
-                    set
-                    {
-                        double_2 = value;
-                    }
-                }
-
-                public double Double_3
-                {
-                    get
-                    {
-                        return double_3;
-                    }
-                    set
-                    {
-                        double_3 = value;
-                    }
-                }
-
-                public int Int32_0
-                {
-                    get
-                    {
-                        return int_0;
-                    }
-                    set
-                    {
-                        int_0 = value;
-                    }
-                }
-            }
-
-            private sealed class Class33
-            {
-                public Random random_0;
-
-                internal char method_0(string string_0)
-                {
-                    return string_0[random_0.Next(string_0.Length)];
-                }
-            }
-
-
-            public static double smethod_7(PointF pointF_0, PointF pointF_1, PointF pointF_2)
-            {
-                float num = pointF_2.X - pointF_1.X;
-                float num2 = pointF_2.Y - pointF_1.Y;
-                PointF pointF;
-                if (num != 0f || num2 != 0f)
-                {
-                    float num3 = ((pointF_0.X - pointF_1.X) * num + (pointF_0.Y - pointF_1.Y) * num2) / (num * num + num2 * num2);
-                    if (num3 >= 0f)
-                    {
-                        if (num3 <= 1f)
-                        {
-                            pointF = new PointF(pointF_1.X + num3 * num, pointF_1.Y + num3 * num2);
-                            num = pointF_0.X - pointF.X;
-                            num2 = pointF_0.Y - pointF.Y;
-                        }
-                        else
-                        {
-                            pointF = new PointF(pointF_2.X, pointF_2.Y);
-                            num = pointF_0.X - pointF_2.X;
-                            num2 = pointF_0.Y - pointF_2.Y;
-                        }
-                    }
-                    else
-                    {
-                        pointF = new PointF(pointF_1.X, pointF_1.Y);
-                        num = pointF_0.X - pointF_1.X;
-                        num2 = pointF_0.Y - pointF_1.Y;
-                    }
-                    if (!(num >= 0f))
-                    {
-                        return Math.Sqrt(num * num + num2 * num2) * -1.0;
-                    }
-                    return Math.Sqrt(num * num + num2 * num2);
-                }
-                pointF = pointF_1;
-                num = pointF_0.X - pointF_1.X;
-                num2 = pointF_0.Y - pointF_1.Y;
-                return Math.Sqrt(num * num + num2 * num2);
-            }
         }
 
-        private List<Class28.Class30> list_0 = new List<Class28.Class30>();
+        private List<RGBClass.PointerClass> rgbLists = new List<RGBClass.PointerClass>();
+        private List<RGBClass.PointlerClass> pointsLists = new List<RGBClass.PointlerClass>();
 
         public static Bitmap BitmapAl()
         {
@@ -554,19 +280,19 @@ namespace Evelynn_Bot.GameAI
             return bitmap;
         }
 
-        public static void HepsiniTarat(Bitmap bitmap_0, List<Class28.Class30> list_0)
+        public static void HepsiniTarat(Bitmap bmp, List<RGBClass.PointerClass> rgbLists)
         {
-            list_0.ToList().ForEach(delegate (Class28.Class30 class30_0)
+            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
             {
-                class30_0.Int32_0 = 0;
+                pClass.tmpB = 0;
             });
-            list_0.ToList().ForEach(delegate (Class28.Class30 class30_0)
+            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
             {
-                class30_0.List_1 = new List<Point>();
+                pClass.pointerList = new List<Point>();
             });
-            BitmapData bitmapData = bitmap_0.LockBits(new Rectangle(0, 0, bitmap_0.Size.Width, bitmap_0.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Size.Width, bmp.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             IntPtr scan = bitmapData.Scan0;
-            int num = bitmapData.Stride * bitmap_0.Height;
+            int num = bitmapData.Stride * bmp.Height;
             byte[] array = new byte[num];
             byte[] byte_2 = new byte[num / 3];
             byte[] byte_1 = new byte[num / 3];
@@ -574,47 +300,47 @@ namespace Evelynn_Bot.GameAI
             Marshal.Copy(scan, array, 0, num);
             int int_ = 0;
             int stride = bitmapData.Stride;
-            for (int int_2 = 0; int_2 < bitmap_0.Height; int_2++)
+            for (int int_2 = 0; int_2 < bmp.Height; int_2++)
             {
                 int int_0;
-                for (int_0 = 0; int_0 < bitmap_0.Width; int_0++)
+                for (int_0 = 0; int_0 < bmp.Width; int_0++)
                 {
                     byte_0[int_] = array[int_2 * stride + int_0 * 3];
                     byte_1[int_] = array[int_2 * stride + int_0 * 3 + 1];
                     byte_2[int_] = array[int_2 * stride + int_0 * 3 + 2];
-                    list_0.ForEach(delegate (Class28.Class30 class30_0)
+                    rgbLists.ForEach(delegate (RGBClass.PointerClass pClass)
                     {
-                        if (Math.Abs(class30_0.List_0[class30_0.Int32_0].Int32_2 - byte_0[int_]) <= 5 && Math.Abs(class30_0.List_0[class30_0.Int32_0].Int32_1 - byte_1[int_]) <= 5 && Math.Abs(class30_0.List_0[class30_0.Int32_0].Int32_0 - byte_2[int_]) <= 5)
+                        if (Math.Abs(pClass.rgbLists[pClass.tmpB].B - byte_0[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].G - byte_1[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].R - byte_2[int_]) <= 5)
                         {
-                            class30_0.Int32_0++;
+                            pClass.tmpB++;
                         }
                         else
                         {
-                            class30_0.Int32_0 = 0;
+                            pClass.tmpB = 0;
                         }
-                        if (class30_0.Int32_0 == class30_0.List_0.Count)
+                        if (pClass.tmpB == pClass.rgbLists.Count)
                         {
-                            class30_0.List_1.Add(new Point(int_0, int_2));
-                            class30_0.Int32_0 = 0;
+                            pClass.pointerList.Add(new Point(int_0, int_2));
+                            pClass.tmpB = 0;
                         }
                     });
                     int num2 = int_;
                     int_ = num2 + 1;
                 }
             }
-            bitmap_0.UnlockBits(bitmapData);
+            bmp.UnlockBits(bitmapData);
         }
 
-        private static double Hesap1(double double_0, double double_1, double double_2, double double_3)
+        private static double Hesap1(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3)
         {
-            return Math.Sqrt(Math.Pow(double_2 - double_0, 2.0) + Math.Pow(double_3 - double_1, 2.0));
+            return Math.Sqrt(Math.Pow(gameTime - healthPercentage, 2.0) + Math.Pow(double_3 - prevHealthPercentage, 2.0));
         }
-        public static double Hesap0(double double_0, double double_1)
+        public static double Hesap0(double healthPercentage, double prevHealthPercentage)
         {
-            return Math.Sqrt(Math.Pow(double_0, 2.0) + Math.Pow(double_1, 2.0));
+            return Math.Sqrt(Math.Pow(healthPercentage, 2.0) + Math.Pow(prevHealthPercentage, 2.0));
         }
 
-        public static void PosHesapla(double double_0, double double_1, double double_2, double double_3, double double_4, double double_5, double double_6, double double_7, double double_8)
+        public static void PosHesapla(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3, double double_4, double double_5, double double_6, double double_7, double double_8)
         {
             Random random = new Random();
             double num = 0.0;
@@ -624,12 +350,12 @@ namespace Evelynn_Bot.GameAI
             double num5 = Math.Sqrt(2.0);
             double num6 = Math.Sqrt(3.0);
             double num7 = Math.Sqrt(5.0);
-            int num8 = (int)Hesap1(Math.Round(double_0), Math.Round(double_1), Math.Round(double_2), Math.Round(double_3));
+            int num8 = (int)Hesap1(Math.Round(healthPercentage), Math.Round(prevHealthPercentage), Math.Round(gameTime), Math.Round(double_3));
             uint num9 = (uint)(Environment.TickCount + 10000);
             int num10 = 0;
             while (Environment.TickCount <= num9)
             {
-                double num11 = Hesap0(double_0 - double_2, double_1 - double_3);
+                double num11 = Hesap0(healthPercentage - gameTime, prevHealthPercentage - double_3);
                 double_5 = Math.Min(double_5, num11);
                 if (num11 < 1.0)
                 {
@@ -661,8 +387,8 @@ namespace Evelynn_Bot.GameAI
                 }
                 num += num3;
                 num2 += num4;
-                num += double_4 * (double_2 - double_0) / num11;
-                num2 += double_4 * (double_3 - double_1) / num11;
+                num += double_4 * (gameTime - healthPercentage) / num11;
+                num2 += double_4 * (double_3 - prevHealthPercentage) / num11;
                 if (Hesap0(num, num2) > num13)
                 {
                     double num14 = num13 / 2.0 + (double)random.Next((int)(Math.Round(num13) / 2.0));
@@ -670,27 +396,27 @@ namespace Evelynn_Bot.GameAI
                     num = num / num15 * num14;
                     num2 = num2 / num15 * num14;
                 }
-                int num16 = (int)Math.Round(double_0);
-                int num17 = (int)Math.Round(double_1);
-                double_0 += num;
-                double_1 += num2;
-                if ((double)num16 != Math.Round(double_0) || (double)num17 != Math.Round(double_1))
+                int num16 = (int)Math.Round(healthPercentage);
+                int num17 = (int)Math.Round(prevHealthPercentage);
+                healthPercentage += num;
+                prevHealthPercentage += num2;
+                if ((double)num16 != Math.Round(healthPercentage) || (double)num17 != Math.Round(prevHealthPercentage))
                 {
-                    Tiklat(new Point((int)double_0, (int)double_1));
+                    Tiklat(new Point((int)healthPercentage, (int)prevHealthPercentage));
                     num10++;
                     if (num10 % 5 == 0)
                     {
                         Thread.Sleep(1);
                     }
                 }
-                if (!(Hesap0(double_0 - double_2, double_1 - double_3) >= 1.0))
+                if (!(Hesap0(healthPercentage - gameTime, prevHealthPercentage - double_3) >= 1.0))
                 {
                     break;
                 }
             }
-            if (Math.Round(double_2) != Math.Round(double_0) || Math.Round(double_3) != Math.Round(double_1))
+            if (Math.Round(gameTime) != Math.Round(healthPercentage) || Math.Round(double_3) != Math.Round(prevHealthPercentage))
             {
-                Tiklat(new Point((int)double_2, (int)double_3));
+                Tiklat(new Point((int)gameTime, (int)double_3));
             }
         }
 
@@ -712,17 +438,18 @@ namespace Evelynn_Bot.GameAI
             SendInput(1u, array, GStruct1.Int32_0);
         }
 
-        public static void TiklatTus(GEnum8 genum8_0)
+        public static void SolTiklat()
         {
             GStruct1[] array = new GStruct1[1];
             GStruct1 gStruct = default(GStruct1);
-            gStruct.uint_0 = 1u;
-            gStruct.gstruct2_0.gstruct4_0.genum8_0 = genum8_0;
-            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.SCANCODE;
+            gStruct.uint_0 = 0u;
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.LEFTDOWN;
+            gStruct.gstruct2_0.gstruct3_0.genum4_0 = GEnum4.Nothing;
+            gStruct.gstruct2_0.gstruct3_0.uintptr_0 = (UIntPtr)0uL;
             array[0] = gStruct;
             SendInput(1u, array, GStruct1.Int32_0);
-            Thread.Sleep(100);
-            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.KEYUP | GEnum6.SCANCODE;
+            Thread.Sleep(250);
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.LEFTUP;
             array[0] = gStruct;
             SendInput(1u, array, GStruct1.Int32_0);
         }
@@ -731,11 +458,11 @@ namespace Evelynn_Bot.GameAI
         {
             Random random = new Random();
             double double_ = random.Next(25, 35);
-            double double_2 = random.Next(50, 60);
+            double gameTime = random.Next(50, 60);
             double double_3 = random.Next(1, 2);
             double double_4 = random.Next(3, 4);
             double double_5 = 1.0;
-            PosHesapla(Cursor.Position.X, Cursor.Position.Y, point_0.X, point_0.Y, double_, double_2, double_3, double_4, double_5);
+            PosHesapla(Cursor.Position.X, Cursor.Position.Y, point_0.X, point_0.Y, double_, gameTime, double_3, double_4, double_5);
         }
 
         public static void TusuAyarla(GEnum8 genum8_0)
@@ -1215,14 +942,14 @@ namespace Evelynn_Bot.GameAI
 
         public Point AnaPointAl(Point point_7)
         {
-            return new Point(point_7.X + int_0, point_7.Y + int_1);
+            return new Point(point_7.X + scrX, point_7.Y + scrY);
         }
-        public static Point PointAl(bool bool_0)
+        public static Point PointAl(bool is43)
         {
             Size size = Screen.PrimaryScreen.Bounds.Size;
             int num = 800;
             int num2 = 600;
-            if (bool_0)
+            if (is43)
             {
                 num = 400;
                 num2 = 300;
@@ -1230,46 +957,855 @@ namespace Evelynn_Bot.GameAI
             return new Point((size.Width != num) ? ((size.Width - num) / 2) : 0, (size.Height != num2) ? ((size.Height - num2) / 2) : 0);
         }
 
-        private int int_0;
-        private int int_1;
+        private int scrX;
+        private int scrY;
         #endregion
+
+        #region Yeni AI
+
+        #region Math, Pixel, BMP
+
+
+        public static double PointHesapla(PointF pointF_0, PointF pointF_1, PointF pointF_2)
+        {
+            float num = pointF_2.X - pointF_1.X;
+            float num2 = pointF_2.Y - pointF_1.Y;
+            PointF pointF;
+            if (num != 0f || num2 != 0f)
+            {
+                float num3 = ((pointF_0.X - pointF_1.X) * num + (pointF_0.Y - pointF_1.Y) * num2) / (num * num + num2 * num2);
+                if (num3 >= 0f)
+                {
+                    if (num3 <= 1f)
+                    {
+                        pointF = new PointF(pointF_1.X + num3 * num, pointF_1.Y + num3 * num2);
+                        num = pointF_0.X - pointF.X;
+                        num2 = pointF_0.Y - pointF.Y;
+                    }
+                    else
+                    {
+                        pointF = new PointF(pointF_2.X, pointF_2.Y);
+                        num = pointF_0.X - pointF_2.X;
+                        num2 = pointF_0.Y - pointF_2.Y;
+                    }
+                }
+                else
+                {
+                    pointF = new PointF(pointF_1.X, pointF_1.Y);
+                    num = pointF_0.X - pointF_1.X;
+                    num2 = pointF_0.Y - pointF_1.Y;
+                }
+                if (!(num >= 0f))
+                {
+                    return Math.Sqrt(num * num + num2 * num2) * -1.0;
+                }
+                return Math.Sqrt(num * num + num2 * num2);
+            }
+            pointF = pointF_1;
+            num = pointF_0.X - pointF_1.X;
+            num2 = pointF_0.Y - pointF_1.Y;
+            return Math.Sqrt(num * num + num2 * num2);
+        }
+
+        public static void KodTarat(GEnum8 genum8_0)
+        {
+            GStruct1[] array = new GStruct1[1];
+            GStruct1 gStruct = default(GStruct1);
+            gStruct.uint_0 = 1u;
+            gStruct.gstruct2_0.gstruct4_0.genum8_0 = genum8_0;
+            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.SCANCODE;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+            Thread.Sleep(100);
+        }
+
+        public static void TusBas(GEnum8 genum8_0)
+        {
+            GStruct1[] array = new GStruct1[1];
+            GStruct1 gStruct = default(GStruct1);
+            gStruct.uint_0 = 1u;
+            gStruct.gstruct2_0.gstruct4_0.genum8_0 = genum8_0;
+            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.KEYUP | GEnum6.SCANCODE;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+            Thread.Sleep(100);
+        }
+
+        public static void EndBas()
+        {
+            KodTarat(GEnum8.CONTROL);
+            TusuAyarla(GEnum8.END);
+            TusBas(GEnum8.CONTROL);
+        }
+
+
+        public static double PointerMath(Point point_0, Point point_1) => Math.Sqrt(Math.Pow((double)(point_1.X - point_0.X), 2.0) + Math.Pow((double)(point_1.Y - point_0.Y), 2.0) * 1.0);
+
+
+        public bool BirseyHesapla(Point point_7)
+        {
+            foreach (RGBClass.PointlerClass item in pointsLists)
+            {
+                if (!item.Boolean_0 && !(PointerMath(point_7, item.Point_0) >= (double)6))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public Point MinimapHesapla(double double_5)
+        {
+            double num = (double)random_0.Next(15, 95) / 100.0;
+            double num2 = (double)random_0.Next(15, 95) / 100.0;
+            double num3 = (double)200 * num;
+            double num4 = (double)150 * num2;
+            if (double_5 <= double_4)
+            {
+                num3 = 0.0;
+            }
+            else if (double_5 >= double_3)
+            {
+                num4 = 0.0;
+            }
+            return new Point(point_4.X - (int)num3, point_4.Y + (int)num4);
+        }
+
+        public Point TowerHesapla(double double_5)
+        {
+            double num = (double)random_0.Next(15, 95) / 100.0;
+            double num2 = (double)random_0.Next(15, 95) / 100.0;
+            double num3 = (double)200 * num;
+            double num4 = (double)150 * num2;
+            if (double_5 > double_4)
+            {
+                if (double_5 >= double_3)
+                {
+                    num3 = 0.0;
+                }
+            }
+            else
+            {
+                num4 = 0.0;
+            }
+            return new Point(point_4.X + (int)num3, point_4.Y - (int)num4);
+        }
+
+        public static void SagTikla()
+        {
+            GStruct1[] array = new GStruct1[1];
+            GStruct1 gStruct = default(GStruct1);
+            gStruct.uint_0 = 0u;
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.RIGHTDOWN;
+            gStruct.gstruct2_0.gstruct3_0.genum4_0 = GEnum4.Nothing;
+            gStruct.gstruct2_0.gstruct3_0.uintptr_0 = (UIntPtr)0uL;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+            Thread.Sleep(100);
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.RIGHTUP;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+        }
+
+        public void TotemAt()
+        {
+            KodTarat(GEnum8.SHIFT);
+            TusuAyarla(GEnum8.KEY_4);
+            TusBas(GEnum8.SHIFT);
+        }
+
+        public void ItemKullan()
+        {
+            KodTarat(GEnum8.SHIFT);
+            TusuAyarla(GEnum8.KEY_1); // 2
+            TusuAyarla(GEnum8.KEY_2); // 3
+            TusuAyarla(GEnum8.KEY_3); // 4
+            TusuAyarla(GEnum8.KEY_5); // 6
+            TusuAyarla(GEnum8.KEY_6); // 7
+            TusuAyarla(GEnum8.KEY_7); // 8
+            TusBas(GEnum8.SHIFT);
+        }
+
+        public void EsyaAl(bool bool_4)
+        {
+            if (bool_4)
+            {
+                int num = random_0.Next(1, 15);
+                EkraniAyarla(new Point(point_3.X + num, point_3.Y + num));
+                Thread.Sleep(4000);
+                SagTikla();
+                Thread.Sleep(150);
+                SagTikla();
+                Thread.Sleep(150);
+                SagTikla();
+                Thread.Sleep(150);
+                Thread.Sleep(3000);
+                TusuAyarla(GEnum8.KEY_P);
+                Thread.Sleep(8000);
+                dateTime_0 = DateTime.Now;
+            }
+            else
+            {
+                TusuAyarla(GEnum8.KEY_P);
+                Thread.Sleep(8000);
+            }
+        }
+
+        public void BaslangicEsyaAl(bool bool_4)
+        {
+            if (bool_4)
+            {
+                int num = random_0.Next(1, 15);
+                EkraniAyarla(new Point(point_2.X + num, point_2.Y + num));
+                Thread.Sleep(4000);
+                SagTikla();
+                Thread.Sleep(150);
+                SagTikla();
+                Thread.Sleep(150);
+                SagTikla();
+                Thread.Sleep(150);
+                EkraniAyarla(new Point(point_1.X + num, point_1.Y + num));
+                Thread.Sleep(4000);
+                SagTikla();
+                Thread.Sleep(150);
+                SagTikla();
+                Thread.Sleep(150);
+                SagTikla();
+                Thread.Sleep(150);
+                Thread.Sleep(3000);
+                TusuAyarla(GEnum8.KEY_P);
+                Thread.Sleep(8000);
+                dateTime_0 = DateTime.Now;
+            }
+            else
+            {
+                TusuAyarla(GEnum8.KEY_P);
+                Thread.Sleep(8000);
+            }
+        }
+
+        #endregion
+
+        public void YeniAI_1(object Interface)
+        {
+            Interface itsInterface = (Interface)Interface;
+            Point point = new Point(400, 300);
+            while (!isGameEnd)
+            {
+                try
+                {
+                    Bitmap bitmap_;
+                    try
+                    {
+                        bitmap_ = BitmapAl();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Error while creating bitmap");
+                        Thread.Sleep(500);
+                        continue;
+                    }
+                    HepsiniTarat(bitmap_, rgbLists);
+                    List<Point> list = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Minimap").pointerList;
+                    List<Point> list2 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "EnemyHero").pointerList;
+                    List<Point> list3 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "EnemyMinion").pointerList;
+                    List<Point> list4 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "AllyMinion").pointerList;
+                    List<Point> list5 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Shop").pointerList;
+                    List<Point> list6 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Fountain").pointerList;
+                    bool flag = list5.Count > 10;
+                    Point point2 = ((list.Count == 0) ? new Point(-1, -1) : new Point(list[0].X + 20, list[0].Y + 15));
+                    Point point_ = ((list3.Count == 0) ? new Point(-1, -1) : new Point(list3[list3.Count - 1].X + 30, list3[list3.Count - 1].Y + 30));
+                    Point point_2 = ((list4.Count == 0) ? new Point(-1, -1) : new Point(list4[0].X + 30, list4[0].Y + 30));
+                    Point point_3 = ((list2.Count == 0) ? new Point(-1, -1) : new Point(list2[0].X + 65, list2[0].Y + 45));
+                    double double_ = PointHesapla(point2, point_5, point_6);
+                    double num = PointerMath(point2, point_0);
+                    bool flag2 = (num < 5.0 && list6.Count > 0) || point2.X == -1; // Base'demi diye kontrol et
+                    bool flag3 = BirseyHesapla(point2);
+                    if (point2.X != -1 || flag)
+                    {
+                        goto IL_03e7;
+                        //if (queueId != 2000 || !bool_2) // Tutorial 1 değil ya da Miss Fortune ile 1 kill almadıysa
+                        //{
+                        //    goto IL_03e7;
+                        //}
+                        //List<Point> list7 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "ChangeHero").pointerList;
+                        //if (list7.Count <= 0)
+                        //{
+                        //    goto IL_03e7;
+                        //}
+                        //EkraniAyarla(AnaPointAl(list7[0]));
+                        //SagTikla();
+                        //Thread.Sleep(5000);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Can't fetch hero position");
+                        Thread.Sleep(400);
+                    }
+                    goto end_IL_0035;
+                IL_051e:
+                    if (healthPercentage < prevHealthPercentage && prevHealthPercentage - healthPercentage > 2.0)
+                    {
+                        EkraniAyarla(MinimapHesapla(double_));
+                        SagTikla();
+                        ItemKullan();
+                        Thread.Sleep(1000);
+                    }
+                    if (canUpgradeAbility)
+                    {
+                        switch (itsInterface.player.Level)
+                        {
+                            case 1:
+                                SkillUp("q", "j");
+                                break;
+                            case 2:
+                                SkillUp("w", "k");
+                                break;
+                            case 3:
+                                SkillUp("e", "m");
+                                break;
+                            case 4:
+                                SkillUp("q", "j");
+                                break;
+                            case 5:
+                                SkillUp("q", "j");
+                                break;
+                            case 6:
+                                SkillUp("r", "l");
+                                break;
+                            case 7:
+                                SkillUp("q", "j");
+                                break;
+                            case 8:
+                                SkillUp("w", "k");
+                                break;
+                            case 9:
+                                SkillUp("q", "j");
+                                break;
+                            case 10:
+                                SkillUp("w", "k");
+                                break;
+                            case 11:
+                                SkillUp("r", "l");
+                                break;
+                            case 12:
+                                SkillUp("w", "k");
+                                break;
+                            case 13:
+                                SkillUp("w", "k");
+                                break;
+                            case 14:
+                                SkillUp("e", "m");
+                                break;
+                            case 15:
+                                SkillUp("e", "m");
+                                break;
+                            case 16:
+                                SkillUp("r", "l");
+                                break;
+                            case 17:
+                                SkillUp("e", "m");
+                                break;
+                            case 18:
+                                SkillUp("e", "m");
+                                break;
+
+                            default:
+                                SkillUp("q", "j");
+                                SkillUp("w", "k");
+                                SkillUp("e", "m");
+                                SkillUp("r", "l");
+                                break;
+                        }
+                    }
+                    if (healthPercentage >= 35.0)
+                    {
+                        if (point_2.X != -1 && list4.Count >= 2) // En az 2 veya daha fazla AllyMinion varsa
+                        {
+                            if (!flag3)
+                            {
+                                if (point_3.X == -1) // EnemyHero yoksa
+                                {
+                                    if (point_.X == -1) // EnemyMinion yoksa
+                                    {
+                                        EkraniAyarla(TowerHesapla(double_));
+                                        TusuAyarla(GEnum8.KEY_A);
+                                    }
+                                    else
+                                    {
+                                        EkraniAyarla(AnaPointAl(point_));
+                                        TusuAyarla(GEnum8.KEY_A);
+                                    }
+                                }
+                                else
+                                {
+                                    EkraniAyarla(AnaPointAl(point_3));
+                                    switch (random_0.Next(1, 5))
+                                    {
+                                        case 3:
+                                            TusuAyarla(GEnum8.KEY_E);
+                                            break;
+                                        case 4:
+                                            TusuAyarla(GEnum8.KEY_R);
+                                            break;
+                                        case 2:
+                                            TusuAyarla(GEnum8.KEY_W);
+                                            break;
+                                        case 1:
+                                            TusuAyarla(GEnum8.KEY_Q);
+                                            break;
+                                    }
+                                    TusuAyarla(GEnum8.KEY_A);
+                                }
+                            }
+                            else if (point_3.X == -1) // EnemyHero yoksa
+                            {
+                                EkraniAyarla(AnaPointAl(point_2));
+                                TusuAyarla(GEnum8.KEY_A);
+                            }
+                            else // Hiçbir şey yoksa
+                            {
+                                EkraniAyarla(MinimapHesapla(double_));
+                                SagTikla();
+                            }
+                        }
+                        else if (flag3)
+                        {
+                            EkraniAyarla(MinimapHesapla(double_));
+                            SagTikla();
+                        }
+                        else if (num >= 15.0)
+                        {
+                            if (point_3.X != -1)
+                            {
+                                EkraniAyarla(AnaPointAl(point_3));
+                                switch (random_0.Next(1, 5))
+                                {
+                                    case 1:
+                                        TusuAyarla(GEnum8.KEY_Q);
+                                        break;
+                                    case 4:
+                                        TusuAyarla(GEnum8.KEY_R);
+                                        break;
+                                    case 3:
+                                        TusuAyarla(GEnum8.KEY_E);
+                                        break;
+                                    case 2:
+                                        TusuAyarla(GEnum8.KEY_W);
+                                        break;
+                                }
+                                TusuAyarla(GEnum8.KEY_A);
+                            }
+                            else if (point_.X != -1)
+                            {
+                                EkraniAyarla(AnaPointAl(point_));
+                                TusuAyarla(GEnum8.KEY_A);
+                            }
+                            else
+                            {
+                                EkraniAyarla(TowerHesapla(double_));
+                                TusuAyarla(GEnum8.KEY_A);
+                            }
+                        }
+                        else
+                        {
+                            double num2 = (double)random_0.Next(50, 95) / 100.0;
+                            double num3 = (double)random_0.Next(50, 95) / 100.0;
+                            double num4 = (double)200 * num2;
+                            double num5 = (double)150 * num3;
+                            EkraniAyarla(new Point(point_4.X + (int)num4, point_4.Y - (int)num5));
+                            SagTikla();
+                        }
+                    }
+                    else
+                    {
+                        TusuAyarla(GEnum8.KEY_F);
+                        //if (spell1ID != 7)
+                        //{
+                        //    if (spell2ID == 7)
+                        //    {
+                        //        TusuAyarla(GEnum8.KEY_F);
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    TusuAyarla(GEnum8.KEY_D);
+                        //}
+                        TotemAt();
+                        /*if (queueId == 2000) // Eğer Tutorial ise
+                        {
+                            EkraniAyarla(MinimapHesapla(double_));
+                            SagTikla();
+                        }
+                        else*/ if (point_.X == -1 && point_3.X == -1)
+                        {
+                            TusuAyarla(GEnum8.KEY_B);
+                            Thread.Sleep(2000);
+                        }
+                        else
+                        {
+                            EkraniAyarla(MinimapHesapla(double_));
+                            SagTikla();
+                            TusuAyarla(GEnum8.KEY_D);
+                            //if (spell1ID == 4 || spell1ID == 6)
+                            //{
+                            //    TusuAyarla(GEnum8.KEY_D);
+                            //}
+                            //else if (spell2ID == 4 || spell2ID == 6)
+                            //{
+                            //    TusuAyarla(GEnum8.KEY_F);
+                            //}
+                        }
+                    }
+                    goto IL_0964;
+                IL_03e7:
+                    if (flag2 /*&& queueId != 2000*/) // Eğer Basedeysek ve tutorial'da değilsek
+                    {
+                        Console.WriteLine("Mağaza Bulundu");
+                        if (summonerItemCount != 0) // Şu anki şampiyonun eşyası varsa
+                        {
+                            if (DateTime.Now.Subtract(dateTime_0).TotalMinutes > 3.0)
+                            {
+                                EsyaAl(flag);
+                                Thread.Sleep(random_0.Next(1000, 1300));
+                                continue;
+                            }
+                            if (flag)
+                            {
+                                TusuAyarla(GEnum8.KEY_P);
+                                Thread.Sleep(3000);
+                                continue;
+                            }
+                            if (!(healthPercentage < 100.0))
+                            {
+                                goto IL_051e;
+                            }
+                            Thread.Sleep(random_0.Next(1000, 1300));
+                        }
+                        else
+                        {
+                            BaslangicEsyaAl(flag); // TODO: BUNLARI REFACTOR ET! TEK KODA AL
+                            Thread.Sleep(random_0.Next(1000, 1300));
+                        }
+                    }
+                    else
+                    {
+                        if (!(!flag2 && flag))
+                        {
+                            goto IL_051e;
+                        }
+                        TusuAyarla(GEnum8.KEY_P);
+                        Thread.Sleep(3000);
+                    }
+                end_IL_0035:;
+                }
+                catch (Exception ex2)
+                {
+                    Console.WriteLine($"HATA: {ex2}");
+                    goto IL_0964;
+                }
+                continue;
+            IL_0964:
+                Thread.Sleep(random_0.Next(400, 800));
+            }
+        }
+
+        public void StartNewGameAI(Interface itsInterface)
+        {
+            try
+            {
+                List<Thread> list = new List<Thread>();
+                Thread thread = new Thread(YeniAI_1); // Oyun AI
+                thread.Start(itsInterface);
+                list.Add(thread);
+                Thread thread2 = new Thread(GetInGameStats);
+                thread2.Start(itsInterface);
+                list.Add(thread2);
+                Thread thread3 = new Thread(AraliEndGonder);
+                thread3.Start();
+                list.Add(thread3);
+                foreach (Thread item in list)
+                {
+                    item.Join();
+                }
+                Console.WriteLine("YENI AI: GAME END");
+                Thread.Sleep(20000);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"HATA: {ex}");
+            }
+        }
+
+        private void GetInGameStats(object Interface)
+        {
+            Interface itsInterface = (Interface)Interface;
+            CurrentPlayerStats(itsInterface);
+            string cGame_championName = itsInterface.player.CurrentGame_ChampName;
+            var inGameData = itsInterface.player.Data;
+            gameTime = inGameData.gameData.gameTime.Value;
+            isGameEnd = inGameData.events.Events.Count((EvelynnLCU.API_Models.GameEventDetails details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
+            summonerItemCount = inGameData.allPlayers.FirstOrDefault((EvelynnLCU.API_Models.AllSummoners liveData) => liveData.championName == cGame_championName).items.Count;
+            prevHealthPercentage = healthPercentage;
+            healthPercentage = itsInterface.player.CurrentHealth * 100.0 / itsInterface.player.MaxHealth;
+            canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
+            isTutorialAndMF =
+                inGameData.allPlayers
+                    .FirstOrDefault((EvelynnLCU.API_Models.AllSummoners liveData) => liveData.championName == cGame_championName).scores
+                    .kills == 1 && inGameData.allPlayers
+                    .FirstOrDefault((EvelynnLCU.API_Models.AllSummoners liveData) => liveData.championName == cGame_championName)
+                    .championName.Length == 12;
+            // Check Towers
+
+            foreach (EvelynnLCU.API_Models.GameEventDetails item in inGameData.events.Events)
+            {
+                if (item.TurretKilled == "Turret_T2_C_05_A")
+                {
+                    pointsLists[0].Boolean_0 = true;
+                }
+                else if (!(item.TurretKilled == "Turret_T2_C_04_A"))
+                {
+                    if (item.TurretKilled == "Turret_T2_C_03_A")
+                    {
+                        pointsLists[2].Boolean_0 = true;
+                    }
+                    else if (item.TurretKilled == "Turret_T2_C_02_A")
+                    {
+                        pointsLists[3].Boolean_0 = true;
+                    }
+                    else if (item.TurretKilled == "Turret_T2_C_01_A")
+                    {
+                        pointsLists[4].Boolean_0 = true;
+                    }
+                }
+                else
+                {
+                    pointsLists[1].Boolean_0 = true;
+                }
+            }
+
+        }
+        public void AraliEndGonder()
+        {
+            while (!isGameEnd)
+            {
+                EndBas();
+                Thread.Sleep(15000);
+            }
+        }
+
+        #region Constants
+
+        private bool isGameEnd;
+
+        private double healthPercentage = 100.0;
+
+        private double prevHealthPercentage = 100.0;
+
+        private DateTime dateTime_0 = new DateTime(2000, 1, 1);
+
+        private double gameTime = 99999.0;
+
+        private bool canUpgradeAbility;
+
+        private bool isTutorialAndMF;
+
+        private Point point_0;
+
+        private Point point_1;
+
+        private Point point_2;
+
+        private Point point_3;
+
+        private Random random_0 = new Random();
+
+        private Point point_4;
+
+        private Point point_5;
+
+        private Point point_6;
+
+        private double double_3;
+
+        private double double_4;
+
+        private DateTime dateTime_1;
+
+        private int summonerItemCount;
+
+        #endregion
+
+        private void RGBHazirla()
+        {
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            {
+                new RGBClass.SetRGB(103, 103, 65),
+                new RGBClass.SetRGB(64, 75, 52),
+                new RGBClass.SetRGB(22, 126, 127)
+            }, "Fountain"));
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            {
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83),
+                new RGBClass.SetRGB(141, 121, 83)
+            }, "Shop"));
+
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            {
+                new RGBClass.SetRGB(255, 255, 255),
+                new RGBClass.SetRGB(255, 255, 255),
+                new RGBClass.SetRGB(255, 255, 255),
+                new RGBClass.SetRGB(255, 255, 255),
+                new RGBClass.SetRGB(255, 255, 255),
+                new RGBClass.SetRGB(255, 255, 255)
+            }, "Minimap"));
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            {
+                new RGBClass.SetRGB(8, 8, 8),
+                new RGBClass.SetRGB(48, 3, 0),
+                new RGBClass.SetRGB(48, 3, 0)
+            }, "EnemyHero"));
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            {
+                new RGBClass.SetRGB(8, 12, 16),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119)
+            }, "AllyMinion"));
+
+            #region TODO CHANGE TUTO
+
+            //if (QUEUEID == 2000) // EĞER OYUN TUTORİAL 1 İSE MİNYON RENGİ DEĞİŞİYOR
+            //{
+            //    rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            //    {
+            //        new RGBClass.SetRGB(9, 13, 16),
+            //        new RGBClass.SetRGB(120, 33, 26),
+            //        new RGBClass.SetRGB(120, 33, 26),
+            //        new RGBClass.SetRGB(120, 33, 26),
+            //        new RGBClass.SetRGB(120, 33, 26),
+            //        new RGBClass.SetRGB(120, 33, 26)
+            //    }, "EnemyMinion"));
+            //    rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            //    {
+            //        new RGBClass.SetRGB(25, 67, 191)
+            //    }, "ChangeHero"));
+            //}
+            //else
+            //{
+            //    rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+            //    {
+            //        new RGBClass.SetRGB(9, 13, 17),
+            //        new RGBClass.SetRGB(119, 56, 54),
+            //        new RGBClass.SetRGB(119, 56, 54),
+            //        new RGBClass.SetRGB(119, 56, 54),
+            //        new RGBClass.SetRGB(119, 56, 54),
+            //        new RGBClass.SetRGB(119, 56, 54)
+            //    }, "EnemyMinion"));
+            //}
+
+            #endregion
+
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+                {
+                    new RGBClass.SetRGB(9, 13, 17),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54)
+                }, "EnemyMinion"));
+
+            pointsLists.Add(new RGBClass.PointlerClass(new Point(385, 262)));
+            pointsLists.Add(new RGBClass.PointlerClass(new Point(391, 255)));
+            pointsLists.Add(new RGBClass.PointlerClass(new Point(397, 250)));
+            pointsLists.Add(new RGBClass.PointlerClass(new Point(403, 241)));
+            pointsLists.Add(new RGBClass.PointlerClass(new Point(406, 243)));
+        }
+
+        public void YeniAIBaslat(Interface itsInterface)
+        {
+            dateTime_1 = DateTime.Now;
+            scrX = PointAl(true).X;
+            scrY = PointAl(true).Y;
+
+            point_5 = new Point(352, 294);
+                point_6 = new Point(405, 241);
+                point_4 = new Point(scrX + 200, scrY + 150);
+                double_3 = 2.0;
+                double_4 = -2.0;
+                point_0 = new Point(351, 301);
+                point_1 = AnaPointAl(new Point(70, 95));
+                point_2 = AnaPointAl(new Point(15, 47));
+                point_3 = AnaPointAl(new Point(38, 180));
+            
+            Thread.Sleep(5000);
+            Console.WriteLine("Game Screen Focus Found");
+            EkraniAyarla(point_4);
+            SolTiklat();
+            Thread.Sleep(5000);
+            EndBas();
+            RGBHazirla();
+            StartNewGameAI(itsInterface);
+        }
+
+        #endregion
+
 
 
         public bool AllyMinionCheck(Interface itsInterface)
         {
-            int_0 = PointAl(true).X;
-            int_1 = PointAl(true).Y;
+            scrX = PointAl(true).X;
+            scrY = PointAl(true).Y;
             Bitmap bitmap_;
-            list_0.Add(new Class28.Class30(new List<Class28.Class29>
+            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
             {
-                new Class28.Class29(8, 12, 16),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119),
-                new Class28.Class29(44, 89, 119)
+                new RGBClass.SetRGB(8, 12, 16),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119),
+                new RGBClass.SetRGB(44, 89, 119)
             }, "AllyMinion"));
 
             try
             {
                 bitmap_ = BitmapAl();
-                HepsiniTarat(bitmap_, list_0);
+                HepsiniTarat(bitmap_, rgbLists);
             }
             catch (Exception)
             {
                 Console.WriteLine("Error while creating bitmap");
             }
 
-            List<Point> list4 = list_0.First((Class28.Class30 class30_0) => class30_0.String_0 == "AllyMinion").List_1;
-            Point AllyMinionPos = ((list4.Count == 0) ? new Point(-1, -1) : new Point(list4[0].X + 30, list4[0].Y + 30));
-            Console.WriteLine(AllyMinionPos);
+            List<Point> aMList = rgbLists.First((RGBClass.PointerClass PointerClass_0) => PointerClass_0.mode == "AllyMinion").pointerList;
+            Point AllyMinionPos = ((aMList.Count == 0) ? new Point(-1, -1) : new Point(aMList[0].X + 30, aMList[0].Y + 30));
             if (AllyMinionPos.X <= 1 || AllyMinionPos.Y <= 1)
             {
                 return false;
@@ -1281,8 +1817,6 @@ namespace Evelynn_Bot.GameAI
 
                 EkraniAyarla(AnaPointAl(AllyMinionPos));
                 TusuAyarla(GEnum8.KEY_A);
-
-
                 return true;
             }
         }
@@ -1609,6 +2143,11 @@ namespace Evelynn_Bot.GameAI
             itsInterface.player.CurrentHealth = liveData.Result.activePlayer.championStats.currentHealth;
             itsInterface.player.CurrentGold = liveData.Result.activePlayer.currentGold;
             itsInterface.player.Level = liveData.Result.activePlayer.level;
+            itsInterface.player.Level_Q = liveData.Result.activePlayer.abilities.Q.abilityLevel.Value;
+            itsInterface.player.Level_W = liveData.Result.activePlayer.abilities.W.abilityLevel.Value;
+            itsInterface.player.Level_E = liveData.Result.activePlayer.abilities.E.abilityLevel.Value;
+            itsInterface.player.Level_R = liveData.Result.activePlayer.abilities.R.abilityLevel.Value;
+            itsInterface.player.Data = liveData.Result;
         }
 
         #region Dispose

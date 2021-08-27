@@ -13,6 +13,7 @@ namespace Evelynn_Bot.ExternalCommands
         {
             AutoUpdater.Mandatory = true;
             AutoUpdater.UpdateMode = Mode.ForcedDownload;
+            AutoUpdater.Synchronous = true;
             AutoUpdater.Start("https://ytdtoken.space/update.xml");
         }
     }
