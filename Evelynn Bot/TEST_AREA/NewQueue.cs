@@ -35,7 +35,7 @@ namespace Evelynn_Bot
         private static readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
         public async Task<Task> Test(Interface itsInterface)
         {
-            itsInterface2 = itsInterface;
+            itsInterface2 = itsInterface; // TODO: VERİ AKTARIRKEN CPU BİNİYOR AMA ANLIK OLDUĞU İÇİN SORUN OLMAYABİLİR (TEK SEFER ZATEN)
             await Connect();
             return Task.CompletedTask;
         }
@@ -60,10 +60,10 @@ namespace Evelynn_Bot
             EventExampleAsync();
             CreateLobby();
 
-            while (!isDone)
-            {
-                //ignored
-            }
+            //while (!isDone) // TODO: BUNUN YERINE BAŞKA BİR ŞEY KULLAN CPU YİYOR
+            //{
+            //    //ignored
+            //}
         }
 
         public async static void CreateLobby()
