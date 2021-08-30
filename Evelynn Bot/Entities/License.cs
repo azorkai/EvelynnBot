@@ -24,6 +24,6 @@ namespace Evelynn_Bot.Entities
         public bool Lol_disenchant { get; set; }
         public bool Lol_doTutorial { get; set; }
         public bool Lol_isEmptyNick { get; set; }
-        public string LeaguePath { get; set; }
+        public string Lol_region { get; set; }
     }
 }

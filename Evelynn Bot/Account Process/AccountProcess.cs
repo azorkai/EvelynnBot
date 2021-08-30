@@ -16,7 +16,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Evelynn_Bot.ExternalCommands;
 using Leaf.xNet;
-using AutoIt;
 using bAUTH;
 using Evelynn_Bot.GameAI;
 using EvelynnLCU.API_Models;
@@ -28,40 +27,16 @@ namespace Evelynn_Bot.Account_Process
 {
     public class AccountProcess : IAccountProcess
     {
-
-
-        private int caps = 0;
-
-        public int SW_HIDE = 0;
-
-        public Encoding HttpRequestEncoding = Encoding.UTF8;
-
-
-
-        [DllImport("User32.dll", SetLastError = true)]
-        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        [DllImport("User32.dll")]
-        public static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
-
-        [DllImport("User32.dll")]
-        public static extern bool EnableWindow(IntPtr hwnd, bool enabled);
-
         public bool StartLeague(Interface itsInterface)
         {
             try
             {
-                // TODO: AUTOİT VE İMAGESEARCH KALDIRILACAK. PROCESS KİLL VE STARTLAR CMD FİLE CREATE (AUR) İLE YAPILACAK
-                AutoItX.Run($"\"{itsInterface.license.LeaguePath}\" --launch-product=league_of_legends --launch-patchline=live", Path.GetDirectoryName(itsInterface.license.LeaguePath));
-                AutoItX.ProcessWait("RiotClientUx.exe", 0);
-                //ProcessStartInfo info = new ProcessStartInfo();
-                //info.FileName = itsInterface.license.LeaguePath;
-                //info.Arguments = "--launch-product=league_of_legends --launch-patchline=live";
-
-                //Process lol = new Process();
-                //lol.StartInfo = info;
-                //lol.Start();
-                //lol.WaitForInputIdle();
+                string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
+                File.Delete(text + "game.cfg");
+                File.Delete(text + "PersistedSettings.json");
+                File.Copy(Directory.GetCurrentDirectory() + "\\Config\\game.cfg", $"{text}game.cfg", overwrite: true);
+                File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
+                itsInterface.clientKiller.StartLeague();
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -83,10 +58,8 @@ namespace Evelynn_Bot.Account_Process
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
                 }
-
-                Thread.Sleep(20000);
-
-                itsInterface.lcuApi.InitRiotClient();
+                
+                
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
                 Thread.Sleep(3500);
@@ -102,33 +75,188 @@ namespace Evelynn_Bot.Account_Process
                 {
                     //ignored
                 }
-
-                Thread.Sleep(10000);
-
-                Process[] processesByName = Process.GetProcessesByName("RiotClientUx");
-                if (processesByName.Length >= 1 && processesByName[0].MainWindowHandle != IntPtr.Zero)
-                {
-                    AutoItX.ControlClick("Riot Client", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 647, 355);
-                    Thread.Sleep(25000);
-                }
-
-                Thread.Sleep(30000);
+                
                 Dispose(true);
                 itsInterface.lcuPlugins = null;
                 return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
             }
             catch (Exception e)
             {
-                itsInterface.clientKiller.KillLeagueClient(itsInterface);
+                //TODO: EĞER GİRİŞ BAŞARISIZ İSE SİTEYE BU BİLGİYİ GÖNDER
+                itsInterface.clientKiller.KillAllLeague();
                 Dispose(true);
                 return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
             }
         }
+
+        public async Task<Task> ChangeRegion(Interface itsInterface)
+        {
+            RegionLocale clientRegion =  await itsInterface.lcuPlugins.GetRegionAsync();
+            string upper = itsInterface.license.Lol_region.ToUpper();
+            string str = upper == "OC" ? "OC1" : upper;
+            string region = str == "EUN" ? "EUNE" : str;
+            Console.WriteLine($"Current Region: {clientRegion.region}");
+            if (clientRegion.region != region)
+            {
+                await itsInterface.lcuPlugins.SetRegionAsync(region);
+                Thread.Sleep(10000);
+                return itsInterface.processManager.StartAccountProcess(itsInterface);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public async Task<string> VerifySession(Interface itsInterface)
+        {
+            int loginAttempt = 0;
+            LolLoginLoginSession loginSession = await itsInterface.lcuPlugins.GetSessionAsync();
+            bool? isConnected = loginSession.connected;
+            if (isConnected.Value)
+            {
+                string? summonerName = loginSession.username;
+                if (!String.IsNullOrEmpty(summonerName))
+                {
+                    summonerName = loginSession.username;
+                    if (summonerName.Length > 0)
+                    {
+                        if (!(loginSession.isNewPlayer.GetValueOrDefault() & loginSession.isNewPlayer.HasValue))
+                        {
+                            // HESAP DOĞRULANDI DEVAM EDEBİLİRSİN
+                            return "already_created_account";
+                        }
+                        // YENİ HESAP, SET SUMMONER KISMINA GÖTÜR
+                        return "new_player_set_account";
+                    }
+                }
+                if (!String.IsNullOrEmpty(summonerName))
+                {
+                    summonerName = loginSession.username;
+                }
+                else
+                {
+                    return "invalid_summoner_name";
+                }
+            }
+            if (loginSession.error.messageId == "ACCOUNT_BANNED") // Account has banned
+            {
+                // Sent the banned account to the dashboard, then get new account.
+                //GClass119.GClass119_0.method_12(Class14.gclass1_0.Int64_0);
+                //Class14.action_0 = Class14.Action.RequestAccount;
+                return "banned_account";
+            }
+            else if (!(loginSession.error.messageId == "RATE_LIMITED"))
+            {
+                if (loginSession.error.messageId == "LOGIN_QUEUE_BUSY")
+                {
+                    Thread.Sleep(300000);
+                }
+                else if (loginSession.error.messageId == "UNSPECIFIED_ERROR") { return "restart_client_error"; }
+                else if (loginSession.error.messageId == "INVALID_CREDENTIALS")
+                {
+                    ++loginAttempt;
+                    // Account credentials are wrong
+                    itsInterface.logger.Log(false, itsInterface.messages.ErrorLogin);
+                    if (loginAttempt >= 3)
+                    {
+                        // BURADA HESABI PANELE BİLDİR VE YENI HESAP İSTE
+                        //GClass115.GStruct0 gstruct0_2 = GClass119.GClass119_0.method_13(Class14.gclass1_0.Int64_0);
+                        //Class14.action_0 = Class14.Action.RequestAccount;
+                        return "invalid_credentials";
+                    }
+                    else
+                    {
+                        return "restart_client_error";
+                    }
+                }
+                else if (loginSession.error.messageId == "LOGGED_IN_ELSEWHERE")
+                {
+                    // YENİ HESAP İSTE
+                    //Class14.action_0 = Class14.Action.RequestAccount;
+                    return "logged_in_from_another";
+                }
+                else if (loginSession.error.messageId == "CHANNEL_AUTH_FAILED")
+                    return "restart_client_error";
+            }
+            else
+            {
+                // RATE LIMIT WAIT 5 MINUTES
+                Thread.Sleep(300000);
+            }
+            return(loginSession.error.messageId);
+        }
+
+        public async Task<bool> OldClientLoginAccount(Interface itsInterface)
+        {
+            try
+            {
+                if (itsInterface.license.Lol_username == "")
+                {
+                    return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
+                }
+
+                if (itsInterface.license.Lol_password == "")
+                {
+                    return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
+                }
+
+
+                itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
+                itsInterface.lcuApi.Socket.DumpToDebug = false;
+                itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
+
+                await ChangeRegion(itsInterface);
+
+                await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+
+                // Verify Session
+                string session = await VerifySession(itsInterface);
+
+                switch (session)
+                {
+                    case "banned_account": 
+                        // hesabı panele gönder ve yenisini al.
+                        break;
+                    case "new_player_set_account":
+                        break;
+                    case "invalid_credentials":
+                        break;
+                    default:
+                        break;
+                }
+                
+                Thread.Sleep(3500);
+                try
+                {
+                    var eula = await itsInterface.lcuPlugins.GetEula("read");
+                    if (eula.Equals("\"AcceptanceRequired\""))
+                    {
+                        await itsInterface.lcuPlugins.GetEula("accept");
+                    }
+                }
+                catch
+                {
+                    //ignored
+                }
+
+                Dispose(true);
+                itsInterface.lcuPlugins = null;
+                return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
+            }
+            catch (Exception e)
+            {
+                //TODO: EĞER GİRİŞ BAŞARISIZ İSE SİTEYE BU BİLGİYİ GÖNDER
+                itsInterface.clientKiller.KillAllLeague();
+                Dispose(true);
+                return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
+            }
+        }
+
+
         public bool Initialize(Interface itsInterface)
         {
             try
             {
-                itsInterface.lcuApi.Init(InitializeMethod.Lockfile);
+                itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
                 itsInterface.lcuApi.Socket.DumpToDebug = false;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
             }
@@ -162,26 +290,12 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.logger.Log(true, "New account!");
 
                 await Task.Delay(5000);
-                //AutoItX.ControlClick("Riot Client", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 647, 355);
-                //await Task.Delay(25000);
-                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 865, 219);
-                //await Task.Delay(1250);
-                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 862, 316);
-                //await Task.Delay(1250);
-                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 819, 430);
-                //await Task.Delay(1250);
-                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 834, 551);
-                //await Task.Delay(1250);
-                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 639, 664);
-                //AutoItX.ControlClick("League of Legends", "Chrome Legacy Window", "[CLASS:Chrome_RenderWidgetHostHWND; INSTANCE:1]", "left", 1, 640, 400); //This is for config bug.
 
                 var name = RandomNameGenerator();
                 itsInterface.lcuPlugins.KillUXAsync();
                 if (await itsInterface.lcuPlugins.SetSummonerName(name))
                 {
                     itsInterface.logger.Log(true, "Successfully used name!");
-                    itsInterface.clientKiller.KillLeagueClient(itsInterface);
-                    await Task.Delay(7000);
                     Dispose(true);
                     return itsInterface.processManager.Start(itsInterface);
                 }
@@ -271,7 +385,8 @@ namespace Evelynn_Bot.Account_Process
                         Thread.Sleep(10000);
                         itsInterface.lcuPlugins.PostMatchmakingSearch();
 
-                        itsInterface.gameAi.TutorialAI_1(itsInterface);
+                        // TODO: YENİ Aİ'I TUTORİALA GÖRE AYARLA, BOOLEAN KOY Bİ TANE, TUTO İSE TRUE GÖNDER.
+                        //itsInterface.gameAi.TutorialAI_1(itsInterface); 
 
                         itsInterface.logger.Log(true, "TUTORIAL 1 ENDED");
                         Thread.Sleep(15000);
@@ -295,7 +410,7 @@ namespace Evelynn_Bot.Account_Process
                         Thread.Sleep(10000);
                         itsInterface.lcuPlugins.PostMatchmakingSearch();
 
-                        itsInterface.gameAi.TutorialAI_2(itsInterface);
+                        //itsInterface.gameAi.TutorialAI_2(itsInterface);
 
                         itsInterface.logger.Log(true, "TUTORIAL 2 ENDED");
                         Thread.Sleep(15000);
@@ -318,7 +433,7 @@ namespace Evelynn_Bot.Account_Process
                         Thread.Sleep(10000);
                         itsInterface.lcuPlugins.PostMatchmakingSearch();
 
-                        itsInterface.gameAi.TutorialAI_2(itsInterface); //Bilerek "2" olarak bırakılmıştır, aynı AI!
+                        //itsInterface.gameAi.TutorialAI_2(itsInterface); //Bilerek "2" olarak bırakılmıştır, aynı AI!
 
                         itsInterface.logger.Log(true, "TUTORIAL 3 ENDED");
                         Thread.Sleep(15000);

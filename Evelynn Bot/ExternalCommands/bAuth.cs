@@ -91,8 +91,6 @@ namespace bAUTH
                 string d = itsInterface.sec.DecryptString(t);
                 string[] p = d.Split('|');
                 var epc = itsInterface.u.GetEpochTime();
-                Console.WriteLine("Your Unix: " + epc);
-                Console.WriteLine("Server Unix: " + p[15]);
                 if (Convert.ToInt32(p[15]) > epc)
                 {
                     //Console.WriteLine(p[1]);
@@ -113,6 +111,7 @@ namespace bAUTH
                             itsInterface.license.Lol_disenchant = Convert.ToBoolean(p[12] == "0" ? "false" : "true");
                             itsInterface.license.Lol_doTutorial = Convert.ToBoolean(p[13] == "0" ? "false" : "true");
                             itsInterface.license.Lol_isEmptyNick = Convert.ToBoolean(p[14] == "0" ? "false" : "true");
+                            itsInterface.license.Lol_region = p[15];
                             break;
                         default: itsInterface.license.Status = false; break;
                     }
@@ -146,6 +145,7 @@ namespace bAUTH
                         itsInterface.license.Lol_disenchant = Convert.ToBoolean(p[6] == "0" ? "false" : "true");
                         itsInterface.license.Lol_doTutorial = Convert.ToBoolean(p[7] == "0" ? "false" : "true");
                         itsInterface.license.Lol_isEmptyNick = Convert.ToBoolean(p[8] == "0" ? "false" : "true");
+                        itsInterface.license.Lol_region = p[9];
                         break;
                     case "NO_ACCOUNT":
                         itsInterface.logger.Log(false, itsInterface.messages.LookingForNewAccount);
@@ -177,7 +177,6 @@ namespace bAUTH
                         if (Convert.ToBoolean(p[2]) == true) // Stop Status
                         {
                             itsInterface.dashboard.IsStop = true;
-                            Console.WriteLine("Action stop geldi");
                         } else if (Convert.ToBoolean(p[3])) // Start Status
                         {
                             itsInterface.dashboard.IsStart = true;

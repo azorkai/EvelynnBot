@@ -26,5 +26,7 @@ namespace Evelynn_Bot.Account_Process
         bool TutorialMissions(Interface itsInterface);
         bool PatchCheck(Interface itsInterface);
         bool LeagueIsPatchAvailable(Interface itsInterface);
+        Task<string> VerifySession(Interface itsInterface);
+        Task<Task> ChangeRegion(Interface itsInterface);
     }
 }

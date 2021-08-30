@@ -7,10 +7,7 @@ namespace Evelynn_Bot.ProcessManager
     {
         Task<Task> Start(Interface itsInterface);
         Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame);
-        bool IsGameStarted(Interface itsInterface);
-        bool CheckInGame(Interface itsInterface);
-        bool winExist(string win, Interface itsInterface);
-        Task<Task> GameAi(Interface itsInterface, bool isFromDetect);
+        Task<object> CheckInGame(Interface itsInterface);
         Task<Task> PlayAgain(Interface itsInterface);
     }
 }

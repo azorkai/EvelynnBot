@@ -1,5 +1,4 @@
-﻿using AutoIt;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -21,205 +20,18 @@ namespace Evelynn_Bot.GameAI
 {
     public class GameAi : IGameAI
     {
-        [DllImport("ImageSearchDLL.dll")]
-        public static extern IntPtr ImageSearch(int x, int y, int right, int bottom, [MarshalAs(UnmanagedType.LPStr)] string imagePath);
+        #region Constants
 
-        private readonly Random _random = new Random();
+        [DllImport("user32.dll")]
+        internal static extern uint SendInput(uint uint_0, [In][MarshalAs(UnmanagedType.LPArray)] GStruct1[] gstruct1_0, int int_0);
 
-        public int game_X;
-        public int game_Y;
-        public int X;
-        public int Y;
+        [DllImport("user32.dll")]
+        private static extern int GetSystemMetrics(GEnum3 genum3_0);
 
+        private List<RGBClass.PointerClass> rgbLists = new List<RGBClass.PointerClass>();
+        private List<RGBClass.PointlerClass> pointsLists = new List<RGBClass.PointlerClass>();
 
-        public string[] UseImageSearch(string imgPath, string tolerance)
-        {
-            try
-            {
-                imgPath = "*" + tolerance + " " + imgPath;
-                var lol = AutoItX.WinGetPos("League of Legends (TM) Client");
-                IntPtr result = ImageSearch(lol.X, lol.Y, lol.Right, lol.Bottom, imgPath);
-                string res = Marshal.PtrToStringAnsi(result);
-                if (res[0] == '0') return null;
-                string[] data = res.Split('|');
-                int x; int y;
-                int.TryParse(data[1], out x);
-                int.TryParse(data[2], out y);
-                Dispose(true);
-                return data;
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
-        }
-        public bool ImageSearchForGameStart(string path, string tolerance, string message, Interface itsInterface)
-        {
-            int x;
-            int y;
-            try
-            {
-                string[] results = UseImageSearch(path, tolerance);
-                if (results != null)
-                {
-                    Int32.TryParse(results[1], out x);
-                    Int32.TryParse(results[2], out y);
-                    game_X = x;
-                    game_Y = y;
-                    return itsInterface.Result(true, message);
-                }
-                return itsInterface.Result(false, "");
-            }
-            catch (Exception e)
-            {
-                return itsInterface.Result(false, "ERROR!");
-            }
-        }
-        public bool ImageSearch(string path, string tolerance, string message, Interface itsInterface)
-        {
-            int x;
-            int y;
-            try
-            {
-                string[] results = UseImageSearch(path, tolerance);
-                if (results != null)
-                {
-                    Int32.TryParse(results[1], out x);
-                    Int32.TryParse(results[2], out y);
-                    X = x;
-                    Y = y;
-                    return itsInterface.Result(true, message);
-                }
-                return itsInterface.Result(false, "");
-            }
-            catch (Exception e)
-            {
-                return itsInterface.Result(false, "ERROR!");
-            }
-        }
-
-        public bool ImageSearchOnlyForControl(string path, string tolerance, string message, Interface itsInterface)
-        {
-            try
-            {
-                string[] results = UseImageSearch(path, tolerance);
-                if (results != null)
-                {
-                    return itsInterface.Result(true, message);
-                }
-                return itsInterface.Result(false, "");
-            }
-            catch (Exception e)
-            {
-                return itsInterface.Result(false, "ERROR!");
-            }
-        }
-
-        public bool RGBPixel(Color color)
-        {
-            var lol = AutoItX.WinGetPos("League of Legends (TM) Client");
-            if (PixelSearch(lol, color.ToArgb(), 0).X <= 1 || PixelSearch(lol, color.ToArgb(), 0).Y <= 1)
-            {
-                return false;
-            }
-            else
-            {
-                X = PixelSearch(lol, color.ToArgb(), 0).X;
-                Y = PixelSearch(lol, color.ToArgb(), 0).Y;
-                return true;
-            }
-        }
-
-        public bool RGBPixelOnlyForControl(Color color)
-        {
-            var lol = AutoItX.WinGetPos("League of Legends (TM) Client");
-            if (PixelSearch(lol, color.ToArgb(), 0).X <= 1 || PixelSearch(lol, color.ToArgb(), 0).Y <= 1)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        public Point PixelSearch(Rectangle rect, int PixelColor, int Shade_Variation)
-        {
-            try
-            {
-                Color Pixel_Color = Color.FromArgb(PixelColor);
-                Point Pixel_Coords = new Point(-1, -1);
-                Bitmap RegionIn_Bitmap = CaptureScreenRegion(rect);
-                BitmapData RegionIn_BitmapData = RegionIn_Bitmap.LockBits(new Rectangle(0, 0, RegionIn_Bitmap.Width, RegionIn_Bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-
-                int[] Formatted_Color = new int[3] { Pixel_Color.B, Pixel_Color.G, Pixel_Color.R }; //bgr
-
-                unsafe
-                {
-                    for (int y = 0; y < RegionIn_BitmapData.Height; y++)
-                    {
-                        byte* row = (byte*)RegionIn_BitmapData.Scan0 + (y * RegionIn_BitmapData.Stride);
-
-                        for (int x = 0; x < RegionIn_BitmapData.Width; x++)
-                        {
-                            if (row[x * 3] >= (Formatted_Color[0] - Shade_Variation) & row[x * 3] <= (Formatted_Color[0] + Shade_Variation)) //blue
-                            {
-                                if (row[(x * 3) + 1] >= (Formatted_Color[1] - Shade_Variation) & row[(x * 3) + 1] <= (Formatted_Color[1] + Shade_Variation)) //green
-                                {
-                                    if (row[(x * 3) + 2] >= (Formatted_Color[2] - Shade_Variation) & row[(x * 3) + 2] <= (Formatted_Color[2] + Shade_Variation)) //red
-                                    {
-                                        Pixel_Coords = new Point(x + rect.X, y + rect.Y);
-                                        goto end;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                end:
-                Dispose(true);
-                return Pixel_Coords;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Dispose(true);
-                return new Point();
-            }
-        }
-        private Bitmap CaptureScreenRegion(Rectangle rect)
-        {
-            try
-            {
-                Bitmap BMP = new Bitmap(rect.Width, rect.Height, PixelFormat.Format24bppRgb);
-                Graphics GFX = Graphics.FromImage(BMP);
-                GFX.CopyFromScreen(rect.X, rect.Y, 0, 0, rect.Size, CopyPixelOperation.SourceCopy);
-                Dispose(true);
-                return BMP;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Dispose(true);
-                return null;
-            }
-        }
-
-
-        public bool TowerCheck(Interface itsInterface)
-        {
-            if (RGBPixelOnlyForControl(itsInterface.ImgPaths.TowerColor))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        #region TEST
-
-        public static class RGBClass
+        public class RGBClass
         {
             public class SetRGB
             {
@@ -270,222 +82,7 @@ namespace Evelynn_Bot.GameAI
 
         }
 
-        private List<RGBClass.PointerClass> rgbLists = new List<RGBClass.PointerClass>();
-        private List<RGBClass.PointlerClass> pointsLists = new List<RGBClass.PointlerClass>();
-
-        public static Bitmap BitmapAl()
-        {
-            Rectangle rectangle = AutoItX.WinGetPos("League of Legends (TM) Client");
-            Bitmap bitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format24bppRgb);
-            Graphics.FromImage(bitmap).CopyFromScreen(rectangle.X, rectangle.Y, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
-            return bitmap;
-        }
-
-        public static void HepsiniTarat(Bitmap bmp, List<RGBClass.PointerClass> rgbLists)
-        {
-            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
-            {
-                pClass.tmpB = 0;
-            });
-            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
-            {
-                pClass.pointerList = new List<Point>();
-            });
-            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Size.Width, bmp.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr scan = bitmapData.Scan0;
-            int num = bitmapData.Stride * bmp.Height;
-            byte[] array = new byte[num];
-            byte[] byte_2 = new byte[num / 3];
-            byte[] byte_1 = new byte[num / 3];
-            byte[] byte_0 = new byte[num / 3];
-            Marshal.Copy(scan, array, 0, num);
-            int int_ = 0;
-            int stride = bitmapData.Stride;
-            for (int int_2 = 0; int_2 < bmp.Height; int_2++)
-            {
-                int int_0;
-                for (int_0 = 0; int_0 < bmp.Width; int_0++)
-                {
-                    byte_0[int_] = array[int_2 * stride + int_0 * 3];
-                    byte_1[int_] = array[int_2 * stride + int_0 * 3 + 1];
-                    byte_2[int_] = array[int_2 * stride + int_0 * 3 + 2];
-                    rgbLists.ForEach(delegate (RGBClass.PointerClass pClass)
-                    {
-                        if (Math.Abs(pClass.rgbLists[pClass.tmpB].B - byte_0[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].G - byte_1[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].R - byte_2[int_]) <= 5)
-                        {
-                            pClass.tmpB++;
-                        }
-                        else
-                        {
-                            pClass.tmpB = 0;
-                        }
-                        if (pClass.tmpB == pClass.rgbLists.Count)
-                        {
-                            pClass.pointerList.Add(new Point(int_0, int_2));
-                            pClass.tmpB = 0;
-                        }
-                    });
-                    int num2 = int_;
-                    int_ = num2 + 1;
-                }
-            }
-            bmp.UnlockBits(bitmapData);
-        }
-
-        private static double Hesap1(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3)
-        {
-            return Math.Sqrt(Math.Pow(gameTime - healthPercentage, 2.0) + Math.Pow(double_3 - prevHealthPercentage, 2.0));
-        }
-        public static double Hesap0(double healthPercentage, double prevHealthPercentage)
-        {
-            return Math.Sqrt(Math.Pow(healthPercentage, 2.0) + Math.Pow(prevHealthPercentage, 2.0));
-        }
-
-        public static void PosHesapla(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3, double double_4, double double_5, double double_6, double double_7, double double_8)
-        {
-            Random random = new Random();
-            double num = 0.0;
-            double num2 = 0.0;
-            double num3 = 0.0;
-            double num4 = 0.0;
-            double num5 = Math.Sqrt(2.0);
-            double num6 = Math.Sqrt(3.0);
-            double num7 = Math.Sqrt(5.0);
-            int num8 = (int)Hesap1(Math.Round(healthPercentage), Math.Round(prevHealthPercentage), Math.Round(gameTime), Math.Round(double_3));
-            uint num9 = (uint)(Environment.TickCount + 10000);
-            int num10 = 0;
-            while (Environment.TickCount <= num9)
-            {
-                double num11 = Hesap0(healthPercentage - gameTime, prevHealthPercentage - double_3);
-                double_5 = Math.Min(double_5, num11);
-                if (num11 < 1.0)
-                {
-                    num11 = 1.0;
-                }
-                double num12 = Math.Round(Math.Round((double)num8) * 0.3) / 7.0;
-                if (num12 > 25.0)
-                {
-                    num12 = 25.0;
-                }
-                if (num12 < 5.0)
-                {
-                    num12 = 5.0;
-                }
-                if ((double)random.Next(6) == 1.0)
-                {
-                    num12 = 2.0;
-                }
-                double num13 = ((!(num12 <= Math.Round(num11))) ? Math.Round(num11) : num12);
-                if (num11 >= double_8)
-                {
-                    num3 = num3 / num6 + ((double)random.Next((int)(Math.Round(double_5) * 2.0 + 1.0)) - double_5) / num7;
-                    num4 = num4 / num6 + ((double)random.Next((int)(Math.Round(double_5) * 2.0 + 1.0)) - double_5) / num7;
-                }
-                else
-                {
-                    num3 /= num5;
-                    num4 /= num5;
-                }
-                num += num3;
-                num2 += num4;
-                num += double_4 * (gameTime - healthPercentage) / num11;
-                num2 += double_4 * (double_3 - prevHealthPercentage) / num11;
-                if (Hesap0(num, num2) > num13)
-                {
-                    double num14 = num13 / 2.0 + (double)random.Next((int)(Math.Round(num13) / 2.0));
-                    double num15 = Math.Sqrt(num * num + num2 * num2);
-                    num = num / num15 * num14;
-                    num2 = num2 / num15 * num14;
-                }
-                int num16 = (int)Math.Round(healthPercentage);
-                int num17 = (int)Math.Round(prevHealthPercentage);
-                healthPercentage += num;
-                prevHealthPercentage += num2;
-                if ((double)num16 != Math.Round(healthPercentage) || (double)num17 != Math.Round(prevHealthPercentage))
-                {
-                    Tiklat(new Point((int)healthPercentage, (int)prevHealthPercentage));
-                    num10++;
-                    if (num10 % 5 == 0)
-                    {
-                        Thread.Sleep(1);
-                    }
-                }
-                if (!(Hesap0(healthPercentage - gameTime, prevHealthPercentage - double_3) >= 1.0))
-                {
-                    break;
-                }
-            }
-            if (Math.Round(gameTime) != Math.Round(healthPercentage) || Math.Round(double_3) != Math.Round(prevHealthPercentage))
-            {
-                Tiklat(new Point((int)gameTime, (int)double_3));
-            }
-        }
-
-        [DllImport("user32.dll")]
-        internal static extern uint SendInput(uint uint_0, [In][MarshalAs(UnmanagedType.LPArray)] GStruct1[] gstruct1_0, int int_0);
-
-        [DllImport("user32.dll")]
-        private static extern int GetSystemMetrics(GEnum3 genum3_0);
-
-        public static void Tiklat(Point point_0)
-        {
-            GStruct1[] array = new GStruct1[1];
-            GStruct1 gStruct = default(GStruct1);
-            gStruct.uint_0 = 0u;
-            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.ABSOLUTE | GEnum5.MOVE;
-            gStruct.gstruct2_0.gstruct3_0.int_0 = point_0.X * (65535 / GetSystemMetrics(GEnum3.SM_CXSCREEN));
-            gStruct.gstruct2_0.gstruct3_0.int_1 = point_0.Y * (65535 / GetSystemMetrics(GEnum3.SM_CYSCREEN));
-            array[0] = gStruct;
-            SendInput(1u, array, GStruct1.Int32_0);
-        }
-
-        public static void SolTiklat()
-        {
-            GStruct1[] array = new GStruct1[1];
-            GStruct1 gStruct = default(GStruct1);
-            gStruct.uint_0 = 0u;
-            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.LEFTDOWN;
-            gStruct.gstruct2_0.gstruct3_0.genum4_0 = GEnum4.Nothing;
-            gStruct.gstruct2_0.gstruct3_0.uintptr_0 = (UIntPtr)0uL;
-            array[0] = gStruct;
-            SendInput(1u, array, GStruct1.Int32_0);
-            Thread.Sleep(250);
-            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.LEFTUP;
-            array[0] = gStruct;
-            SendInput(1u, array, GStruct1.Int32_0);
-        }
-
-        public static void EkraniAyarla(Point point_0)
-        {
-            Random random = new Random();
-            double double_ = random.Next(25, 35);
-            double gameTime = random.Next(50, 60);
-            double double_3 = random.Next(1, 2);
-            double double_4 = random.Next(3, 4);
-            double double_5 = 1.0;
-            PosHesapla(Cursor.Position.X, Cursor.Position.Y, point_0.X, point_0.Y, double_, gameTime, double_3, double_4, double_5);
-        }
-
-        public static void TusuAyarla(GEnum8 genum8_0)
-        {
-            GStruct1[] array = new GStruct1[1];
-            GStruct1 gStruct = default(GStruct1);
-            gStruct.uint_0 = 1u;
-            gStruct.gstruct2_0.gstruct4_0.genum8_0 = genum8_0;
-            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.SCANCODE;
-            array[0] = gStruct;
-            SendInput(1u, array, GStruct1.Int32_0);
-            Thread.Sleep(100);
-            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.KEYUP | GEnum6.SCANCODE;
-            array[0] = gStruct;
-            SendInput(1u, array, GStruct1.Int32_0);
-        }
-
         #region ENUMS WIN32
-
-
-
-
         public enum GEnum3
         {
             SM_CXSCREEN,
@@ -938,14 +535,56 @@ namespace Evelynn_Bot.GameAI
             internal short short_1;
         }
 
-
+        private int scrX;
+        private int scrY;
         #endregion
 
+        private int isItemHasBought;
+
+        private bool isGameEnd;
+
+        private double healthPercentage = 100.0;
+
+        private double prevHealthPercentage = 100.0;
+
+        private DateTime dateTime_0 = new DateTime(2000, 1, 1);
+
+        private double gameTime = 99999.0;
+
+        private bool canUpgradeAbility;
+
+        private bool isTutorialAndMF;
+
+        private Point point_0;
+
+        private Point point_1;
+
+        private Point point_2;
+
+        private Point point_3;
+
+        private Random random_0 = new Random();
+
+        private Point point_4;
+
+        private Point point_5;
+
+        private Point point_6;
+
+        private double double_3;
+
+        private double double_4;
+
+        private DateTime dateTime_1;
+
+        private int summonerItemCount;
+
+        #endregion
         public Point AnaPointAl(Point point_7)
         {
             return new Point(point_7.X + scrX, point_7.Y + scrY);
         }
-        public static Point PointAl(bool is43)
+        public Point PointAl(bool is43)
         {
             Size size = Screen.PrimaryScreen.Bounds.Size;
             int num = 800;
@@ -957,17 +596,201 @@ namespace Evelynn_Bot.GameAI
             }
             return new Point((size.Width != num) ? ((size.Width - num) / 2) : 0, (size.Height != num2) ? ((size.Height - num2) / 2) : 0);
         }
-
-        private int scrX;
-        private int scrY;
-        #endregion
-
-        #region Yeni AI
-
-        #region Math, Pixel, BMP
-
-
-        public static double PointHesapla(PointF pointF_0, PointF pointF_1, PointF pointF_2)
+        public Bitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY)
+        {
+            Rectangle rectangle = new Rectangle(screenX, screenY, rectangleX, rectangleY);
+            Bitmap bitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format24bppRgb);
+            Graphics.FromImage(bitmap).CopyFromScreen(screenX, screenY, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
+            return bitmap;
+        }
+        public void HepsiniTarat(Bitmap bmp, List<RGBClass.PointerClass> rgbLists)
+        {
+            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
+            {
+                pClass.tmpB = 0;
+            });
+            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
+            {
+                pClass.pointerList = new List<Point>();
+            });
+            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Size.Width, bmp.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr scan = bitmapData.Scan0;
+            int num = bitmapData.Stride * bmp.Height;
+            byte[] array = new byte[num];
+            byte[] byte_2 = new byte[num / 3];
+            byte[] byte_1 = new byte[num / 3];
+            byte[] byte_0 = new byte[num / 3];
+            Marshal.Copy(scan, array, 0, num);
+            int int_ = 0;
+            int stride = bitmapData.Stride;
+            for (int int_2 = 0; int_2 < bmp.Height; int_2++)
+            {
+                int int_0;
+                for (int_0 = 0; int_0 < bmp.Width; int_0++)
+                {
+                    byte_0[int_] = array[int_2 * stride + int_0 * 3];
+                    byte_1[int_] = array[int_2 * stride + int_0 * 3 + 1];
+                    byte_2[int_] = array[int_2 * stride + int_0 * 3 + 2];
+                    rgbLists.ForEach(delegate (RGBClass.PointerClass pClass)
+                    {
+                        if (Math.Abs(pClass.rgbLists[pClass.tmpB].B - byte_0[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].G - byte_1[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].R - byte_2[int_]) <= 5)
+                        {
+                            pClass.tmpB++;
+                        }
+                        else
+                        {
+                            pClass.tmpB = 0;
+                        }
+                        if (pClass.tmpB == pClass.rgbLists.Count)
+                        {
+                            pClass.pointerList.Add(new Point(int_0, int_2));
+                            pClass.tmpB = 0;
+                        }
+                    });
+                    int num2 = int_;
+                    int_ = num2 + 1;
+                }
+            }
+            bmp.UnlockBits(bitmapData);
+        }
+        public double Hesap1(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3)
+        {
+            return Math.Sqrt(Math.Pow(gameTime - healthPercentage, 2.0) + Math.Pow(double_3 - prevHealthPercentage, 2.0));
+        }
+        public double Hesap0(double healthPercentage, double prevHealthPercentage)
+        {
+            return Math.Sqrt(Math.Pow(healthPercentage, 2.0) + Math.Pow(prevHealthPercentage, 2.0));
+        }
+        public void PosHesapla(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3, double double_4, double double_5, double double_6, double double_7, double double_8)
+        {
+            Random random = new Random();
+            double num = 0.0;
+            double num2 = 0.0;
+            double num3 = 0.0;
+            double num4 = 0.0;
+            double num5 = Math.Sqrt(2.0);
+            double num6 = Math.Sqrt(3.0);
+            double num7 = Math.Sqrt(5.0);
+            int num8 = (int)Hesap1(Math.Round(healthPercentage), Math.Round(prevHealthPercentage), Math.Round(gameTime), Math.Round(double_3));
+            uint num9 = (uint)(Environment.TickCount + 10000);
+            int num10 = 0;
+            while (Environment.TickCount <= num9)
+            {
+                double num11 = Hesap0(healthPercentage - gameTime, prevHealthPercentage - double_3);
+                double_5 = Math.Min(double_5, num11);
+                if (num11 < 1.0)
+                {
+                    num11 = 1.0;
+                }
+                double num12 = Math.Round(Math.Round((double)num8) * 0.3) / 7.0;
+                if (num12 > 25.0)
+                {
+                    num12 = 25.0;
+                }
+                if (num12 < 5.0)
+                {
+                    num12 = 5.0;
+                }
+                if ((double)random.Next(6) == 1.0)
+                {
+                    num12 = 2.0;
+                }
+                double num13 = ((!(num12 <= Math.Round(num11))) ? Math.Round(num11) : num12);
+                if (num11 >= double_8)
+                {
+                    num3 = num3 / num6 + ((double)random.Next((int)(Math.Round(double_5) * 2.0 + 1.0)) - double_5) / num7;
+                    num4 = num4 / num6 + ((double)random.Next((int)(Math.Round(double_5) * 2.0 + 1.0)) - double_5) / num7;
+                }
+                else
+                {
+                    num3 /= num5;
+                    num4 /= num5;
+                }
+                num += num3;
+                num2 += num4;
+                num += double_4 * (gameTime - healthPercentage) / num11;
+                num2 += double_4 * (double_3 - prevHealthPercentage) / num11;
+                if (Hesap0(num, num2) > num13)
+                {
+                    double num14 = num13 / 2.0 + (double)random.Next((int)(Math.Round(num13) / 2.0));
+                    double num15 = Math.Sqrt(num * num + num2 * num2);
+                    num = num / num15 * num14;
+                    num2 = num2 / num15 * num14;
+                }
+                int num16 = (int)Math.Round(healthPercentage);
+                int num17 = (int)Math.Round(prevHealthPercentage);
+                healthPercentage += num;
+                prevHealthPercentage += num2;
+                if ((double)num16 != Math.Round(healthPercentage) || (double)num17 != Math.Round(prevHealthPercentage))
+                {
+                    Tiklat(new Point((int)healthPercentage, (int)prevHealthPercentage));
+                    num10++;
+                    if (num10 % 5 == 0)
+                    {
+                        Thread.Sleep(1);
+                    }
+                }
+                if (!(Hesap0(healthPercentage - gameTime, prevHealthPercentage - double_3) >= 1.0))
+                {
+                    break;
+                }
+            }
+            if (Math.Round(gameTime) != Math.Round(healthPercentage) || Math.Round(double_3) != Math.Round(prevHealthPercentage))
+            {
+                Tiklat(new Point((int)gameTime, (int)double_3));
+            }
+        }
+        public void Tiklat(Point point_0)
+        {
+            GStruct1[] array = new GStruct1[1];
+            GStruct1 gStruct = default(GStruct1);
+            gStruct.uint_0 = 0u;
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.ABSOLUTE | GEnum5.MOVE;
+            gStruct.gstruct2_0.gstruct3_0.int_0 = point_0.X * (65535 / GetSystemMetrics(GEnum3.SM_CXSCREEN));
+            gStruct.gstruct2_0.gstruct3_0.int_1 = point_0.Y * (65535 / GetSystemMetrics(GEnum3.SM_CYSCREEN));
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+        }
+        public void SolTiklat()
+        {
+            GStruct1[] array = new GStruct1[1];
+            GStruct1 gStruct = default(GStruct1);
+            gStruct.uint_0 = 0u;
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.LEFTDOWN;
+            gStruct.gstruct2_0.gstruct3_0.genum4_0 = GEnum4.Nothing;
+            gStruct.gstruct2_0.gstruct3_0.uintptr_0 = (UIntPtr)0uL;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+            Thread.Sleep(250);
+            gStruct.gstruct2_0.gstruct3_0.genum5_0 = GEnum5.LEFTUP;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+        }
+        public void EkraniAyarla(Point point_0)
+        {
+            Random random = new Random();
+            double double_ = random.Next(25, 35);
+            double gameTime = random.Next(50, 60);
+            double double_3 = random.Next(1, 2);
+            double double_4 = random.Next(3, 4);
+            double double_5 = 1.0;
+            PosHesapla(Cursor.Position.X, Cursor.Position.Y, point_0.X, point_0.Y, double_, gameTime, double_3, double_4, double_5);
+        }
+        public void TusuAyarla(GEnum8 genum8_0)
+        {
+            GStruct1[] array = new GStruct1[1];
+            GStruct1 gStruct = default(GStruct1);
+            gStruct.uint_0 = 1u;
+            gStruct.gstruct2_0.gstruct4_0.genum8_0 = genum8_0;
+            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.SCANCODE;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+            Thread.Sleep(100);
+            gStruct.gstruct2_0.gstruct4_0.genum6_0 = GEnum6.KEYUP | GEnum6.SCANCODE;
+            array[0] = gStruct;
+            SendInput(1u, array, GStruct1.Int32_0);
+        }
+        public double PointHesapla(PointF pointF_0, PointF pointF_1, PointF pointF_2)
         {
             float num = pointF_2.X - pointF_1.X;
             float num2 = pointF_2.Y - pointF_1.Y;
@@ -1007,8 +830,7 @@ namespace Evelynn_Bot.GameAI
             num2 = pointF_0.Y - pointF_1.Y;
             return Math.Sqrt(num * num + num2 * num2);
         }
-
-        public static void KodTarat(GEnum8 genum8_0)
+        public void KodTarat(GEnum8 genum8_0)
         {
             GStruct1[] array = new GStruct1[1];
             GStruct1 gStruct = default(GStruct1);
@@ -1019,8 +841,7 @@ namespace Evelynn_Bot.GameAI
             SendInput(1u, array, GStruct1.Int32_0);
             Thread.Sleep(100);
         }
-
-        public static void TusBas(GEnum8 genum8_0)
+        public void TusBas(GEnum8 genum8_0)
         {
             GStruct1[] array = new GStruct1[1];
             GStruct1 gStruct = default(GStruct1);
@@ -1031,18 +852,13 @@ namespace Evelynn_Bot.GameAI
             SendInput(1u, array, GStruct1.Int32_0);
             Thread.Sleep(100);
         }
-
-        public static void EndBas()
+        public void EndBas()
         {
             KodTarat(GEnum8.CONTROL);
             TusuAyarla(GEnum8.END);
             TusBas(GEnum8.CONTROL);
         }
-
-
-        public static double PointerMath(Point point_0, Point point_1) => Math.Sqrt(Math.Pow((double)(point_1.X - point_0.X), 2.0) + Math.Pow((double)(point_1.Y - point_0.Y), 2.0) * 1.0);
-
-
+        public double PointerMath(Point point_0, Point point_1) => Math.Sqrt(Math.Pow((double)(point_1.X - point_0.X), 2.0) + Math.Pow((double)(point_1.Y - point_0.Y), 2.0) * 1.0);
         public bool BirseyHesapla(Point point_7)
         {
             foreach (RGBClass.PointlerClass item in pointsLists)
@@ -1054,7 +870,6 @@ namespace Evelynn_Bot.GameAI
             }
             return false;
         }
-
         public Point MinimapHesapla(double double_5)
         {
             double num = (double)random_0.Next(15, 95) / 100.0;
@@ -1071,7 +886,6 @@ namespace Evelynn_Bot.GameAI
             }
             return new Point(point_4.X - (int)num3, point_4.Y + (int)num4);
         }
-
         public Point TowerHesapla(double double_5)
         {
             double num = (double)random_0.Next(15, 95) / 100.0;
@@ -1091,8 +905,7 @@ namespace Evelynn_Bot.GameAI
             }
             return new Point(point_4.X + (int)num3, point_4.Y - (int)num4);
         }
-
-        public static void SagTikla()
+        public void SagTikla()
         {
             GStruct1[] array = new GStruct1[1];
             GStruct1 gStruct = default(GStruct1);
@@ -1107,14 +920,12 @@ namespace Evelynn_Bot.GameAI
             array[0] = gStruct;
             SendInput(1u, array, GStruct1.Int32_0);
         }
-
         public void TotemAt()
         {
             KodTarat(GEnum8.SHIFT);
             TusuAyarla(GEnum8.KEY_4);
             TusBas(GEnum8.SHIFT);
         }
-
         public void ItemKullan()
         {
             KodTarat(GEnum8.SHIFT);
@@ -1126,7 +937,6 @@ namespace Evelynn_Bot.GameAI
             TusuAyarla(GEnum8.KEY_7); // 8
             TusBas(GEnum8.SHIFT);
         }
-
         public void EsyaAl(bool bool_4)
         {
             if (bool_4)
@@ -1151,7 +961,6 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(8000);
             }
         }
-
         public void BaslangicEsyaAl(bool bool_4)
         {
             if (bool_4)
@@ -1184,9 +993,6 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(8000);
             }
         }
-
-        #endregion
-
         public void YeniAI_1(object Interface)
         {
             Interface itsInterface = (Interface)Interface;
@@ -1198,7 +1004,7 @@ namespace Evelynn_Bot.GameAI
                     Bitmap bitmap_;
                     try
                     {
-                        bitmap_ = BitmapAl();
+                        bitmap_ = BitmapAl(scrX, scrY, point.X, point.Y);
                     }
                     catch (Exception)
                     {
@@ -1241,7 +1047,6 @@ namespace Evelynn_Bot.GameAI
                     }
                     else
                     {
-                        Console.WriteLine("Game is not started yet!");
                         Thread.Sleep(5000);
                     }
                     goto end_IL_0035;
@@ -1258,65 +1063,64 @@ namespace Evelynn_Bot.GameAI
                         switch (itsInterface.player.Level)
                         {
                             case 1:
-                                SkillUp("q", "j");
+                                TusuAyarla(GEnum8.KEY_J);
                                 break;
                             case 2:
-                                SkillUp("w", "k");
+                                TusuAyarla(GEnum8.KEY_K);
                                 break;
                             case 3:
-                                SkillUp("e", "m");
+                                TusuAyarla(GEnum8.KEY_M);
                                 break;
                             case 4:
-                                SkillUp("q", "j");
+                                TusuAyarla(GEnum8.KEY_J);
                                 break;
                             case 5:
-                                SkillUp("q", "j");
+                                TusuAyarla(GEnum8.KEY_J);
                                 break;
                             case 6:
-                                SkillUp("r", "l");
+                                TusuAyarla(GEnum8.KEY_L);
                                 break;
                             case 7:
-                                SkillUp("q", "j");
+                                TusuAyarla(GEnum8.KEY_J);
                                 break;
                             case 8:
-                                SkillUp("w", "k");
+                                TusuAyarla(GEnum8.KEY_K);
                                 break;
                             case 9:
-                                SkillUp("q", "j");
+                                TusuAyarla(GEnum8.KEY_J);
                                 break;
                             case 10:
-                                SkillUp("w", "k");
+                                TusuAyarla(GEnum8.KEY_K);
                                 break;
                             case 11:
-                                SkillUp("r", "l");
+                                TusuAyarla(GEnum8.KEY_L);
                                 break;
                             case 12:
-                                SkillUp("w", "k");
+                                TusuAyarla(GEnum8.KEY_K);
                                 break;
                             case 13:
-                                SkillUp("w", "k");
+                                TusuAyarla(GEnum8.KEY_K);
                                 break;
                             case 14:
-                                SkillUp("e", "m");
+                                TusuAyarla(GEnum8.KEY_M);
                                 break;
                             case 15:
-                                SkillUp("e", "m");
+                                TusuAyarla(GEnum8.KEY_M);
                                 break;
                             case 16:
-                                SkillUp("r", "l");
+                                TusuAyarla(GEnum8.KEY_L);
                                 break;
                             case 17:
-                                SkillUp("e", "m");
+                                TusuAyarla(GEnum8.KEY_M);
                                 break;
                             case 18:
-                                SkillUp("e", "m");
+                                TusuAyarla(GEnum8.KEY_M);
                                 break;
-
                             default:
-                                SkillUp("q", "j");
-                                SkillUp("w", "k");
-                                SkillUp("e", "m");
-                                SkillUp("r", "l");
+                                TusuAyarla(GEnum8.KEY_J);
+                                TusuAyarla(GEnum8.KEY_K);
+                                TusuAyarla(GEnum8.KEY_M);
+                                TusuAyarla(GEnum8.KEY_L);
                                 break;
                         }
                     }
@@ -1515,7 +1319,6 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(random_0.Next(400, 800));
             }
         }
-
         public void StartNewGameAI(Interface itsInterface)
         {
             try
@@ -1546,8 +1349,7 @@ namespace Evelynn_Bot.GameAI
                 Console.WriteLine($"HATA: {ex}");
             }
         }
-
-        private void GetInGameStats(object Interface)
+        public void GetInGameStats(object Interface)
         {
             Interface itsInterface = (Interface)Interface;
             while (!isGameEnd)
@@ -1619,52 +1421,7 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(15000);
             }
         }
-
-        #region Constants
-
-        private int isItemHasBought;
-
-        private bool isGameEnd;
-
-        private double healthPercentage = 100.0;
-
-        private double prevHealthPercentage = 100.0;
-
-        private DateTime dateTime_0 = new DateTime(2000, 1, 1);
-
-        private double gameTime = 99999.0;
-
-        private bool canUpgradeAbility;
-
-        private bool isTutorialAndMF;
-
-        private Point point_0;
-
-        private Point point_1;
-
-        private Point point_2;
-
-        private Point point_3;
-
-        private Random random_0 = new Random();
-
-        private Point point_4;
-
-        private Point point_5;
-
-        private Point point_6;
-
-        private double double_3;
-
-        private double double_4;
-
-        private DateTime dateTime_1;
-
-        private int summonerItemCount;
-
-        #endregion
-
-        private void RGBHazirla()
+        public void RGBHazirla()
         {
             rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
             {
@@ -1769,7 +1526,6 @@ namespace Evelynn_Bot.GameAI
             pointsLists.Add(new RGBClass.PointlerClass(new Point(403, 241)));
             pointsLists.Add(new RGBClass.PointlerClass(new Point(406, 243)));
         }
-
         public void YeniAIBaslat(Interface itsInterface)
         {
             isGameEnd = false;
@@ -1778,15 +1534,15 @@ namespace Evelynn_Bot.GameAI
             scrY = PointAl(true).Y;
 
             point_5 = new Point(352, 294);
-                point_6 = new Point(405, 241);
-                point_4 = new Point(scrX + 200, scrY + 150);
-                double_3 = 2.0;
-                double_4 = -2.0;
-                point_0 = new Point(351, 301);
-                point_1 = AnaPointAl(new Point(70, 95));
-                point_2 = AnaPointAl(new Point(15, 47));
-                point_3 = AnaPointAl(new Point(38, 180));
-            
+            point_6 = new Point(405, 241);
+            point_4 = new Point(scrX + 200, scrY + 150);
+            double_3 = 2.0;
+            double_4 = -2.0;
+            point_0 = new Point(351, 301);
+            point_1 = AnaPointAl(new Point(70, 95));
+            point_2 = AnaPointAl(new Point(15, 47));
+            point_3 = AnaPointAl(new Point(38, 180));
+
             Thread.Sleep(5000);
             Console.WriteLine("Game Screen Focus Found");
             EkraniAyarla(point_4);
@@ -1796,375 +1552,6 @@ namespace Evelynn_Bot.GameAI
             RGBHazirla();
             StartNewGameAI(itsInterface);
         }
-
-        #endregion
-
-
-
-        public bool AllyMinionCheck(Interface itsInterface)
-        {
-            scrX = PointAl(true).X;
-            scrY = PointAl(true).Y;
-            Bitmap bitmap_;
-            rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
-            {
-                new RGBClass.SetRGB(8, 12, 16),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119),
-                new RGBClass.SetRGB(44, 89, 119)
-            }, "AllyMinion"));
-
-            try
-            {
-                bitmap_ = BitmapAl();
-                HepsiniTarat(bitmap_, rgbLists);
-            }
-            catch (Exception)
-            {
-                //Console.WriteLine("Error while creating bitmap");
-            }
-
-            List<Point> aMList = rgbLists.First((RGBClass.PointerClass PointerClass_0) => PointerClass_0.mode == "AllyMinion").pointerList;
-            Point AllyMinionPos = ((aMList.Count == 0) ? new Point(-1, -1) : new Point(aMList[0].X + 30, aMList[0].Y + 30));
-            if (AllyMinionPos.X <= 1 || AllyMinionPos.Y <= 1)
-            {
-                return false;
-            }
-            else
-            {
-                X = AllyMinionPos.X;
-                Y = AllyMinionPos.Y;
-
-                EkraniAyarla(AnaPointAl(AllyMinionPos));
-                TusuAyarla(GEnum8.KEY_A);
-                return true;
-            }
-        }
-
-        public void SkillUp(string skill, string skill2)
-        {
-            AutoItX.Send("{CTRLDOWN}");
-            AutoItX.Send(skill);
-            AutoItX.Send("{CTRLUP}");
-            AutoItX.Send(skill2);
-        }
-
-        public void HitMove(int x, int y)
-        {
-            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
-            AutoItX.Send("a");
-            Thread.Sleep(700);
-            AutoItX.MouseClick("LEFT", x - 17, y + 35, 1, 1);
-            AutoItX.Send("a");
-            AutoItX.Send("a");
-            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
-            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
-            AutoItX.MouseClick("RIGHT", x - 17, y + 35, 1, 1);
-
-        }
-
-        public async Task Combo(int x, int y)
-        {
-            AutoItX.MouseClick("LEFT", x + 65, y + 75, 1, 0);
-            await Task.Delay(200);
-            AutoItX.Send("q");
-            AutoItX.Send("w");
-            AutoItX.Send("e");
-            await Task.Delay(200);
-            AutoItX.Send("r");
-            await Task.Delay(1000);
-            AutoItX.Send("a");
-        }
-
-        public void Heal()
-        {
-            AutoItX.Send("f");
-        }
-
-        public async Task GoSafeArea()
-        {
-            AutoItX.MouseClick("RIGHT", game_X + 30, game_Y - 20, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 30, game_Y - 20, 1, 0);
-            await Task.Delay(1500);
-        }
-
-        public async Task GoMid()
-        {
-            AutoItX.MouseClick("RIGHT", game_X + 42, game_Y - 30, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 42, game_Y - 30, 1, 0);
-            await Task.Delay(1900);
-        }
-
-        public void GoTop()
-        {
-            AutoItX.MouseClick("RIGHT", game_X + 25, game_Y - 55, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 25, game_Y - 55, 1, 0);
-        }
-
-        public void GoBot()
-        {
-            AutoItX.MouseClick("RIGHT", game_X + 73, game_Y, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 73, game_Y, 1, 0);
-        }
-
-        public async Task GoBase()
-        {
-            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
-            await Task.Delay(14000);
-            AutoItX.Send("b");
-            AutoItX.Send("b");
-            AutoItX.Send("b");
-            await Task.Delay(14000);
-            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X + 31, game_Y - 19, 1, 0);
-        }
-
-        public void PickTutorialChampionAI()
-        {
-            AutoItX.MouseClick("RIGHT", game_X - 199, game_Y -218, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X - 199, game_Y - 218, 1, 0);
-            AutoItX.MouseClick("RIGHT", game_X - 199, game_Y - 218, 1, 0);
-        }
-
-        public void BuyItem()
-        {
-            AutoItX.Send("p");
-            Thread.Sleep(2000);
-            AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
-            AutoItX.MouseDown();
-            Thread.Sleep(500);
-            AutoItX.MouseUp();
-            Thread.Sleep(700);
-            for (int i = 0; i < 10; i++)
-            {
-                AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
-                Thread.Sleep(1500);
-                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
-                Thread.Sleep(500);
-                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
-                Thread.Sleep(200);
-                AutoItX.MouseClick("LEFT", game_X - 158, game_Y - 172, 1, 0);
-                Thread.Sleep(200);
-                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
-                Thread.Sleep(200);
-                AutoItX.MouseClick("RIGHT", game_X - 158, game_Y - 172, 1, 0);
-                AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 1, 0);
-                AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5, 1);
-                Thread.Sleep(200);
-                AutoItX.MouseClick("LEFT", game_X - 13, game_Y - 48, 5, 1);
-            }
-            AutoItX.Send("p");
-        }
-
-        public void RandomLaner()
-        {
-            int random =_random.Next(1, 4);
-            if (random == 1)
-            {
-                GoTop();
-                Console.WriteLine("Going to Top!");
-            }
-
-            if (random == 2)
-            {
-                GoMid();
-                Console.WriteLine("Going to Mid");
-            }
-
-            if (random == 3)
-            {
-                GoBot();
-                Console.WriteLine("Going to Bot!");
-            }
-        }
-
-        public bool processExist(string win, Interface itsInterface)
-        {
-            int a = AutoItX.ProcessExists(win);
-            return itsInterface.Result(Convert.ToBoolean(a), "");
-        }
-
-        #region TutorialAI
-        public void TutorialAI_1(Interface itsInterface)
-        {
-            while (IsGameStarted(itsInterface) == false)
-            {
-                Thread.Sleep(15000);
-                IsGameStarted(itsInterface);
-            }
-
-            while (processExist("League of Legends.exe", itsInterface))
-            {
-                while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
-                {
-                    GoMid();
-
-                    if (ImageSearch(itsInterface.ImgPaths.shop, "1", "", itsInterface))
-                    {
-                        AutoItX.Send("p");
-                    }
-
-                    if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                    {
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        HitMove(X, Y);
-                        Combo(X, Y);
-                        AutoItX.Send("d");
-                        AutoItX.Send("f");
-                        Thread.Sleep(1500);
-                    }
-
-                    while (ImageSearch(itsInterface.ImgPaths.minions_tutorial, "3", itsInterface.messages.SuccessMinion, itsInterface))
-                    {
-                        HitMove(X, Y);
-                        Thread.Sleep(500);
-
-                        if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                        {
-                            AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
-                            AutoItX.Send("q");
-                            Thread.Sleep(1500);
-                            AutoItX.Send("w");
-                            Thread.Sleep(1500);
-                            AutoItX.Send("e");
-                            Thread.Sleep(1500);
-                            AutoItX.Send("r");
-                            AutoItX.Send("d");
-                            AutoItX.Send("f");
-                            Thread.Sleep(1500);
-                        }
-
-                        if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                        {
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            HitMove(X, Y);
-                            Combo(X, Y);
-                            AutoItX.Send("d");
-                            AutoItX.Send("f");
-                            Thread.Sleep(1500);
-                        }
-
-                        if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                        {
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            Thread.Sleep(3000);
-                        }
-                        GoMid();
-                    }
-
-                    Thread.Sleep(6000);
-                    PickTutorialChampionAI();
-                }
-
-            }
-
-        }
-
-        public void TutorialAI_2(Interface itsInterface)
-        {
-            while (IsGameStarted(itsInterface) == false)
-            {
-                Thread.Sleep(15000);
-                IsGameStarted(itsInterface);
-            }
-
-            Thread.Sleep(5000);
-            SkillUp("q", "j");
-            Thread.Sleep(5000);
-            for (int i = 0; i < 2; i++)
-            {
-                BuyItem();
-            }
-
-            while (processExist("League of Legends.exe", itsInterface))
-            {
-                while (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
-                {
-                    SkillUp("q", "j");
-                    GoMid();
-                    Thread.Sleep(4000);
-
-                    if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                    {
-                        AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                        HitMove(X, Y);
-                        Combo(X, Y);
-                        AutoItX.Send("d");
-                        AutoItX.Send("f");
-                        Thread.Sleep(1500);
-                    }
-
-                    while (ImageSearch(itsInterface.ImgPaths.minions, "3", itsInterface.messages.SuccessMinion, itsInterface))
-                    {
-                        SkillUp("q", "j");
-                        SkillUp("w", "k");
-                        SkillUp("e", "m");
-                        SkillUp("r", "l");
-                        HitMove(X, Y);
-                        Thread.Sleep(500);
-
-                        if (ImageSearch(itsInterface.ImgPaths.enemy_minions, "3", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                        {
-                            AutoItX.MouseClick("RIGHT", X + 27, Y + 20, 1, 0);
-                            AutoItX.Send("q");
-                            Thread.Sleep(1500);
-                            AutoItX.Send("w");
-                            Thread.Sleep(1500);
-                            AutoItX.Send("e");
-                            Thread.Sleep(1500);
-                            AutoItX.Send("r");
-                            AutoItX.Send("d");
-                            AutoItX.Send("f");
-                            Thread.Sleep(1500);
-                        }
-
-                        if (ImageSearch(itsInterface.ImgPaths.enemy_health, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                        {
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            HitMove(X, Y);
-                            Combo(X, Y);
-                            AutoItX.Send("d");
-                            AutoItX.Send("f");
-                            Thread.Sleep(1500);
-                        }
-
-                        if (ImageSearch(itsInterface.ImgPaths.tower, "2", itsInterface.messages.SuccessEnemyChampion, itsInterface))
-                        {
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            AutoItX.MouseClick("RIGHT", X + 65, Y + 75, 1, 0);
-                            Thread.Sleep(3000);
-                        }
-                    }
-                }
-            }
-            Thread.Sleep(10000);
-        }
-
-        public bool IsGameStarted(Interface itsInterface)
-        {
-            if (ImageSearchForGameStart(itsInterface.ImgPaths.game_started, "2", itsInterface.messages.GameStarted, itsInterface))
-            {
-                return true;
-            }
-            return false;
-        }
-
-
-        #endregion
-
         public void CurrentPlayerStats(Interface itsInterface)
         {
             var liveData = itsInterface.lcuPlugins.GetLiveGameData();
@@ -2177,6 +1564,7 @@ namespace Evelynn_Bot.GameAI
             itsInterface.player.Level_E = liveData.Result.ActivePlayer.Abilities.E.AbilityLevel.Value;
             itsInterface.player.Level_R = liveData.Result.ActivePlayer.Abilities.R.AbilityLevel.Value;
             itsInterface.player.Data = liveData.Result;
+            Console.WriteLine(itsInterface.player.Level);
         }
 
         #region Dispose

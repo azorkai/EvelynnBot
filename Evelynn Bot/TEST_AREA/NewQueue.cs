@@ -35,7 +35,7 @@ namespace Evelynn_Bot
         private static readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
         public async Task<Task> Test(Interface itsInterface)
         {
-            itsInterface2 = itsInterface; // TODO: VERİ AKTARIRKEN CPU BİNİYOR AMA ANLIK OLDUĞU İÇİN SORUN OLMAYABİLİR (TEK SEFER ZATEN)
+            itsInterface2 = itsInterface;
             await Connect();
             return Task.CompletedTask;
         }
@@ -59,11 +59,6 @@ namespace Evelynn_Bot
 
             EventExampleAsync();
             CreateLobby();
-
-            //while (!isDone) // TODO: BUNUN YERINE BAŞKA BİR ŞEY KULLAN CPU YİYOR
-            //{
-            //    //ignored
-            //}
         }
 
         public async static void CreateLobby()
@@ -81,85 +76,82 @@ namespace Evelynn_Bot
 
         }
 
-        async static void PickChampion()
+        async void PickChampion()
         {
-            try
+            List<long> pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
+
+            LolChampSelectChampSelectSession champSession = await itsInterface2.lcuPlugins.GetChampSelectSessionAsync();
+            long localPlayerCellId = champSession.localPlayerCellId.Value;
+            long value2 = champSession.actions[0][(int)localPlayerCellId].id.Value;
+            long selectedChampId = -1;
+            bool isLocked = false;
+            foreach (long championId in pickableChampions.Where((long cId) => itsInterface2.championDatas.ADCChampions.Contains(cId)))
             {
-                LolChampSelectChampSelectAction champSelectInfos = new LolChampSelectChampSelectAction();
-                int[] pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
-                List<int> champList = pickableChampions != null ? ((IEnumerable<int>)pickableChampions).ToList<int>() : (List<int>)null;
-                List<int> champList2 = new List<int>();
-
-                int champion = 0;
-
-                for (int i1 = 0; i1 < champList.Count; ++i1)
-                {
-                    for (int i2 = 0; i2 < itsInterface2.championDatas.ADCChampions.Count; ++i2)
-                    {
-                        if (champList.Contains(itsInterface2.championDatas.ADCChampions[i2]))
-                            champList2.Add(itsInterface2.championDatas.ADCChampions[i2]);
-                    }
-                }
-                if (champList2.Count > 0)
-                {
-                    int index = new Random().Next(0, champList2.Count);
-                    champion = champList2[index];
-                }
-
-                champSelectInfos.actorCellId = 0;
-                champSelectInfos.championId = champion;
-                champSelectInfos.completed = true;
-                champSelectInfos.id = 0;
-                champSelectInfos.type = "pick";
-
-                for (int k = 0; k < 6; k++)
-                {
-                    for (int l = 0; l < 6; l++)
-                    {
-                        try
-                        {
-                            champSelectInfos.actorCellId = k;
-                            champSelectInfos.id = l;
-                            itsInterface2.lcuPlugins.SelectChampionAsync(champSelectInfos, k);
-                            goto IL_KIRMANOKTASI;
-                        }
-                        catch
-                        {
-                            goto IL_KIRMANOKTASI;
-                        }
-                        break;
-                    IL_KIRMANOKTASI:;
-                    }
-                }
-
+                itsInterface2.lcuPlugins.SelectChampionAsync(value2, championId, localPlayerCellId);
                 int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
                 if (currentChampion == 0)
                 {
-                    PickChampion();
+                    Thread.Sleep(2500);
+                    continue;
                 }
-                else
+                Console.WriteLine($"Playing {championId}");
+                selectedChampId = championId;
+                isLocked = true;
+                long summonerId = itsInterface2.summoner.summonerId;
+                var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
+                itsInterface2.player.CurrentGame_ChampName = champDetails.name;
+                itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
+                break;
+            }
+            if (!isLocked)
+            {
+                foreach (long championId2 in pickableChampions)
                 {
+                    itsInterface2.lcuPlugins.SelectChampionAsync(value2, championId2, localPlayerCellId);
+                    int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
+                    if (currentChampion == 0)
+                    {
+                        Thread.Sleep(2500);
+                        continue;
+                    }
+                    Console.WriteLine($"Locked {championId2}");
+                    selectedChampId = championId2;
                     long summonerId = itsInterface2.summoner.summonerId;
                     var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
                     itsInterface2.player.CurrentGame_ChampName = champDetails.name;
                     itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
+                    break;
                 }
             }
-            catch
-            {
-                
-            }
+
+            // Set Spells
+
+            itsInterface2.lcuPlugins.SetSpellAsync((itsInterface2.summoner.summonerLevel >= 7) ? 4 : 6, 7);
+
+
+
+        }
+
+        public async Task UxEventAsync()
+        {
+            UxStateChanged += OnUxStateChanged;
+            
+            itsInterface2.lcuApi.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
+
+            // Wait until work is complete.
+            await _work.Task;
+            Console.WriteLine("Done.");
         }
 
 
         public static async Task EventExampleAsync()
         {
-            UxStateChanged += OnUxStateChanged;
+            //UxStateChanged += OnUxStateChanged;
             StateChanged += OnStateChanged;
             OnSearchStateChanged += OnSearchChanged;
 
             itsInterface2.lcuApi.Socket.Subscribe("/lol-lobby/v2/lobby/matchmaking/search-state", OnSearchStateChanged);
-            itsInterface2.lcuApi.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
+            //itsInterface2.lcuApi.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
             itsInterface2.lcuApi.Socket.Subscribe("/lol-gameflow/v1/session", StateChanged);
 
             // Wait until work is complete.
@@ -203,7 +195,7 @@ namespace Evelynn_Bot
             {
                 case "ShowMain":
                     state = "show";
-                    await Task.Delay(4000);
+                    //await Task.Delay(4000);
                     itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 case "Quit":
@@ -218,6 +210,7 @@ namespace Evelynn_Bot
                     state = $"unknown ux state: {result.State}";
                     break;
             }
+            itsInterface2.logger.Log(true, "UX State: " + state);
         }
 
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
@@ -255,6 +248,35 @@ namespace Evelynn_Bot
 
                     case "Lobby":
                         state = "Lobby";
+
+                        var searchState = await itsInterface2.lcuPlugins.GetSearchState();
+
+                        if (searchState.errors.Count <= 0)
+                        {
+                            if (searchState.lowPriorityData.penaltyTimeRemaining.Value > 0)
+                            {
+                                double lpqRemaining = searchState.lowPriorityData.penaltyTimeRemaining.Value;
+                                if (lpqRemaining > 0.0)
+                                {
+                                    // TODO: PANELE GÖNDER
+                                    itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
+                                    Thread.Sleep((int)lpqRemaining * 1000);
+                                    return;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            double penaltyRemaining = searchState.errors[0].penaltyTimeRemaining.Value;
+                            if (!(penaltyRemaining <= 0.0))
+                            {
+                                // TODO: PANELE GÖNDER
+                                itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
+                                Thread.Sleep((int)penaltyRemaining * 1000);
+                                return;
+                            }
+                        }
+
                         await Task.Delay(2500);
 
                         GameAiBool = true;
@@ -268,7 +290,7 @@ namespace Evelynn_Bot
                         BugTime = 0;
 
                         await Task.Delay(1500);
-                        PickChampion();
+                        itsInterface2.newQueue.PickChampion();
                         break;
 
                     case "GameStart":
@@ -313,7 +335,6 @@ namespace Evelynn_Bot
 
                     case "PreEndOfGame":
                         state = "Honor Screen";
-
                         bugTimer.Stop();
                         BugTime = 0;
                         await itsInterface2.processManager.PlayAgain(itsInterface2);
@@ -323,7 +344,7 @@ namespace Evelynn_Bot
                         state = $"unknown state: {result.Phase}";
                         break;
                 }
-                itsInterface2.logger.Log(true, itsInterface2.messages.InfoQueueStats + " " + state);
+                //itsInterface2.logger.Log(true, itsInterface2.messages.InfoQueueStats + " " + state);
             }
             catch (Exception e)
             {

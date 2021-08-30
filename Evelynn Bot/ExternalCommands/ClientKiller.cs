@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoIt;
 using Evelynn_Bot.Account_Process;
 using Evelynn_Bot.Constants;
 
@@ -15,128 +14,133 @@ namespace Evelynn_Bot.ExternalCommands
 {
     public class ClientKiller
     {
-        [DllImport("User32.dll")]
-        public static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
-        [DllImport("User32.dll", SetLastError = true)]
-        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-        [DllImport("User32.dll")]
-        public static extern bool EnableWindow(IntPtr hwnd, bool enabled);
-
-        public void KillLeagueClient(Interface itsInterface)
+        public void StartLeague()
         {
-            try
-            {
-                itsInterface.lcuApi.Socket.Close();
-                itsInterface.lcuApi.Close();
-                KillLeagueClientNormally(itsInterface);
-                Thread.Sleep(3000);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Kill Process Hata: " + e);
-            }
+            KillLeagueOfLegends();
+            KillLeagueClients();
+            KillRiotClient();
+            Thread.Sleep(5000);
+            //LaunchLeague(GetLeaguePath() + "\\..\\Riot Client\\RiotClientServices.exe"); //Start RiotClient
+            LaunchLeagueFromLeagueClient("D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\LeagueClient.exe"); //Start LeagueClient
         }
 
-
-        public void KillLeagueClientNormally(Interface itsInterface)
+        public void LaunchLeagueFromLeagueClient(string path)
         {
-            for (int i = 0; i < 3; i++)
+            while (Process.GetProcessesByName("LeagueClient").Length == 0)
             {
                 try
                 {
-                    AutoItX.ProcessSetPriority("LeagueClientUx.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("LeagueClient.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("LeagueClientUxRender.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("LeagueClientUxRender.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("RiotClientServices.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("RiotClientUx.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("RiotClientUxRender.exe", 0); // Idle/Low
-                    AutoItX.ProcessSetPriority("RiotClientUxRender.exe", 0); // Idle/Low
-                    AutoItX.ProcessClose("LeagueClientUx.exe"); 
-                    AutoItX.ProcessClose("LeagueClient.exe");
-                    AutoItX.ProcessClose("LeagueClientUxRender.exe");
-                    AutoItX.ProcessClose("LeagueClientUxRender.exe");
-                    AutoItX.ProcessClose("RiotClientServices.exe");
-                    AutoItX.ProcessClose("RiotClientUx.exe");
-                    AutoItX.ProcessClose("RiotClientUxRender.exe");
-                    AutoItX.ProcessClose("RiotClientUxRender.exe");
+                    //File.Delete(GetLeaguePath() + "system2.yaml");
+                    File.Delete("D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\system2.yaml");
+                    File.Copy("Config/system.yaml", "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\system2.yaml");
+                    //File.Copy("Config/system.yaml", GetLeaguePath() + "system2.yaml");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    //ignored
                 }
+                using (StreamWriter text = File.CreateText("del.bat"))
+                    text.WriteLine("start \"\" \"" + path + "\" --system-yaml-override=system2.yaml --headless");
+                Process.Start(new ProcessStartInfo("del.bat")
+                {
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+                Thread.Sleep(5000);
             }
+            File.Delete("del.bat");
         }
 
-        [Flags]
-        public enum ThreadAccess : int
+        public void LaunchLeagueFromRiotClient(string path)
         {
-            TERMINATE = (0x0001),
-            SUSPEND_RESUME = (0x0002),
-            GET_CONTEXT = (0x0008),
-            SET_CONTEXT = (0x0010),
-            SET_INFORMATION = (0x0020),
-            QUERY_INFORMATION = (0x0040),
-            SET_THREAD_TOKEN = (0x0080),
-            IMPERSONATE = (0x0100),
-            DIRECT_IMPERSONATION = (0x0200)
-        }
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
-        [DllImport("kernel32.dll")]
-        static extern uint SuspendThread(IntPtr hThread);
-        [DllImport("kernel32.dll")]
-        static extern int ResumeThread(IntPtr hThread);
-        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern bool CloseHandle(IntPtr handle);
-
-
-        private void SuspendProcess(int pid)
-        {
-            var process = Process.GetProcessById(pid); // throws exception if process does not exist
-
-            foreach (ProcessThread pT in process.Threads)
+            while (Process.GetProcessesByName("RiotClientServices").Length == 0)
             {
-                IntPtr pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)pT.Id);
-
-                if (pOpenThread == IntPtr.Zero)
+                using (StreamWriter streamWriter = File.CreateText("del.bat"))
                 {
+                    streamWriter.WriteLine("start \"\" \"" + path + "\" --launch-product=league_of_legends --launch-patchline=live");
+                }
+                Process.Start(new ProcessStartInfo("del.bat")
+                {
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+                Thread.Sleep(5000);
+            }
+            File.Delete("del.bat");
+        }
+
+        public string GetLeaguePath()
+        {
+            DriveInfo[] drivesArray = DriveInfo.GetDrives();
+            int counter = 0;
+            DriveInfo driveInfo;
+            while (true)
+            {
+                if (counter < drivesArray.Length)
+                {
+                    driveInfo = drivesArray[counter];
+                    if (File.Exists($"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\LeagueClient.exe"))
+                    {
+                        break;
+                    }
+                    counter++;
                     continue;
                 }
-
-                SuspendThread(pOpenThread);
-
-                CloseHandle(pOpenThread);
+                Thread.Sleep(5000);
+                //Environment.Exit(0);
+                return string.Empty;
             }
+            return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
         }
 
-        public void ResumeProcess(int pid)
+        public void KillRiotLockFile()
         {
-            var process = Process.GetProcessById(pid);
-
-            if (process.ProcessName == string.Empty)
-                return;
-
-            foreach (ProcessThread pT in process.Threads)
-            {
-                IntPtr pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)pT.Id);
-
-                if (pOpenThread == IntPtr.Zero)
-                {
-                    continue;
-                }
-
-                var suspendCount = 0;
-                do
-                {
-                    suspendCount = ResumeThread(pOpenThread);
-                } while (suspendCount > 0);
-
-                CloseHandle(pOpenThread);
-            }
+            string riotLockFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Riot Games\\Riot Client\\Config\\lockfile";
+            if (File.Exists(riotLockFilePath)) { File.Delete(riotLockFilePath); }
         }
 
+        public void KillRiotClient()
+        {
+            Process[] pbN = Process.GetProcessesByName("RiotClientServices");
+            foreach (Process p in pbN) { p.Kill(); }
+            pbN = Process.GetProcessesByName("RiotClientUx");
+            foreach (Process p2 in pbN) { p2.Kill();}
+            pbN = Process.GetProcessesByName("RiotClientUxRender");
+            foreach (Process p3 in pbN) { p3.Kill(); }
+            pbN = Process.GetProcessesByName("RiotClientCrashHandler");
+            foreach (Process p4 in pbN) { p4.Kill(); }
+            KillRiotLockFile();
+        }
 
+        public void KillAllLeague()
+        {
+            KillLeagueOfLegends();
+            KillLeagueClients();
+            KillRiotClient();
+        }
+
+        public void DeleteLockFile()
+        {
+            string lockfilePath = $"{GetLeaguePath()}lockfile";
+            if (File.Exists(lockfilePath)) { File.Delete(lockfilePath); }
+        }
+
+        public void KillLeagueOfLegends()
+        {
+            Process[] pBN = Process.GetProcessesByName("League of Legends");
+            foreach (Process p in pBN) { p.Kill(); }
+        }
+
+        public void KillLeagueClients()
+        {
+            Process[] pBN = Process.GetProcessesByName("LeagueClient");
+            foreach (Process p in pBN) { p.Kill(); }
+            pBN = Process.GetProcessesByName("LeagueClientUx");
+            foreach (Process p2 in pBN) { p2.Kill(); }
+            pBN = Process.GetProcessesByName("LeagueClientUxRender");
+            foreach (Process p3 in pBN) { p3.Kill(); }
+            pBN = Process.GetProcessesByName("LeagueCrashHandler");
+            foreach (Process p4 in pBN) { p4.Kill(); }
+            DeleteLockFile();
+        }
     }
 }

@@ -16,7 +16,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using AutoIt;
 using bAUTH;
 using Evelynn_Bot.Account_Process;
 using Evelynn_Bot.Constants;
@@ -24,6 +23,7 @@ using Evelynn_Bot.ExternalCommands;
 using EvelynnLCU;
 using EvelynnLCU.Plugins.LoL;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Console = System.Console;
 using License = Evelynn_Bot.Entities.License;
 

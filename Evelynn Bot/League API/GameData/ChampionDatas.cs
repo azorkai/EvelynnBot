@@ -20,25 +20,36 @@ namespace Evelynn_Bot.League_API.GameData
 			"Smite"
 		};
 
-		public List<int> ADCChampions = new List<int>
+		public List<long> ADCChampions = new List<long>
 		{
+            15,
+            17,
+            18,
             21,
-            202,
+            22,
             29,
-            81,
+            42,
             51,
             67,
-            523,
-            236,
-            222,
-            15,
-            145,
-            18,
+            81,
+            85,
+            96,
+            104,
             110,
-            22,
-            429,
             119,
+            126,
+            133,
+            145,
+            202,
+            203,
+            222,
+            235,
+            236,
+            268,
+            360,
+            429,
             498,
+            523
         };
 
 
