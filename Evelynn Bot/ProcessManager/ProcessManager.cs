@@ -55,7 +55,7 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
 
-            NewQueue.bugTimer.Stop();
+            itsInterface.newQueue.bugTimer.Stop();
             // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)
             try
             {
@@ -86,6 +86,8 @@ namespace Evelynn_Bot.ProcessManager
                             await Task.Delay(10000);
                             return Start(itsInterface);
                         }
+
+                        await itsInterface.lcuPlugins.ChangeSummonerIconAsync();
 
                         Dispose(true);
 
@@ -161,6 +163,7 @@ namespace Evelynn_Bot.ProcessManager
                     {
                         // Started Old League Client instead of RiotClient, login from LCU!
                         if (isFromGame == false) { await accountProcess.OldClientLoginAccount(itsInterface); }
+                        itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
                         await itsInterface.lcuPlugins.GetSetMissions();
                         if (!await accountProcess.GetSetWallet(itsInterface))
@@ -169,6 +172,8 @@ namespace Evelynn_Bot.ProcessManager
                             await Task.Delay(10000);
                             return Start(itsInterface);
                         }
+
+                        await itsInterface.lcuPlugins.ChangeSummonerIconAsync();
 
                         Dispose(true);
 
@@ -353,6 +358,7 @@ namespace Evelynn_Bot.ProcessManager
             {
                 if(pnC==0) { Console.WriteLine("Panelden Stop Geldi!") ; }
                 pnC++;
+                Thread.Sleep(10000);
                 goto CHECKACTIONS;
             }
 
@@ -416,7 +422,7 @@ namespace Evelynn_Bot.ProcessManager
                     await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
                 }
 
-                NewQueue.CreateLobby();
+                itsInterface.newQueue.CreateLobby();
 
                 Dispose(true);
                 return Task.CompletedTask;

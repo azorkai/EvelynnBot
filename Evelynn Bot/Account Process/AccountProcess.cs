@@ -32,8 +32,8 @@ namespace Evelynn_Bot.Account_Process
             try
             {
                 string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
-                File.Delete(text + "game.cfg");
-                File.Delete(text + "PersistedSettings.json");
+                File.Delete($"{text}game.cfg");
+                File.Delete($"{text}PersistedSettings.json");
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\game.cfg", $"{text}game.cfg", overwrite: true);
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
                 itsInterface.clientKiller.StartLeague();
@@ -203,7 +203,7 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
                 itsInterface.lcuApi.Socket.DumpToDebug = false;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
-
+                Thread.Sleep(2500);
                 await ChangeRegion(itsInterface);
 
                 await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
@@ -221,6 +221,7 @@ namespace Evelynn_Bot.Account_Process
                     case "invalid_credentials":
                         break;
                     default:
+                        Console.WriteLine($"LOGIN SESSION: ");
                         break;
                 }
                 
@@ -239,11 +240,11 @@ namespace Evelynn_Bot.Account_Process
                 }
 
                 Dispose(true);
-                itsInterface.lcuPlugins = null;
                 return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
             }
             catch (Exception e)
             {
+                Console.WriteLine($"LOGIN HATA: {e}");
                 //TODO: EĞER GİRİŞ BAŞARISIZ İSE SİTEYE BU BİLGİYİ GÖNDER
                 itsInterface.clientKiller.KillAllLeague();
                 Dispose(true);

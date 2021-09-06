@@ -149,7 +149,7 @@ namespace Evelynn_Bot.ExternalCommands
                     ))},
                 Method.POST);
 
-            Console.WriteLine(DecryptString(botRequest));
+            //Console.WriteLine(DecryptString(botRequest));
         }
 
         public void UpdateLolStatus(string status, Interface itsInterface)
@@ -190,49 +190,8 @@ namespace Evelynn_Bot.ExternalCommands
                     ))},
                 Method.POST);
 
-            Console.WriteLine(DecryptString(botRequest));
+            //Console.WriteLine(DecryptString(botRequest));
         }
-
-        public string DecryptString(string cipherText)
-        {
-            try
-            {
-                // KEY ve IV fonksiyon icin artik gerekli degil.
-                string password = "HnSdyBPo4I";
-                SHA256 mySHA256 = SHA256Managed.Create();
-                byte[] key = mySHA256.ComputeHash(Encoding.ASCII.GetBytes(password));
-                byte[] iv = new byte[16] { 0x9, 0xF, 0x9, 0x0, 0xF, 0x0, 0x0, 0x0, 0x0, 0xF, 0xA, 0x0, 0x1, 0x0, 0xF, 0x0 };
-
-                Aes encryptor = Aes.Create();
-                encryptor.Mode = CipherMode.CBC;
-                encryptor.Key = key.Take(32).ToArray();
-                encryptor.IV = iv;
-                MemoryStream memoryStream = new MemoryStream();
-                ICryptoTransform aesDecryptor = encryptor.CreateDecryptor();
-                CryptoStream cryptoStream = new CryptoStream(memoryStream, aesDecryptor, CryptoStreamMode.Write);
-                string plainText = String.Empty;
-                try
-                {
-                    byte[] cipherBytes = Convert.FromBase64String(cipherText);
-                    cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
-                    cryptoStream.FlushFinalBlock();
-                    byte[] plainBytes = memoryStream.ToArray();
-                    plainText = Encoding.ASCII.GetString(plainBytes, 0, plainBytes.Length);
-                }
-                finally
-                {
-                    memoryStream.Close();
-                    cryptoStream.Close();
-                }
-                return plainText;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"DECRYPT STRING HATA {e}");
-                return "";
-            }
-        }
-
 
         #endregion
     }

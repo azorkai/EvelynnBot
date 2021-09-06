@@ -1076,6 +1076,7 @@ namespace Evelynn_Bot.GameAI
                                 break;
                             case 5:
                                 TusuAyarla(GEnum8.KEY_J);
+                                TusuAyarla(GEnum8.KEY_K);
                                 break;
                             case 6:
                                 TusuAyarla(GEnum8.KEY_L);
@@ -1359,12 +1360,12 @@ namespace Evelynn_Bot.GameAI
                     CurrentPlayerStats(itsInterface);
                     string cGame_championName = itsInterface.player.CurrentGame_ChampName;
                     var inGameData = itsInterface.player.Data;
+                    canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
                     gameTime = inGameData.GameData.GameTime.Value;
                     isGameEnd = inGameData.Events.EventsEvents.Count((EvelynnLCU.API_Models.Event details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
                     summonerItemCount = inGameData.AllPlayers.FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName).Items.Length;
                     prevHealthPercentage = healthPercentage;
                     healthPercentage = itsInterface.player.CurrentHealth * 100.0 / itsInterface.player.MaxHealth;
-                    canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
                     isTutorialAndMF =
                         inGameData.AllPlayers
                             .FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName).Scores
@@ -1401,8 +1402,9 @@ namespace Evelynn_Bot.GameAI
                     }
 
                 }
-                catch (Exception)
+                catch (Exception ec)
                 {
+                    //Console.WriteLine(ec);
                     isGameEnd = isGameEnd || !(Process.GetProcessesByName("League of Legends").Length != 0);
                 }
                 if (DateTime.Now.Subtract(dateTime_1).TotalMinutes > 90.0)
@@ -1564,7 +1566,7 @@ namespace Evelynn_Bot.GameAI
             itsInterface.player.Level_E = liveData.Result.ActivePlayer.Abilities.E.AbilityLevel.Value;
             itsInterface.player.Level_R = liveData.Result.ActivePlayer.Abilities.R.AbilityLevel.Value;
             itsInterface.player.Data = liveData.Result;
-            Console.WriteLine(itsInterface.player.Level);
+            //Console.WriteLine(itsInterface.player.Level);
         }
 
         #region Dispose

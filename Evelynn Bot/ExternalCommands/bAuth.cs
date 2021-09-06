@@ -91,7 +91,7 @@ namespace bAUTH
                 string d = itsInterface.sec.DecryptString(t);
                 string[] p = d.Split('|');
                 var epc = itsInterface.u.GetEpochTime();
-                if (Convert.ToInt32(p[15]) > epc)
+                if (Convert.ToInt32(p[16]) > epc)
                 {
                     //Console.WriteLine(p[1]);
                     switch (p[1])
@@ -121,7 +121,7 @@ namespace bAUTH
             }
             catch(Exception e)
             {
-                //Console.WriteLine(e.Message);
+                //Console.WriteLine(e);
                 itsInterface.license.Status = false;
                 return itsInterface.license;
             }
@@ -150,7 +150,6 @@ namespace bAUTH
                     case "NO_ACCOUNT":
                         itsInterface.logger.Log(false, itsInterface.messages.LookingForNewAccount);
                         itsInterface.dashboard.IsStop = true;
-                        Console.WriteLine("NO_ACCOUNT Stop geldi");
                         break;
                     default: itsInterface.license.Status = false; break;
                 }
@@ -236,7 +235,7 @@ namespace bAUTH
             }
             catch (Exception e)
             {
-                Console.WriteLine($"BAUTH ENCRYPT STRING HATA {e}");
+                //Console.WriteLine($"BAUTH ENCRYPT STRING HATA {e}");
                 return "";
             }
         }

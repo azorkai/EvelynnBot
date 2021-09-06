@@ -21,7 +21,7 @@ namespace Evelynn_Bot.ExternalCommands
             KillRiotClient();
             Thread.Sleep(5000);
             //LaunchLeague(GetLeaguePath() + "\\..\\Riot Client\\RiotClientServices.exe"); //Start RiotClient
-            LaunchLeagueFromLeagueClient("D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\LeagueClient.exe"); //Start LeagueClient
+            LaunchLeagueFromLeagueClient($"{GetLeaguePath()}\\LeagueClient.exe"); //Start LeagueClient
         }
 
         public void LaunchLeagueFromLeagueClient(string path)
@@ -30,10 +30,11 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 try
                 {
-                    //File.Delete(GetLeaguePath() + "system2.yaml");
-                    File.Delete("D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\system2.yaml");
-                    File.Copy("Config/system.yaml", "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\system2.yaml");
-                    //File.Copy("Config/system.yaml", GetLeaguePath() + "system2.yaml");
+                    File.Delete(GetLeaguePath() + "system2.yaml");
+                    File.Copy("Config/system.yaml", GetLeaguePath() + "system2.yaml");
+
+                    //File.Delete("D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\system2.yaml");
+                    //File.Copy("Config/system.yaml", "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\system2.yaml");
                 }
                 catch (Exception ex)
                 {
@@ -121,6 +122,7 @@ namespace Evelynn_Bot.ExternalCommands
         public void DeleteLockFile()
         {
             string lockfilePath = $"{GetLeaguePath()}lockfile";
+            //string lockfilePath = $"D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\lockfile";
             if (File.Exists(lockfilePath)) { File.Delete(lockfilePath); }
         }
 

@@ -22,17 +22,17 @@ namespace Evelynn_Bot
 {
     public class NewQueue
     {
-        public static System.Timers.Timer bugTimer = new System.Timers.Timer();
-        private static int BugTime;
-        public static bool GameAiBool;
+        public System.Timers.Timer bugTimer = new System.Timers.Timer();
+        private int BugTime;
+        public bool GameAiBool;
 
 
-        private static event MessageHandlerDelegate<UxState> UxStateChanged;
-        private static event MessageHandlerDelegate<GameFlow> StateChanged;
-        private static event MessageHandlerDelegate<Search> OnSearchStateChanged;
-        private static Interface itsInterface2;
+        private event MessageHandlerDelegate<UxState> UxStateChanged;
+        private event MessageHandlerDelegate<GameFlow> StateChanged;
+        private event MessageHandlerDelegate<Search> OnSearchStateChanged;
+        public Interface itsInterface2;
 
-        private static readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
+        private readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
         public async Task<Task> Test(Interface itsInterface)
         {
             itsInterface2 = itsInterface;
@@ -40,7 +40,7 @@ namespace Evelynn_Bot
             return Task.CompletedTask;
         }
 
-        public static bool isDone = false;
+        public bool isDone = false;
 
         public void SetWorkDone()
         {
@@ -61,7 +61,7 @@ namespace Evelynn_Bot
             CreateLobby();
         }
 
-        public async static void CreateLobby()
+        public async void CreateLobby()
         {
             try
             {
@@ -78,58 +78,62 @@ namespace Evelynn_Bot
 
         async void PickChampion()
         {
-            List<long> pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
+            try
+            {
+                List<long> pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
 
-            LolChampSelectChampSelectSession champSession = await itsInterface2.lcuPlugins.GetChampSelectSessionAsync();
-            long localPlayerCellId = champSession.localPlayerCellId.Value;
-            long value2 = champSession.actions[0][(int)localPlayerCellId].id.Value;
-            long selectedChampId = -1;
-            bool isLocked = false;
-            foreach (long championId in pickableChampions.Where((long cId) => itsInterface2.championDatas.ADCChampions.Contains(cId)))
-            {
-                itsInterface2.lcuPlugins.SelectChampionAsync(value2, championId, localPlayerCellId);
-                int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
-                if (currentChampion == 0)
+                LolChampSelectChampSelectSession champSession = await itsInterface2.lcuPlugins.GetChampSelectSessionAsync();
+                long localPlayerCellId = champSession.localPlayerCellId.Value;
+                long value2 = champSession.actions[0][(int)localPlayerCellId].id.Value;
+                long selectedChampId = -1;
+                bool isLocked = false;
+                foreach (long championId in pickableChampions.Where((long cId) => itsInterface2.championDatas.ADCChampions.Contains(cId)))
                 {
-                    Thread.Sleep(2500);
-                    continue;
-                }
-                Console.WriteLine($"Playing {championId}");
-                selectedChampId = championId;
-                isLocked = true;
-                long summonerId = itsInterface2.summoner.summonerId;
-                var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
-                itsInterface2.player.CurrentGame_ChampName = champDetails.name;
-                itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
-                break;
-            }
-            if (!isLocked)
-            {
-                foreach (long championId2 in pickableChampions)
-                {
-                    itsInterface2.lcuPlugins.SelectChampionAsync(value2, championId2, localPlayerCellId);
+                    itsInterface2.lcuPlugins.SelectChampionAsync(value2, championId, localPlayerCellId);
                     int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
                     if (currentChampion == 0)
                     {
                         Thread.Sleep(2500);
                         continue;
                     }
-                    Console.WriteLine($"Locked {championId2}");
-                    selectedChampId = championId2;
+                    //Console.WriteLine($"Playing {championId}");
+                    selectedChampId = championId;
+                    isLocked = true;
                     long summonerId = itsInterface2.summoner.summonerId;
                     var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
                     itsInterface2.player.CurrentGame_ChampName = champDetails.name;
                     itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
                     break;
                 }
+                if (!isLocked)
+                {
+                    foreach (long championId2 in pickableChampions)
+                    {
+                        itsInterface2.lcuPlugins.SelectChampionAsync(value2, championId2, localPlayerCellId);
+                        int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
+                        if (currentChampion == 0)
+                        {
+                            Thread.Sleep(2500);
+                            continue;
+                        }
+                        //Console.WriteLine($"Locked {championId2}");
+                        selectedChampId = championId2;
+                        long summonerId = itsInterface2.summoner.summonerId;
+                        var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
+                        itsInterface2.player.CurrentGame_ChampName = champDetails.name;
+                        itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
+                        break;
+                    }
+                }
+
+                // Set Spells
+                itsInterface2.lcuPlugins.SetSpellAsync((itsInterface2.summoner.summonerLevel >= 7) ? 4 : 6, 7);
+
             }
+            catch (Exception e)
+            {
 
-            // Set Spells
-
-            itsInterface2.lcuPlugins.SetSpellAsync((itsInterface2.summoner.summonerLevel >= 7) ? 4 : 6, 7);
-
-
-
+            }
         }
 
         public async Task UxEventAsync()
@@ -144,7 +148,7 @@ namespace Evelynn_Bot
         }
 
 
-        public static async Task EventExampleAsync()
+        public async Task EventExampleAsync()
         {
             //UxStateChanged += OnUxStateChanged;
             StateChanged += OnStateChanged;
@@ -159,7 +163,7 @@ namespace Evelynn_Bot
             Console.WriteLine("Done.");
         }
 
-        private static async void OnSearchChanged(EventType sender, Search result)
+        private async void OnSearchChanged(EventType sender, Search result)
         {
             try
             {
@@ -187,7 +191,7 @@ namespace Evelynn_Bot
         }
 
 
-        private static async void OnUxStateChanged(EventType sender, UxState result)
+        private async void OnUxStateChanged(EventType sender, UxState result)
         {
             var state = string.Empty;
 
@@ -210,10 +214,10 @@ namespace Evelynn_Bot
                     state = $"unknown ux state: {result.State}";
                     break;
             }
-            itsInterface2.logger.Log(true, "UX State: " + state);
+            //itsInterface2.logger.Log(true, "UX State: " + state);
         }
 
-        private static void OnTimedEvent(object source, ElapsedEventArgs e)
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             Console.WriteLine("Bug Check!");
             BugTime++;
@@ -233,7 +237,7 @@ namespace Evelynn_Bot
             }
         }
 
-        private static async void OnStateChanged(EventType sender, GameFlow result)
+        private async void OnStateChanged(EventType sender, GameFlow result)
         {
             try
             {
@@ -243,7 +247,7 @@ namespace Evelynn_Bot
                 {
                     case "None":
                         state = "Main Menu";
-                        CreateLobby();
+                        itsInterface2.newQueue.CreateLobby();
                         break;
 
                     case "Lobby":
