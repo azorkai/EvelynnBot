@@ -35,7 +35,6 @@ namespace Evelynn_Bot.ProcessManager
         public static System.Timers.Timer ExtremeGameTimer = new System.Timers.Timer();
 
         private int ExtremeGameTime;
-
         private bool randomController;
 
         public async Task<Task> Start(Interface itsInterface)
@@ -54,8 +53,8 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
-
             itsInterface.newQueue.bugTimer.Stop();
+            itsInterface.clientKiller.KillAllLeague();
             // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)
             try
             {
@@ -104,6 +103,7 @@ namespace Evelynn_Bot.ProcessManager
                             eBot.StartInfo.Arguments = licenseBase64String;
                             eBot.StartInfo.Verb = "runas";
                             eBot.Start();
+
                             Environment.Exit(0);
                             return Start(itsInterface);
                         }
@@ -121,6 +121,7 @@ namespace Evelynn_Bot.ProcessManager
                             eBot.StartInfo.Arguments = licenseBase64String;
                             eBot.StartInfo.Verb = "runas";
                             eBot.Start();
+
                             Environment.Exit(0);
                             return Start(itsInterface);
                         }
@@ -235,7 +236,6 @@ namespace Evelynn_Bot.ProcessManager
                             accountProcess.TutorialMissions(itsInterface);
                         }
 
-
                         itsInterface.lcuPlugins.KillUXAsync();
 
                         await Task.Delay(15000);
@@ -250,14 +250,12 @@ namespace Evelynn_Bot.ProcessManager
                         return StartAccountProcess(itsInterface);
                     }
                 }
-                    
-
             }
             catch (Exception e)
             {
                 Console.WriteLine($"START ACCOUNT PROCESS HATA {e}");
                 Dispose(true);
-                itsInterface.Result(false, "");
+                return StartAccountProcess(itsInterface);
             }
             return Task.CompletedTask;
         }
@@ -341,6 +339,7 @@ namespace Evelynn_Bot.ProcessManager
                 itsInterface.dashboard.IsRestart = false;
                 itsInterface.dashboard.IsStop = false;
                 itsInterface.dashboard.IsStart = true;
+                itsInterface.clientKiller.KillAllLeague();
                 if (pnC == 0) { Console.WriteLine("Panelden Restart Geldi!"); }
                 var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
                 var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -386,6 +385,7 @@ namespace Evelynn_Bot.ProcessManager
                 if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
                 {
                     itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
+                    
                     itsInterface.clientKiller.KillAllLeague();
                     itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));

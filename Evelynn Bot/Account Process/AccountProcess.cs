@@ -30,7 +30,8 @@ namespace Evelynn_Bot.Account_Process
         public bool StartLeague(Interface itsInterface)
         {
             try
-            {
+            { 
+                itsInterface.clientKiller.KillAllLeague();
                 string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
                 File.Delete($"{text}game.cfg");
                 File.Delete($"{text}PersistedSettings.json");
@@ -210,7 +211,7 @@ namespace Evelynn_Bot.Account_Process
 
                 // Verify Session
                 string session = await VerifySession(itsInterface);
-
+                itsInterface.logger.Log(false, session);
                 switch (session)
                 {
                     case "banned_account": 
@@ -226,6 +227,7 @@ namespace Evelynn_Bot.Account_Process
                 }
                 
                 Thread.Sleep(3500);
+
                 try
                 {
                     var eula = await itsInterface.lcuPlugins.GetEula("read");
@@ -481,7 +483,7 @@ namespace Evelynn_Bot.Account_Process
         {
             LeaguePatch lolPatchNew = itsInterface.lcuPlugins.GetLeaguePatchAsync().Result;
             //Logger.Status($@"Is there a new league patch: {lolPatchNew.isUpdateAvailable}");
-            return itsInterface.Result(lolPatchNew.isCorrupted || lolPatchNew.isUpdateAvailable || !lolPatchNew.isUpToDate, "");
+            return itsInterface.Result(lolPatchNew.isCorrupted.Value || lolPatchNew.isUpdateAvailable.Value || !lolPatchNew.isUpToDate.Value, "");
         }
 
 
