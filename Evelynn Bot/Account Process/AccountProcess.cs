@@ -89,7 +89,6 @@ namespace Evelynn_Bot.Account_Process
                 return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
             }
         }
-
         public async Task<Task> ChangeRegion(Interface itsInterface)
         {
             RegionLocale clientRegion =  await itsInterface.lcuPlugins.GetRegionAsync();
@@ -106,7 +105,6 @@ namespace Evelynn_Bot.Account_Process
 
             return Task.CompletedTask;
         }
-
         public async Task<string> VerifySession(Interface itsInterface)
         {
             int loginAttempt = 0;
@@ -145,11 +143,13 @@ namespace Evelynn_Bot.Account_Process
                 //Class14.action_0 = Class14.Action.RequestAccount;
                 return "banned_account";
             }
-            else if (!(loginSession.error.messageId == "RATE_LIMITED"))
+            else if (loginSession.error.messageId != "RATE_LIMITED")
             {
                 if (loginSession.error.messageId == "LOGIN_QUEUE_BUSY")
                 {
+                    Console.WriteLine("We have a rate limit on league side.");
                     Thread.Sleep(300000);
+                    return "restart_client_error";
                 }
                 else if (loginSession.error.messageId == "UNSPECIFIED_ERROR") { return "restart_client_error"; }
                 else if (loginSession.error.messageId == "INVALID_CREDENTIALS")
@@ -181,30 +181,50 @@ namespace Evelynn_Bot.Account_Process
             else
             {
                 // RATE LIMIT WAIT 5 MINUTES
+                Console.WriteLine("We have a rate limit on league side.");
                 Thread.Sleep(300000);
+                return "restart_client_error";
             }
             return(loginSession.error.messageId);
         }
+        public async Task<Task> CheckLeagueBan(Interface itsInterface)
+        {
+            var isBanned = await itsInterface.lcuPlugins.CheckBanAsync();
+            if (isBanned.isPermaBan.Value)
+            {
+                // Account has perma banned!
+                // TODO: BURDA HESABI PANELE GÖNDER SONRA YENİ HESAP AL ( SET LOL STATUS BANNED EKLENECEK PANELE )
+                Console.WriteLine("ACCOUNT PERMA BANNED!");
+                Console.WriteLine("ACCOUNT PERMA BANNED!");
+                Console.WriteLine("ACCOUNT PERMA BANNED!");
+                Console.WriteLine("ACCOUNT PERMA BANNED!");
+                Console.WriteLine("ACCOUNT PERMA BANNED!");
+                return Task.CompletedTask;
+            }
+            return Task.CompletedTask;
 
-        public async Task<bool> OldClientLoginAccount(Interface itsInterface)
+        }
+        public async Task<Task> OldClientLoginAccount(Interface itsInterface)
         {
             try
             {
                 if (itsInterface.license.Lol_username == "")
                 {
-                    return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
+                     itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
+                     return Task.CompletedTask;
                 }
 
                 if (itsInterface.license.Lol_password == "")
                 {
-                    return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
+                    itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
+                    return Task.CompletedTask;
                 }
 
 
                 itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
                 itsInterface.lcuApi.Socket.DumpToDebug = false;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
-                Thread.Sleep(2500);
+                Thread.Sleep(3500);
                 await ChangeRegion(itsInterface);
 
                 await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
@@ -214,15 +234,36 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.logger.Log(false, session);
                 switch (session)
                 {
-                    case "banned_account": 
+                    case "banned_account":
                         // hesabı panele gönder ve yenisini al.
+                        Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
                         break;
                     case "new_player_set_account":
+                        await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                        Console.WriteLine("NEW PLAYER, SETTING UP NEW PLAYER");
+                        if (itsInterface.license.Lol_isEmptyNick == false)
+                        {
+                            Dispose(true);
+                            using (AccountProcess accountProcess = new AccountProcess())
+                            {
+                                await accountProcess.CheckNewAccount(itsInterface);
+                            }
+                        }
                         break;
                     case "invalid_credentials":
+                        Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
+                        break;
+                    case "restart_client_error":
+                        return itsInterface.processManager.StartAccountProcess(itsInterface);
+                    case "invalid_summoner_name":
+                        Console.WriteLine("We have a invalid summoner name!");
+                        break;
+                    case "logged_in_from_another":
+                        Console.WriteLine("This account has logged in from somewhere else already!");
                         break;
                     default:
-                        Console.WriteLine($"LOGIN SESSION: ");
+                        Console.WriteLine($"LOGIN SESSION: {session}");
+                        Console.WriteLine($"LOGIN SESSION: {session}");
                         break;
                 }
                 
@@ -242,7 +283,8 @@ namespace Evelynn_Bot.Account_Process
                 }
 
                 Dispose(true);
-                return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
+                itsInterface.Result(true, itsInterface.messages.SuccessLogin);
+                return Task.CompletedTask;
             }
             catch (Exception e)
             {
@@ -250,11 +292,10 @@ namespace Evelynn_Bot.Account_Process
                 //TODO: EĞER GİRİŞ BAŞARISIZ İSE SİTEYE BU BİLGİYİ GÖNDER
                 itsInterface.clientKiller.KillAllLeague();
                 Dispose(true);
-                return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
+                itsInterface.Result(false, itsInterface.messages.ErrorLogin);
+                return itsInterface.processManager.StartAccountProcess(itsInterface);
             }
         }
-
-
         public bool Initialize(Interface itsInterface)
         {
             try
@@ -293,6 +334,8 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.logger.Log(true, "New account!");
 
                 await Task.Delay(5000);
+
+                await itsInterface.lcuPlugins.CompleteNewAccountAsync();
 
                 var name = RandomNameGenerator();
                 itsInterface.lcuPlugins.KillUXAsync();
@@ -372,88 +415,6 @@ namespace Evelynn_Bot.Account_Process
                 return RandomName(6, false);
             }
         }
-        public bool TutorialMissions(Interface itsInterface)
-        {
-            itsInterface.dashboardHelper.UpdateLolStatus("Playing Tutorial", itsInterface);
-            itsInterface.summoner = itsInterface.lcuPlugins.GetCurrentSummoner().Result;
-            if (itsInterface.summoner.summonerLevel < 11)
-            {
-                Tutorial[] objectArray = itsInterface.lcuPlugins.GetTutorials().Result;
-                try
-                {
-                    if (!objectArray[0].isViewed)
-                    {
-                        itsInterface.logger.Log(true, "TUTORIAL 1");
-                        itsInterface.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = 2000 });
-                        Thread.Sleep(10000);
-                        itsInterface.lcuPlugins.PostMatchmakingSearch();
-
-                        // TODO: YENİ Aİ'I TUTORİALA GÖRE AYARLA, BOOLEAN KOY Bİ TANE, TUTO İSE TRUE GÖNDER.
-                        //itsInterface.gameAi.TutorialAI_1(itsInterface); 
-
-                        itsInterface.logger.Log(true, "TUTORIAL 1 ENDED");
-                        Thread.Sleep(15000);
-                        itsInterface.lcuPlugins.GetSetMissions();
-                        itsInterface.lcuPlugins.KillUXAsync();
-                        Thread.Sleep(5000);
-                    }
-                }
-                catch
-                {
-                    // ignored
-                }
-
-                Thread.Sleep(5000);
-                try
-                {
-                    if (!objectArray[1].isViewed)
-                    {
-                        itsInterface.logger.Log(true, "TUTORIAL 2");
-                        itsInterface.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = 2010 });
-                        Thread.Sleep(10000);
-                        itsInterface.lcuPlugins.PostMatchmakingSearch();
-
-                        //itsInterface.gameAi.TutorialAI_2(itsInterface);
-
-                        itsInterface.logger.Log(true, "TUTORIAL 2 ENDED");
-                        Thread.Sleep(15000);
-                        itsInterface.lcuPlugins.GetSetMissions();
-                        itsInterface.lcuPlugins.KillUXAsync();
-                        Thread.Sleep(5000);
-                    }
-                }
-                catch
-                {
-                    // ignored
-                }
-
-                Thread.Sleep(5000);
-                try
-                {
-                    if (!objectArray[2].isViewed)
-                    {
-                        itsInterface.logger.Log(true, "TUTORIAL 3"); itsInterface.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = 2020 });
-                        Thread.Sleep(10000);
-                        itsInterface.lcuPlugins.PostMatchmakingSearch();
-
-                        //itsInterface.gameAi.TutorialAI_2(itsInterface); //Bilerek "2" olarak bırakılmıştır, aynı AI!
-
-                        itsInterface.logger.Log(true, "TUTORIAL 3 ENDED");
-                        Thread.Sleep(15000);
-                        itsInterface.lcuPlugins.GetSetMissions();
-                        itsInterface.lcuPlugins.KillUXAsync();
-                        Thread.Sleep(5000);
-                        Dispose(true);
-                        return itsInterface.Result(true, "Tutorial games are finished!");
-                    }
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
-            return itsInterface.Result(false, "");
-        }
         public bool PatchCheck(Interface itsInterface)
         {
             try
@@ -485,7 +446,6 @@ namespace Evelynn_Bot.Account_Process
             //Logger.Status($@"Is there a new league patch: {lolPatchNew.isUpdateAvailable}");
             return itsInterface.Result(lolPatchNew.isCorrupted.Value || lolPatchNew.isUpdateAvailable.Value || !lolPatchNew.isUpToDate.Value, "");
         }
-
 
         #region Dispose
         protected virtual void Dispose(bool disposing)

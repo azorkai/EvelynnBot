@@ -23,10 +23,11 @@ namespace Evelynn_Bot.Account_Process
         Task<Task> CheckNewAccount(Interface itsInterface);
         string RandomName(int len, bool two);
         string RandomNameGenerator();
-        bool TutorialMissions(Interface itsInterface);
         bool PatchCheck(Interface itsInterface);
         bool LeagueIsPatchAvailable(Interface itsInterface);
         Task<string> VerifySession(Interface itsInterface);
         Task<Task> ChangeRegion(Interface itsInterface);
+        Task<Task> OldClientLoginAccount(Interface itsInterface);
+        Task<Task> CheckLeagueBan(Interface itsInterface);
     }
 }

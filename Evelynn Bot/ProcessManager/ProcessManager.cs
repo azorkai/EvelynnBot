@@ -39,6 +39,9 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> Start(Interface itsInterface)
         {
+
+            await itsInterface.clientKiller.ExecuteBypass();
+
             await StartAccountProcess(itsInterface);
 
             //itsInterface.gameAi.YeniAIBaslat(itsInterface);
@@ -142,12 +145,21 @@ namespace Evelynn_Bot.ProcessManager
 
                         if (itsInterface.license.Lol_disenchant)
                         {
-                            await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
+                            DisenchantAgain:
+                            await itsInterface.lcuPlugins.CraftKeysAsync();
+                            bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
+                            await itsInterface.lcuPlugins.CraftChampionShardAsync();
+                            await itsInterface.lcuPlugins.DisenchantChampionsAsync();
+                            if (isMoreChest)
+                            {
+                                Thread.Sleep(5000);
+                                goto DisenchantAgain;
+                            }
                         }
 
                         if (itsInterface.license.Lol_doTutorial)
                         {
-                            accountProcess.TutorialMissions(itsInterface);
+                            //accountProcess.TutorialMissions(itsInterface);
                         }
 
 
@@ -164,8 +176,11 @@ namespace Evelynn_Bot.ProcessManager
                     {
                         // Started Old League Client instead of RiotClient, login from LCU!
                         if (isFromGame == false) { await accountProcess.OldClientLoginAccount(itsInterface); }
+                        await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
+                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh yani
+                        await itsInterface.lcuPlugins.RemoveNotificationsAsync();
                         await itsInterface.lcuPlugins.GetSetMissions();
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
@@ -224,16 +239,23 @@ namespace Evelynn_Bot.ProcessManager
                             await accountProcess.CheckNewAccount(itsInterface);
                         }
 
-                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak
-
                         if (itsInterface.license.Lol_disenchant)
                         {
-                            await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
+                            DisenchantAgain:
+                            await itsInterface.lcuPlugins.CraftKeysAsync();
+                            bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
+                            await itsInterface.lcuPlugins.CraftChampionShardAsync();
+                            await itsInterface.lcuPlugins.DisenchantChampionsAsync();
+                            if (isMoreChest)
+                            {
+                                Thread.Sleep(5000);
+                                goto DisenchantAgain;
+                            }
                         }
 
                         if (itsInterface.license.Lol_doTutorial)
                         {
-                            accountProcess.TutorialMissions(itsInterface);
+                            //accountProcess.TutorialMissions(itsInterface);
                         }
 
                         itsInterface.lcuPlugins.KillUXAsync();
@@ -367,6 +389,7 @@ namespace Evelynn_Bot.ProcessManager
             {
                 itsInterface.logger.Log(true, itsInterface.messages.InfoStartingAgain);
                 //accountProcess.Initialize(itsInterface);
+                await itsInterface.lcuPlugins.RemoveNotificationsAsync();
                 await itsInterface.lcuPlugins.GetSetMissions();
 
                 //GetSetWallet Riot yüzünden patladığı oluyor (Client Yarım Yükleniyor)
@@ -419,9 +442,18 @@ namespace Evelynn_Bot.ProcessManager
 
                 if (itsInterface.license.Lol_disenchant)
                 {
-                    await itsInterface.lcuPlugins.DisenchantSummonerCapsules();
+                    DisenchantAgain:
+                    await itsInterface.lcuPlugins.CraftKeysAsync();
+                    bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
+                    await itsInterface.lcuPlugins.CraftChampionShardAsync();
+                    await itsInterface.lcuPlugins.DisenchantChampionsAsync();
+                    if (isMoreChest)
+                    {
+                        Thread.Sleep(5000);
+                        goto DisenchantAgain;
+                    }
                 }
-
+                
                 itsInterface.newQueue.CreateLobby();
 
                 Dispose(true);

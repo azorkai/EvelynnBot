@@ -252,7 +252,7 @@ namespace Evelynn_Bot
 
                     case "Lobby":
                         state = "Lobby";
-
+                        itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
                         var searchState = await itsInterface2.lcuPlugins.GetSearchState();
 
                         if (searchState.errors.Count <= 0)
@@ -290,7 +290,7 @@ namespace Evelynn_Bot
                         break;
                     case "ChampSelect":
                         state = "Champ Select [Ignore this message if game is started!]";
-
+                        itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
                         BugTime = 0;
 
                         await Task.Delay(1500);
@@ -303,6 +303,7 @@ namespace Evelynn_Bot
 
                     case "ReadyCheck":
                         state = "Match Found";
+                        itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
 
                         BugTime = 0;
 
@@ -311,6 +312,7 @@ namespace Evelynn_Bot
 
                     case "InProgress":
                         state = "Game in Progress";
+                        itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
 
                         bugTimer.Stop();
                         BugTime = 0;
