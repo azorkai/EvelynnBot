@@ -378,6 +378,7 @@ namespace Evelynn_Bot.ProcessManager
             if (itsInterface.dashboard.IsStop) // Dashboard Action Stop
             {
                 if(pnC==0) { Console.WriteLine("Panelden Stop Geldi!") ; }
+                itsInterface.isBotStarted = false;
                 pnC++;
                 Thread.Sleep(10000);
                 goto CHECKACTIONS;

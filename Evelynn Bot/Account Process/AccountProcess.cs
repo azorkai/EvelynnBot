@@ -204,6 +204,18 @@ namespace Evelynn_Bot.Account_Process
             return Task.CompletedTask;
 
         }
+
+        public void LogYaz(string Hata1, string LFile)
+        {
+            FileStream dosyaAc = new FileStream(@LFile,
+                    FileMode.OpenOrCreate, FileAccess.Write);
+                StreamWriter dosyaYaz = new StreamWriter(dosyaAc);
+                dosyaYaz.BaseStream.Seek(0, SeekOrigin.End);
+                dosyaYaz.WriteLine(Hata1);
+                dosyaYaz.Flush(); dosyaYaz.Close();
+            
+        }
+
         public async Task<Task> OldClientLoginAccount(Interface itsInterface)
         {
             try
@@ -227,7 +239,11 @@ namespace Evelynn_Bot.Account_Process
                 Thread.Sleep(3500);
                 await ChangeRegion(itsInterface);
 
-                await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+                string logins = await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+
+                var LogFile = $@"{Path.GetTempPath()}\Eve.TXT";
+
+                LogYaz(logins, LogFile);
 
                 // Verify Session
                 string session = await VerifySession(itsInterface);
@@ -254,6 +270,8 @@ namespace Evelynn_Bot.Account_Process
                         Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
                         break;
                     case "restart_client_error":
+                        Console.WriteLine("CLIENT ERROR! RESTART");
+
                         return itsInterface.processManager.StartAccountProcess(itsInterface);
                     case "invalid_summoner_name":
                         Console.WriteLine("We have a invalid summoner name!");
@@ -262,7 +280,6 @@ namespace Evelynn_Bot.Account_Process
                         Console.WriteLine("This account has logged in from somewhere else already!");
                         break;
                     default:
-                        Console.WriteLine($"LOGIN SESSION: {session}");
                         Console.WriteLine($"LOGIN SESSION: {session}");
                         break;
                 }

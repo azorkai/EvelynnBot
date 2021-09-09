@@ -76,9 +76,7 @@ namespace Evelynn_Bot.ExternalCommands
                     .WithIdentity("GetActions", "DBLicenseAndAction")
                     .Build();
 
-                
                 job.JobDataMap["InterfaceClass"] = itsInterface;
-
 
                 // Trigger the job to run now, and then repeat every 60 seconds
                 ITrigger trigger = TriggerBuilder.Create()
@@ -95,6 +93,7 @@ namespace Evelynn_Bot.ExternalCommands
 
                 if (method)
                 {
+                    itsInterface.isBotStarted = true;
                     itsInterface.dashboard.IsStart = false;
                     itsInterface.dashboard.IsStop = false;
                     itsInterface.dashboard.IsRestart = false;
@@ -109,6 +108,7 @@ namespace Evelynn_Bot.ExternalCommands
                     GC.Collect();
                     if (itsInterface.dashboard.IsStart)
                     {
+                        itsInterface.isBotStarted = true;
                         itsInterface.dashboard.IsStart = false;
                         itsInterface.dashboard.IsStop = false;
                         itsInterface.dashboard.IsRestart = false;
@@ -233,14 +233,15 @@ namespace Evelynn_Bot.ExternalCommands
             string r = itsInterface.req.CreateRequest(DashboardHelper.URI,
                 new string[] { "data" },
                 new string[] { itsInterface.sec.EncryptString(
-                    string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",
+                    string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}",
                         itsInterface.u.GetRandomString(new Random().Next(100,128)),
                         "ACTION",
                         itsInterface.license.Username,
                         itsInterface.license.Password,
                         itsInterface.license.ID,
                         itsInterface.license.Last,
-                        itsInterface.uptime.Millisec.ToString()
+                        itsInterface.uptime.Millisec.ToString(),
+                        itsInterface.isBotStarted ? "Running" : "Idle"
                     ))},
                 Method.POST);
 
@@ -254,7 +255,6 @@ namespace Evelynn_Bot.ExternalCommands
             // Read the random line
             string line = musicList.Skip(randomNumber - 1).Take(1).First();
             Program.SetWindowText(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, line);
-
         }
     }
 

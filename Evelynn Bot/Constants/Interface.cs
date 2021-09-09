@@ -46,6 +46,7 @@ namespace Evelynn_Bot.Constants
         public GameflowSession gameflowSession = new GameflowSession();
         public ILeagueClient lcuApi  = LeagueClient.CreateNew();
         public Plugins lcuPlugins;
+        public bool isBotStarted = false;
         public bool Result(bool succes, string message)
         {
             Message = message;
