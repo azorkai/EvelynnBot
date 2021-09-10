@@ -61,7 +61,7 @@ namespace Evelynn_Bot
 
         #endregion
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             UpdateBot.CheckUpdate();
 

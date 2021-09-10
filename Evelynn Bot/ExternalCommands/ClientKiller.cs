@@ -25,9 +25,19 @@ namespace Evelynn_Bot.ExternalCommands
             KillLeagueClients();
             KillRiotClient();
             Thread.Sleep(5000);
-            //LaunchLeague(GetLeaguePath() + "\\..\\Riot Client\\RiotClientServices.exe"); //Start RiotClient
             LaunchLeagueFromLeagueClient($"{GetLeaguePath()}\\LeagueClient.exe"); //Start LeagueClient
         }
+
+        public void StartRiotClient()
+        {
+            KillExplorer();
+            KillLeagueOfLegends();
+            KillLeagueClients();
+            KillRiotClient();
+            Thread.Sleep(5000);
+            LaunchLeagueFromRiotClient(GetLeaguePath() + "\\..\\Riot Client\\RiotClientServices.exe"); //Start RiotClient
+        }
+
 
         #region Bypass
 
@@ -316,9 +326,11 @@ namespace Evelynn_Bot.ExternalCommands
                 }
                 Thread.Sleep(5000);
                 //Environment.Exit(0);
-                return string.Empty;
+                //return string.Empty;
+                return "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\";
             }
-            return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
+            //return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
+            return "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\";
         }
 
         public void KillRiotLockFile()

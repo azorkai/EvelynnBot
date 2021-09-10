@@ -335,6 +335,7 @@
     <Compile Include="Account Process\IAccountProcess.cs" />
     <Compile Include="Constants\IClass.cs" />
     <Compile Include="Constants\Interface.cs" />
+    <Compile Include="Constants\StartEnums.cs" />
     <Compile Include="Constants\UpTimer.cs" />
     <Compile Include="Entities\Dashboard.cs" />
     <Compile Include="ExternalCommands\bAuth.cs" />

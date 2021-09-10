@@ -64,6 +64,7 @@ namespace Evelynn_Bot.ExternalCommands
 
             if (itsInterface.license.Status)
             {
+                itsInterface.isBotStarted = false;
                 // Grab the Scheduler instance from the Factory
                 StdSchedulerFactory factory = new StdSchedulerFactory();
                 IScheduler scheduler = await factory.GetScheduler();

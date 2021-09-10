@@ -18,6 +18,7 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.ProcessManager;
+using EvelynnLCU.Plugins.LoL;
 using Newtonsoft.Json;
 using Timer = System.Threading.Timer;
 
@@ -40,7 +41,7 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> Start(Interface itsInterface)
         {
 
-            await itsInterface.clientKiller.ExecuteBypass();
+            //await itsInterface.clientKiller.ExecuteBypass();
 
             await StartAccountProcess(itsInterface);
 
@@ -73,14 +74,70 @@ namespace Evelynn_Bot.ProcessManager
                 {
                     if (isFromGame == false)
                     {
-                        accountProcess.StartLeague(itsInterface);
-                        //itsInterface.lcuApi.BeginTryInitRiotClient();
+                        accountProcess.StartLeague(itsInterface, StartEnums.RiotClient);
+                        Thread.Sleep(15000);
+                        itsInterface.lcuApi.BeginTryInitRiotClient();
                     }
                     if (processExist("RiotClientServices", itsInterface))
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
                         accountProcess.Initialize(itsInterface);
+                        itsInterface.lcuPlugins.KillUXAsync();
+                        string session = await accountProcess.VerifySession(itsInterface);
+                        itsInterface.logger.Log(false, session);
+                        switch (session)
+                        {
+                            case "banned_account":
+                                // hesabı panele gönder ve yenisini al.
+                                Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
+                                break;
+                            case "new_player_set_account":
+                                await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                                Console.WriteLine("NEW PLAYER, SETTING UP NEW PLAYER");
+                                if (itsInterface.license.Lol_isEmptyNick == false)
+                                {
+                                    Dispose(true);
+                                    await accountProcess.CheckNewAccount(itsInterface);
+                                }
+                                break;
+                            case "invalid_credentials":
+                                Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
+                                break;
+                            case "restart_client_error":
+                                Console.WriteLine("CLIENT ERROR! RESTART");
+
+                                return itsInterface.processManager.StartAccountProcess(itsInterface);
+                            case "invalid_summoner_name":
+                                Console.WriteLine("We have a invalid summoner name!");
+                                break;
+                            case "logged_in_from_another":
+                                Console.WriteLine("This account has logged in from somewhere else already!");
+                                break;
+                            default:
+                                Console.WriteLine($"LOGIN SESSION: {session}");
+                                break;
+                        }
+
+                        Thread.Sleep(3500);
+
+                        try
+                        {
+                            var eula = await itsInterface.lcuPlugins.GetEula("read");
+                            if (eula.Equals("\"AcceptanceRequired\""))
+                            {
+                                await itsInterface.lcuPlugins.GetEula("accept");
+                            }
+                        }
+                        catch
+                        {
+                            //ignored
+                        }
+
+                        await accountProcess.CheckLeagueBan(itsInterface);
+                        itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
+                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh yani
+                        await itsInterface.lcuPlugins.RemoveNotificationsAsync();
                         await itsInterface.lcuPlugins.GetSetMissions();
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
@@ -106,7 +163,6 @@ namespace Evelynn_Bot.ProcessManager
                             eBot.StartInfo.Arguments = licenseBase64String;
                             eBot.StartInfo.Verb = "runas";
                             eBot.Start();
-
                             Environment.Exit(0);
                             return Start(itsInterface);
                         }
@@ -124,7 +180,6 @@ namespace Evelynn_Bot.ProcessManager
                             eBot.StartInfo.Arguments = licenseBase64String;
                             eBot.StartInfo.Verb = "runas";
                             eBot.Start();
-
                             Environment.Exit(0);
                             return Start(itsInterface);
                         }
@@ -140,8 +195,6 @@ namespace Evelynn_Bot.ProcessManager
                             Dispose(true);
                             await accountProcess.CheckNewAccount(itsInterface);
                         }
-
-                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak
 
                         if (itsInterface.license.Lol_disenchant)
                         {
@@ -161,7 +214,6 @@ namespace Evelynn_Bot.ProcessManager
                         {
                             //accountProcess.TutorialMissions(itsInterface);
                         }
-
 
                         itsInterface.lcuPlugins.KillUXAsync();
 

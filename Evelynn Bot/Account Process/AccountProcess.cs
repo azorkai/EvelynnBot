@@ -27,7 +27,7 @@ namespace Evelynn_Bot.Account_Process
 {
     public class AccountProcess : IAccountProcess
     {
-        public bool StartLeague(Interface itsInterface)
+        public bool StartLeague(Interface itsInterface, StartEnums startEnums)
         {
             try
             { 
@@ -37,7 +37,14 @@ namespace Evelynn_Bot.Account_Process
                 File.Delete($"{text}PersistedSettings.json");
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\game.cfg", $"{text}game.cfg", overwrite: true);
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
-                itsInterface.clientKiller.StartLeague();
+                if (startEnums == StartEnums.LeagueClient)
+                {
+                    itsInterface.clientKiller.StartLeague();
+                }
+                else
+                {
+                    itsInterface.clientKiller.StartRiotClient();
+                }
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -59,10 +66,31 @@ namespace Evelynn_Bot.Account_Process
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
                 }
-                
-                
+
+
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
-                await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+                var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+
+                if (loginStatus.error != string.Empty)
+                {
+                    if (loginStatus.error == "rate_limited")
+                    {
+                        Console.WriteLine("Rate limit, wait 5 min");
+                        Thread.Sleep(new TimeSpan(0, 5, 0));
+                        return false;
+                        //return itsInterface.processManager.StartAccountProcess(itsInterface);
+                    }
+                    if (loginStatus.error == "auth_failure")
+                    {
+                        // TODO: PANELE BİLDİR SONRA YENİ HESAP AL, STARTACCOUNT PROCESS
+                        return false;
+                    }
+                }
+                if (loginStatus.type != "authenticated")
+                {
+                    Console.WriteLine($"ERROR LOGIN TYPE: {loginStatus.type}");
+                }
+
                 Thread.Sleep(3500);
                 try
                 {
@@ -76,8 +104,9 @@ namespace Evelynn_Bot.Account_Process
                 {
                     //ignored
                 }
-                
+                Thread.Sleep(22000);
                 Dispose(true);
+                itsInterface.lcuApi.Close();
                 itsInterface.lcuPlugins = null;
                 return itsInterface.Result(true, itsInterface.messages.SuccessLogin);
             }
@@ -205,17 +234,6 @@ namespace Evelynn_Bot.Account_Process
 
         }
 
-        public void LogYaz(string Hata1, string LFile)
-        {
-            FileStream dosyaAc = new FileStream(@LFile,
-                    FileMode.OpenOrCreate, FileAccess.Write);
-                StreamWriter dosyaYaz = new StreamWriter(dosyaAc);
-                dosyaYaz.BaseStream.Seek(0, SeekOrigin.End);
-                dosyaYaz.WriteLine(Hata1);
-                dosyaYaz.Flush(); dosyaYaz.Close();
-            
-        }
-
         public async Task<Task> OldClientLoginAccount(Interface itsInterface)
         {
             try
@@ -241,9 +259,6 @@ namespace Evelynn_Bot.Account_Process
 
                 string logins = await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
 
-                var LogFile = $@"{Path.GetTempPath()}\Eve.TXT";
-
-                LogYaz(logins, LogFile);
 
                 // Verify Session
                 string session = await VerifySession(itsInterface);
@@ -318,8 +333,9 @@ namespace Evelynn_Bot.Account_Process
             try
             {
                 itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
-                itsInterface.lcuApi.Socket.DumpToDebug = false;
+                itsInterface.lcuApi.Socket.DumpToDebug = true;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
+                Thread.Sleep(3500);
             }
             catch (Exception e)
             {

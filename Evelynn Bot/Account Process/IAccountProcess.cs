@@ -16,7 +16,7 @@ namespace Evelynn_Bot.Account_Process
 {
     public interface IAccountProcess:IDisposable
     {
-        bool StartLeague(Interface itsInterface);
+        bool StartLeague(Interface itsInterface, StartEnums startEnums);
         Task<bool> LoginAccount(Interface itsInterface);
         bool Initialize(Interface itsInterface);
         Task<bool> GetSetWallet(Interface itsInterface);
