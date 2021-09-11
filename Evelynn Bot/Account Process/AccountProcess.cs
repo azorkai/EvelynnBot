@@ -218,17 +218,20 @@ namespace Evelynn_Bot.Account_Process
         }
         public async Task<Task> CheckLeagueBan(Interface itsInterface)
         {
-            var isBanned = await itsInterface.lcuPlugins.CheckBanAsync();
-            if (isBanned.isPermaBan.Value)
+            try
             {
-                // Account has perma banned!
-                // TODO: BURDA HESABI PANELE GÖNDER SONRA YENİ HESAP AL ( SET LOL STATUS BANNED EKLENECEK PANELE )
-                Console.WriteLine("ACCOUNT PERMA BANNED!");
-                Console.WriteLine("ACCOUNT PERMA BANNED!");
-                Console.WriteLine("ACCOUNT PERMA BANNED!");
-                Console.WriteLine("ACCOUNT PERMA BANNED!");
-                Console.WriteLine("ACCOUNT PERMA BANNED!");
-                return Task.CompletedTask;
+                var isBanned = await itsInterface.lcuPlugins.CheckBanAsync();
+                if (isBanned.isPermaBan.Value)
+                {
+                    // Account has perma banned!
+                    // TODO: BURDA HESABI PANELE GÖNDER SONRA YENİ HESAP AL ( SET LOL STATUS BANNED EKLENECEK PANELE )
+                    itsInterface.logger.Log(true,("Account Banned"));
+                    return Task.CompletedTask;
+                }
+            }
+            catch (Exception e)
+            {
+                // account not banned
             }
             return Task.CompletedTask;
 

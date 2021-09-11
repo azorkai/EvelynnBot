@@ -81,43 +81,54 @@ namespace Evelynn_Bot.ProcessManager
                     if (processExist("RiotClientServices", itsInterface))
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
+                        Thread.Sleep(5000);
                         accountProcess.Initialize(itsInterface);
                         itsInterface.lcuPlugins.KillUXAsync();
-                        string session = await accountProcess.VerifySession(itsInterface);
-                        itsInterface.logger.Log(false, session);
-                        switch (session)
-                        {
-                            case "banned_account":
-                                // hesabı panele gönder ve yenisini al.
-                                Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
-                                break;
-                            case "new_player_set_account":
-                                await itsInterface.lcuPlugins.CompleteNewAccountAsync();
-                                Console.WriteLine("NEW PLAYER, SETTING UP NEW PLAYER");
-                                if (itsInterface.license.Lol_isEmptyNick == false)
-                                {
-                                    Dispose(true);
-                                    await accountProcess.CheckNewAccount(itsInterface);
-                                }
-                                break;
-                            case "invalid_credentials":
-                                Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
-                                break;
-                            case "restart_client_error":
-                                Console.WriteLine("CLIENT ERROR! RESTART");
 
-                                return itsInterface.processManager.StartAccountProcess(itsInterface);
-                            case "invalid_summoner_name":
-                                Console.WriteLine("We have a invalid summoner name!");
-                                break;
-                            case "logged_in_from_another":
-                                Console.WriteLine("This account has logged in from somewhere else already!");
-                                break;
-                            default:
-                                Console.WriteLine($"LOGIN SESSION: {session}");
-                                break;
+                        try
+                        {
+                            string session = await accountProcess.VerifySession(itsInterface);
+                            itsInterface.logger.Log(false, session);
+
+                            switch (session)
+                            {
+                                case "banned_account":
+                                    // hesabı panele gönder ve yenisini al.
+                                    Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
+                                    break;
+                                case "new_player_set_account":
+                                    await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                                    Console.WriteLine("NEW PLAYER, SETTING UP NEW PLAYER");
+                                    if (itsInterface.license.Lol_isEmptyNick == false)
+                                    {
+                                        Dispose(true);
+                                        await accountProcess.CheckNewAccount(itsInterface);
+                                    }
+                                    break;
+                                case "invalid_credentials":
+                                    Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
+                                    break;
+                                case "restart_client_error":
+                                    Console.WriteLine("CLIENT ERROR! RESTART");
+
+                                    return itsInterface.processManager.StartAccountProcess(itsInterface);
+                                case "invalid_summoner_name":
+                                    Console.WriteLine("We have a invalid summoner name!");
+                                    break;
+                                case "logged_in_from_another":
+                                    Console.WriteLine("This account has logged in from somewhere else already!");
+                                    break;
+                                default:
+                                    Console.WriteLine($"LOGIN SESSION: {session}");
+                                    break;
+                            }
                         }
 
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                        
                         Thread.Sleep(3500);
 
                         try
@@ -134,11 +145,22 @@ namespace Evelynn_Bot.ProcessManager
                         }
 
                         await accountProcess.CheckLeagueBan(itsInterface);
+
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
-                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh yani
-                        await itsInterface.lcuPlugins.RemoveNotificationsAsync();
+                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh degil ihh yani
+
+                        try
+                        {
+                            await itsInterface.lcuPlugins.RemoveNotificationsAsync();
+                        }
+                        catch (Exception e)
+                        {
+                            
+                        }
+
                         await itsInterface.lcuPlugins.GetSetMissions();
+
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
                             itsInterface.clientKiller.KillAllLeague();
@@ -198,15 +220,22 @@ namespace Evelynn_Bot.ProcessManager
 
                         if (itsInterface.license.Lol_disenchant)
                         {
-                            DisenchantAgain:
-                            await itsInterface.lcuPlugins.CraftKeysAsync();
-                            bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
-                            await itsInterface.lcuPlugins.CraftChampionShardAsync();
-                            await itsInterface.lcuPlugins.DisenchantChampionsAsync();
-                            if (isMoreChest)
+                            try
                             {
-                                Thread.Sleep(5000);
-                                goto DisenchantAgain;
+                                DisenchantAgain:
+                                await itsInterface.lcuPlugins.CraftKeysAsync();
+                                bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
+                                await itsInterface.lcuPlugins.CraftChampionShardAsync();
+                                await itsInterface.lcuPlugins.DisenchantChampionsAsync();
+                                if (isMoreChest)
+                                {
+                                    Thread.Sleep(5000);
+                                    goto DisenchantAgain;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                
                             }
                         }
 
@@ -214,10 +243,6 @@ namespace Evelynn_Bot.ProcessManager
                         {
                             //accountProcess.TutorialMissions(itsInterface);
                         }
-
-                        itsInterface.lcuPlugins.KillUXAsync();
-
-                        await Task.Delay(15000);
 
                         itsInterface.lcuPlugins.KillUXAsync();
 

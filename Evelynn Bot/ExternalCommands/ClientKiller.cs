@@ -327,10 +327,10 @@ namespace Evelynn_Bot.ExternalCommands
                 Thread.Sleep(5000);
                 //Environment.Exit(0);
                 //return string.Empty;
-                return "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\";
+                return "F:\\Riot Games\\League of Legends\\";
             }
             //return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
-            return "D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\";
+            return "F:\\Riot Games\\League of Legends\\";
         }
 
         public void KillRiotLockFile()
