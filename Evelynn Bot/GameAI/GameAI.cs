@@ -1546,7 +1546,8 @@ namespace Evelynn_Bot.GameAI
             point_3 = AnaPointAl(new Point(38, 180));
 
             Thread.Sleep(5000);
-            Console.WriteLine("Game Screen Focus Found");
+            itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
+            itsInterface.clientKiller.ActivateGame();
             EkraniAyarla(point_4);
             SolTiklat();
             Thread.Sleep(5000);

@@ -18,6 +18,10 @@ namespace Evelynn_Bot.ExternalCommands
 {
     public class ClientKiller
     {
+
+        [DllImport("User32.dll", SetLastError = true)]
+        static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+
         public void StartLeague()
         {
             KillExplorer();
@@ -380,6 +384,26 @@ namespace Evelynn_Bot.ExternalCommands
             pBN = Process.GetProcessesByName("LeagueCrashHandler");
             foreach (Process p4 in pBN) { p4.Kill(); }
             DeleteLockFile();
+        }
+
+        public void ActivateGame()
+        {
+            try
+            {
+                int iP;
+                Process currentProcess = Process.GetCurrentProcess();
+                Process[] proc = Process.GetProcessesByName("League of Legends");
+
+                for (iP = 0; iP < proc.Length; iP++)
+                {
+                    if (proc[iP].Id != currentProcess.Id)
+                        SwitchToThisWindow(proc[0].MainWindowHandle, true);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
 }
