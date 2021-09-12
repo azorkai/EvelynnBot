@@ -41,7 +41,7 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> Start(Interface itsInterface)
         {
 
-            //await itsInterface.clientKiller.ExecuteBypass();
+            await itsInterface.clientKiller.ExecuteBypass();
 
             await StartAccountProcess(itsInterface);
 
@@ -93,7 +93,7 @@ namespace Evelynn_Bot.ProcessManager
                             switch (session)
                             {
                                 case "banned_account":
-                                    // hesabı panele gönder ve yenisini al.
+                                    // Report that account to banned pool and get new from the accounts pool
                                     Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
                                     break;
                                 case "new_player_set_account":
@@ -106,11 +106,11 @@ namespace Evelynn_Bot.ProcessManager
                                     }
                                     break;
                                 case "invalid_credentials":
+                                    // Report that account to wrong accounts pool and get new from the accounts pool
                                     Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
                                     break;
                                 case "restart_client_error":
                                     Console.WriteLine("CLIENT ERROR! RESTART");
-
                                     return itsInterface.processManager.StartAccountProcess(itsInterface);
                                 case "invalid_summoner_name":
                                     Console.WriteLine("We have a invalid summoner name!");

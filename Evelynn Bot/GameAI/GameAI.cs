@@ -1380,7 +1380,7 @@ namespace Evelynn_Bot.GameAI
                         {
                             pointsLists[0].Boolean_0 = true;
                         }
-                        else if (!(item.EventName == "Turret_T2_C_04_A"))
+                        else if (item.EventName != "Turret_T2_C_04_A")
                         {
                             if (item.EventName == "Turret_T2_C_03_A")
                             {
@@ -1405,7 +1405,7 @@ namespace Evelynn_Bot.GameAI
                 catch (Exception ec)
                 {
                     //Console.WriteLine(ec);
-                    isGameEnd = isGameEnd || !(Process.GetProcessesByName("League of Legends").Length != 0);
+                    isGameEnd = isGameEnd || Process.GetProcessesByName("League of Legends").Length == 0;
                 }
                 if (DateTime.Now.Subtract(dateTime_1).TotalMinutes > 90.0)
                 {

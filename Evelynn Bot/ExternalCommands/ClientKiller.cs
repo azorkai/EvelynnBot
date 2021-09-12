@@ -326,11 +326,9 @@ namespace Evelynn_Bot.ExternalCommands
                 }
                 Thread.Sleep(5000);
                 //Environment.Exit(0);
-                //return string.Empty;
-                return "F:\\Riot Games\\League of Legends\\";
+                return string.Empty;
             }
-            //return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
-            return "F:\\Riot Games\\League of Legends\\";
+            return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
         }
 
         public void KillRiotLockFile()
@@ -362,7 +360,6 @@ namespace Evelynn_Bot.ExternalCommands
         public void DeleteLockFile()
         {
             string lockfilePath = $"{GetLeaguePath()}lockfile";
-            //string lockfilePath = $"D:\\Games\\League Of Legends\\Riot Games\\League of Legends\\lockfile";
             if (File.Exists(lockfilePath)) { File.Delete(lockfilePath); }
         }
 
