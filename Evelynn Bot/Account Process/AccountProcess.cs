@@ -70,7 +70,7 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-
+                Console.WriteLine(loginStatus);
                 if (loginStatus.error != string.Empty)
                 {
                     if (loginStatus.error == "rate_limited")
