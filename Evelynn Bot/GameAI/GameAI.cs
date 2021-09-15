@@ -1030,20 +1030,19 @@ namespace Evelynn_Bot.GameAI
                     bool flag3 = BirseyHesapla(point2);
                     if (point2.X != -1 || flag)
                     {
-                        goto IL_03e7; //Item Aldırmaca
-                        //if (queueId != 2000 || !bool_2) // Tutorial 1 değil ya da Miss Fortune ile 1 kill almadıysa
-                        //{
-                        //    goto IL_03e7;
-                        //}
-                        //List<Point> list7 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "ChangeHero").pointerList;
-                        //if (list7.Count <= 0)
-                        //{
-                        //    goto IL_03e7;
-                        //}
+                        if (itsInterface.queueId != 2000 || !isTutorialAndMF) // Tutorial 1 değil ya da Miss Fortune ile 1 kill almadıysa
+                        {
+                            goto IL_03e7;
+                        }
+                        List<Point> list7 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "ChangeHero").pointerList;
+                        if (list7.Count <= 0)
+                        {
+                            goto IL_03e7;
+                        }
 
-                        //EkraniAyarla(AnaPointAl(list7[0]));
-                        //SagTikla();
-                        //Thread.Sleep(5000);
+                        EkraniAyarla(AnaPointAl(list7[0]));
+                        SagTikla();
+                        Thread.Sleep(5000);
                     }
                     else
                     {
@@ -1240,12 +1239,12 @@ namespace Evelynn_Bot.GameAI
                         //    TusuAyarla(GEnum8.KEY_D);
                         //}
                         TotemAt();
-                        /*if (queueId == 2000) // Eğer Tutorial ise
+                        if (itsInterface.queueId == 2000) // Eğer Tutorial ise
                         {
                             EkraniAyarla(MinimapHesapla(double_));
                             SagTikla();
                         }
-                        else*/ if (point_.X == -1 && point_3.X == -1)
+                        else if (point_.X == -1 && point_3.X == -1)
                         {
                             isItemHasBought = 0;
                             TusuAyarla(GEnum8.KEY_B);
@@ -1268,7 +1267,7 @@ namespace Evelynn_Bot.GameAI
                     }
                     goto IL_0964;
                 IL_03e7:
-                    if (flag2 /*&& queueId != 2000*/ && isItemHasBought < 2) // Eğer Basedeysek ve tutorial'da değilsek
+                    if (flag2 && itsInterface.queueId != 2000 && isItemHasBought < 2) // Eğer Basedeysek ve tutorial'da değilsek
                     {
                         Console.WriteLine("Mağaza Bulundu");
                         if (summonerItemCount != 0) // Şu anki şampiyonun eşyası varsa
@@ -1366,8 +1365,7 @@ namespace Evelynn_Bot.GameAI
                     summonerItemCount = inGameData.AllPlayers.FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName).Items.Length;
                     prevHealthPercentage = healthPercentage;
                     healthPercentage = itsInterface.player.CurrentHealth * 100.0 / itsInterface.player.MaxHealth;
-                    isTutorialAndMF =
-                        inGameData.AllPlayers
+                    isTutorialAndMF = inGameData.AllPlayers
                             .FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName).Scores
                             .Kills == 1 && inGameData.AllPlayers
                             .FirstOrDefault((EvelynnLCU.API_Models.AllPlayer liveData) => liveData.ChampionName == cGame_championName)
@@ -1423,7 +1421,7 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(15000);
             }
         }
-        public void RGBHazirla()
+        public void RGBHazirla(Interface itsInterface)
         {
             rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
             {
@@ -1481,34 +1479,34 @@ namespace Evelynn_Bot.GameAI
 
             #region TODO CHANGE TUTO
 
-            //if (QUEUEID == 2000) // EĞER OYUN TUTORİAL 1 İSE MİNYON RENGİ DEĞİŞİYOR
-            //{
-            //    rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
-            //    {
-            //        new RGBClass.SetRGB(9, 13, 16),
-            //        new RGBClass.SetRGB(120, 33, 26),
-            //        new RGBClass.SetRGB(120, 33, 26),
-            //        new RGBClass.SetRGB(120, 33, 26),
-            //        new RGBClass.SetRGB(120, 33, 26),
-            //        new RGBClass.SetRGB(120, 33, 26)
-            //    }, "EnemyMinion"));
-            //    rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
-            //    {
-            //        new RGBClass.SetRGB(25, 67, 191)
-            //    }, "ChangeHero"));
-            //}
-            //else
-            //{
-            //    rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
-            //    {
-            //        new RGBClass.SetRGB(9, 13, 17),
-            //        new RGBClass.SetRGB(119, 56, 54),
-            //        new RGBClass.SetRGB(119, 56, 54),
-            //        new RGBClass.SetRGB(119, 56, 54),
-            //        new RGBClass.SetRGB(119, 56, 54),
-            //        new RGBClass.SetRGB(119, 56, 54)
-            //    }, "EnemyMinion"));
-            //}
+            if (itsInterface.queueId == 2000) // EĞER OYUN TUTORİAL 1 İSE MİNYON RENGİ DEĞİŞİYOR
+            {
+                rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+                {
+                    new RGBClass.SetRGB(9, 13, 16),
+                    new RGBClass.SetRGB(120, 33, 26),
+                    new RGBClass.SetRGB(120, 33, 26),
+                    new RGBClass.SetRGB(120, 33, 26),
+                    new RGBClass.SetRGB(120, 33, 26),
+                    new RGBClass.SetRGB(120, 33, 26)
+                }, "EnemyMinion"));
+                rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+                {
+                    new RGBClass.SetRGB(25, 67, 191)
+                }, "ChangeHero"));
+            }
+            else
+            {
+                rgbLists.Add(new RGBClass.PointerClass(new List<RGBClass.SetRGB>
+                {
+                    new RGBClass.SetRGB(9, 13, 17),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54),
+                    new RGBClass.SetRGB(119, 56, 54)
+                }, "EnemyMinion"));
+            }
 
             #endregion
 
@@ -1552,7 +1550,7 @@ namespace Evelynn_Bot.GameAI
             SolTiklat();
             Thread.Sleep(5000);
             EndBas();
-            RGBHazirla();
+            RGBHazirla(itsInterface);
             StartNewGameAI(itsInterface);
         }
         public void CurrentPlayerStats(Interface itsInterface)

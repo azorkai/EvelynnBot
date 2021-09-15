@@ -47,6 +47,7 @@ namespace Evelynn_Bot.Constants
         public ILeagueClient lcuApi  = LeagueClient.CreateNew();
         public Plugins lcuPlugins;
         public bool isBotStarted = false;
+        public int queueId = 830;
         public bool Result(bool succes, string message)
         {
             Message = message;

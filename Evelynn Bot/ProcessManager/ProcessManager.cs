@@ -241,6 +241,15 @@ namespace Evelynn_Bot.ProcessManager
 
                         if (itsInterface.license.Lol_doTutorial)
                         {
+                            var summonerTutorials = await itsInterface.lcuPlugins.GetTutorials();
+                            foreach (EvelynnLCU.API_Models.Tutorial item in summonerTutorials)
+                            {
+                                if (item.type == "CARD" && item.status != "COMPLETED")
+                                {
+                                    itsInterface.queueId = int.Parse(item.queueId);
+                                    itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
+                                }
+                            }
                             //accountProcess.TutorialMissions(itsInterface);
                         }
 
@@ -332,6 +341,15 @@ namespace Evelynn_Bot.ProcessManager
 
                         if (itsInterface.license.Lol_doTutorial)
                         {
+                            var summonerTutorials = await itsInterface.lcuPlugins.GetTutorials();
+                            foreach (EvelynnLCU.API_Models.Tutorial item in summonerTutorials)
+                            {
+                                if (item.type == "CARD" && item.status != "COMPLETED")
+                                {
+                                    itsInterface.queueId = int.Parse(item.queueId);
+                                    itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
+                                }
+                            }
                             //accountProcess.TutorialMissions(itsInterface);
                         }
 
@@ -366,7 +384,7 @@ namespace Evelynn_Bot.ProcessManager
             {
                 if (!gameFlowPhase.Contains("Reconnect"))
                 {
-                    // LOBBY AÇTIRT
+                    
                     return (bool)false;
                 }
 

@@ -36,7 +36,7 @@ namespace Evelynn_Bot
         public async Task<Task> Test(Interface itsInterface)
         {
             itsInterface2 = itsInterface;
-            await Connect();
+            await Connect(itsInterface);
             return Task.CompletedTask;
         }
 
@@ -47,7 +47,7 @@ namespace Evelynn_Bot
             _work.SetResult(true);
         }
 
-        private async Task Connect()
+        private async Task Connect(Interface itsInterface)
         {
             bugTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             bugTimer.Interval = 60000;
@@ -58,15 +58,15 @@ namespace Evelynn_Bot
             isDone = false;
 
             EventExampleAsync();
-            CreateLobby();
+            CreateLobby(itsInterface);
         }
 
-        public async void CreateLobby()
+        public async void CreateLobby(Interface itsInterface)
         {
             try
             {
                 await Task.Delay(1000);
-                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830});
+                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = itsInterface.queueId});
                 itsInterface2.logger.Log(true, itsInterface2.messages.SuccessCreateGame);
             }
             catch (Exception e)

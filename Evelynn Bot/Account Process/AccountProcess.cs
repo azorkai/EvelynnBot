@@ -95,10 +95,11 @@ namespace Evelynn_Bot.Account_Process
                 try
                 {
                     var eula = await itsInterface.lcuPlugins.GetEula("read");
-                    if (eula.Equals("\"AcceptanceRequired\""))
+                    if (eula == "AcceptanceRequired")
                     {
                         await itsInterface.lcuPlugins.GetEula("accept");
                     }
+                    await itsInterface.lcuPlugins.ClickPlay();
                 }
                 catch
                 {

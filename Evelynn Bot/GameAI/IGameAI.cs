@@ -41,7 +41,7 @@ namespace Evelynn_Bot.GameAI
         void StartNewGameAI(Interface itsInterface);
         void GetInGameStats(object Interface);
         void AraliEndGonder();
-        void RGBHazirla();
+        void RGBHazirla(Interface itsInterface);
         void YeniAIBaslat(Interface itsInterface);
 
 
