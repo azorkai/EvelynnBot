@@ -33,7 +33,7 @@ namespace Evelynn_Bot.Constants
         public string SuccessMinion = "";
         public string SuccessEnemyMinion = "";
         public string SuccessEnemyChampion = "";
-        public string GameStarted = "";
+        public string GameStarted = "Oyun başladı";
         public string GameStartedTutorial = "Tutorial oyunu başladı";
         public string GameFound = "Oyun bulundu!";
         public string AccountDoneXP = "Hesap belirtilen seviyeye ulaştı!";
@@ -73,7 +73,7 @@ namespace Evelynn_Bot.Constants
                 SuccessMinion = "";
                 SuccessEnemyMinion = "";
                 SuccessEnemyChampion = "";
-                GameStarted = "";
+                GameStarted = "Game is started";
                 GameStartedTutorial = "Tutorial game has started!";
                 GameFound = "Game Found!";
                 AccountDoneXP = "The account has reached the specified level!";

@@ -33,10 +33,10 @@ namespace Evelynn_Bot
         public Interface itsInterface2;
 
         private readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
-        public async Task<Task> Test(Interface itsInterface)
+        public async Task<Task> Test(Interface itsInterface, bool isTuto)
         {
             itsInterface2 = itsInterface;
-            await Connect(itsInterface);
+            await Connect(itsInterface, isTuto);
             return Task.CompletedTask;
         }
 
@@ -47,13 +47,26 @@ namespace Evelynn_Bot
             _work.SetResult(true);
         }
 
-        private async Task Connect(Interface itsInterface)
+        public async Task DoTutorials(Interface itsInterface)
         {
-            bugTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            bugTimer.Interval = 60000;
-            bugTimer.Enabled = true;
-            bugTimer.Stop();
+            await Task.Delay(1000);
+            itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = itsInterface.queueId });
+            itsInterface2.lcuPlugins.PostMatchmakingSearch();
+            itsInterface2.lcuPlugins.AcceptReadyCheck();
+            itsInterface2.logger.Log(true, "Tutorial Game");
+            await Task.Delay(7000);
+            itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
+        }
 
+        private async Task Connect(Interface itsInterface, bool isTuto)
+        {
+            if (!isTuto)
+            {
+                bugTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+                bugTimer.Interval = 60000;
+                bugTimer.Enabled = true;
+                bugTimer.Stop();
+            }
 
             isDone = false;
 
@@ -66,14 +79,13 @@ namespace Evelynn_Bot
             try
             {
                 await Task.Delay(1000);
-                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = itsInterface.queueId});
+                itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830});
                 itsInterface2.logger.Log(true, itsInterface2.messages.SuccessCreateGame);
             }
             catch (Exception e)
             {
                 itsInterface2.logger.Log(false,itsInterface2.messages.ErrorCreateGame + e);
             }
-
         }
 
         async void PickChampion()
@@ -247,7 +259,7 @@ namespace Evelynn_Bot
                 {
                     case "None":
                         state = "Main Menu";
-                        itsInterface2.newQueue.CreateLobby();
+                        itsInterface2.newQueue.CreateLobby(itsInterface2);
                         break;
 
                     case "Lobby":

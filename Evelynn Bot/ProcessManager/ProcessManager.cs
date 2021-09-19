@@ -26,22 +26,19 @@ namespace Evelynn_Bot.ProcessManager
 {
     public class ProcessManager : IProcessManager
     {
-        private Random random = new Random();
-        
-        private bool danger;
-        private float lastHealth;
-        private float currentHealth;
-
         public static System.Timers.Timer DamageCheckerTimer = new System.Timers.Timer();
         public static System.Timers.Timer ExtremeGameTimer = new System.Timers.Timer();
 
-        private int ExtremeGameTime;
-        private bool randomController;
-
         public async Task<Task> Start(Interface itsInterface)
         {
-
-            await itsInterface.clientKiller.ExecuteBypass();
+            try
+            {
+                await itsInterface.clientKiller.ExecuteBypass();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             await StartAccountProcess(itsInterface);
 
@@ -97,13 +94,24 @@ namespace Evelynn_Bot.ProcessManager
                                     Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
                                     break;
                                 case "new_player_set_account":
-                                    await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+
                                     Console.WriteLine("NEW PLAYER, SETTING UP NEW PLAYER");
+                                    try
+                                    {
+                                        await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                                    }
+
+                                    catch (Exception e)
+                                    {
+                                        Console.WriteLine(e);
+                                    }
+
                                     if (itsInterface.license.Lol_isEmptyNick == false)
                                     {
                                         Dispose(true);
                                         await accountProcess.CheckNewAccount(itsInterface);
                                     }
+
                                     break;
                                 case "invalid_credentials":
                                     // Report that account to wrong accounts pool and get new from the accounts pool
@@ -145,7 +153,6 @@ namespace Evelynn_Bot.ProcessManager
                         }
 
                         await accountProcess.CheckLeagueBan(itsInterface);
-
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
                         accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh degil ihh yani
@@ -212,11 +219,11 @@ namespace Evelynn_Bot.ProcessManager
                             itsInterface.gameAi.YeniAIBaslat(itsInterface);
                         }
 
-                        if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
-                        {
-                            Dispose(true);
-                            await accountProcess.CheckNewAccount(itsInterface);
-                        }
+                        //if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
+                        //{
+                        //    Dispose(true);
+                        //    await accountProcess.CheckNewAccount(itsInterface);
+                        //}
 
                         if (itsInterface.license.Lol_disenchant)
                         {
@@ -246,8 +253,11 @@ namespace Evelynn_Bot.ProcessManager
                             {
                                 if (item.type == "CARD" && item.status != "COMPLETED")
                                 {
+                                    Console.WriteLine(item.queueId);
+                                    itsInterface.gameAi.pickedTutoChamp = false;
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
+                                    await itsInterface.newQueue.DoTutorials(itsInterface);
                                 }
                             }
                             //accountProcess.TutorialMissions(itsInterface);
@@ -256,7 +266,7 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.lcuPlugins.KillUXAsync();
 
                         Dispose(true);
-                        return itsInterface.newQueue.Test(itsInterface);
+                        return itsInterface.newQueue.Test(itsInterface, false);
                     }
                     else if (processExist("LeagueClient", itsInterface))
                     {
@@ -319,11 +329,11 @@ namespace Evelynn_Bot.ProcessManager
                             itsInterface.gameAi.YeniAIBaslat(itsInterface);
                         }
 
-                        if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
-                        {
-                            Dispose(true);
-                            await accountProcess.CheckNewAccount(itsInterface);
-                        }
+                        //if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
+                        //{
+                        //    Dispose(true);
+                        //    await accountProcess.CheckNewAccount(itsInterface);
+                        //}
 
                         if (itsInterface.license.Lol_disenchant)
                         {
@@ -346,8 +356,10 @@ namespace Evelynn_Bot.ProcessManager
                             {
                                 if (item.type == "CARD" && item.status != "COMPLETED")
                                 {
+                                    Console.WriteLine(item.queueId);
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
+                                    await itsInterface.newQueue.Test(itsInterface, true);
                                 }
                             }
                             //accountProcess.TutorialMissions(itsInterface);
@@ -360,7 +372,7 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.lcuPlugins.KillUXAsync();
 
                         Dispose(true);
-                        return itsInterface.newQueue.Test(itsInterface);
+                        return itsInterface.newQueue.Test(itsInterface, false);
                     }
                     else
                     {
@@ -550,7 +562,7 @@ namespace Evelynn_Bot.ProcessManager
                     }
                 }
                 
-                itsInterface.newQueue.CreateLobby();
+                itsInterface.newQueue.CreateLobby(itsInterface);
 
                 Dispose(true);
                 return Task.CompletedTask;

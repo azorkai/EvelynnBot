@@ -63,8 +63,9 @@ namespace Evelynn_Bot
 
         static async Task Main(string[] args)
         {
+            Interface itsInterface = new Interface();
             UpdateBot.CheckUpdate();
-
+            itsInterface.logger.Log(true, "Version: " + Assembly.GetExecutingAssembly().GetName().Version);
             #region Resize Console
             //Console.WindowWidth = 80;
             //Console.WindowHeight = 15;
@@ -79,7 +80,6 @@ namespace Evelynn_Bot
             //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             //GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency; //Kaldirildi
 
-            Interface itsInterface = new Interface();
             Language.language = itsInterface.jsonRead.Language();
             itsInterface.messages.SetLanguage();
             string botArg = "";

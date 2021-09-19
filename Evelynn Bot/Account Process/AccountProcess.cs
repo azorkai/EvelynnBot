@@ -372,13 +372,21 @@ namespace Evelynn_Bot.Account_Process
 
                 await Task.Delay(5000);
 
-                await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                try
+                {
+                    await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
 
                 var name = RandomNameGenerator();
                 itsInterface.lcuPlugins.KillUXAsync();
+
                 if (await itsInterface.lcuPlugins.SetSummonerName(name))
                 {
-                    itsInterface.logger.Log(true, "Successfully used name!");
+                    itsInterface.logger.Log(true, "Successfully used name! " + name);
                     Dispose(true);
                     return itsInterface.processManager.Start(itsInterface);
                 }
