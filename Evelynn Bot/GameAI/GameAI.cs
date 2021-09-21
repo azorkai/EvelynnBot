@@ -966,10 +966,8 @@ namespace Evelynn_Bot.GameAI
         }
         public void BaslangicEsyaAl(bool bool_4)
         {
-            Console.WriteLine("Eşya Alınıyor (Galiba)");
             if (bool_4)
             {
-                Console.WriteLine("Eşya Alınıyor!");
                 int num = random_0.Next(1, 15);
                 EkraniAyarla(new Point(point_2.X + num, point_2.Y + num));
                 Thread.Sleep(4000);
@@ -994,9 +992,7 @@ namespace Evelynn_Bot.GameAI
             }
             else
             {
-                Console.WriteLine("Market Açılıyor");
                 TusuAyarla(GEnum8.KEY_P);
-                Console.WriteLine("Eşya Alınıyor!");
                 int num = random_0.Next(1, 15);
                 EkraniAyarla(new Point(point_2.X + num, point_2.Y + num));
                 Thread.Sleep(4000);
@@ -1154,7 +1150,7 @@ namespace Evelynn_Bot.GameAI
                                 break;
                         }
                     }
-                    if (healthPercentage >= 35.0)
+                    if (healthPercentage >= 38.0)
                     {
                         if (point_2.X != -1 && list4.Count >= 2) // En az 2 veya daha fazla AllyMinion varsa
                         {
@@ -1300,7 +1296,6 @@ namespace Evelynn_Bot.GameAI
                 IL_03e7:
                     if (flag2 && itsInterface.queueId != 2000) // Eğer Basedeysek ve tutorial'da değilsek //&& isItemHasBought < 2
                     {
-                        Console.WriteLine("Mağaza Bulundu");
                         if (summonerItemCount != 0) // Şu anki şampiyonun eşyası varsa
                         {
                             if (DateTime.Now.Subtract(dateTime_0).TotalMinutes > 3.0)
@@ -1665,12 +1660,8 @@ namespace Evelynn_Bot.GameAI
             {
                 GC.Collect();
             }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
         }
 
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
         ~GameAi()
         {
             Dispose(disposing: false);

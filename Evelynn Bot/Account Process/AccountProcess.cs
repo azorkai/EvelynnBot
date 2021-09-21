@@ -70,7 +70,6 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-                Console.WriteLine(loginStatus);
                 if (loginStatus.error != string.Empty)
                 {
                     if (loginStatus.error == "rate_limited")
@@ -82,7 +81,7 @@ namespace Evelynn_Bot.Account_Process
                     }
                     if (loginStatus.error == "auth_failure")
                     {
-                        // TODO: PANELE BİLDİR SONRA YENİ HESAP AL, STARTACCOUNT PROCESS
+                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                         return false;
                     }
                 }
@@ -113,7 +112,6 @@ namespace Evelynn_Bot.Account_Process
             }
             catch (Exception e)
             {
-                //TODO: EĞER GİRİŞ BAŞARISIZ İSE SİTEYE BU BİLGİYİ GÖNDER
                 itsInterface.clientKiller.KillAllLeague();
                 Dispose(true);
                 return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
@@ -168,9 +166,6 @@ namespace Evelynn_Bot.Account_Process
             }
             if (loginSession.error.messageId == "ACCOUNT_BANNED") // Account has banned
             {
-                // Sent the banned account to the dashboard, then get new account.
-                //GClass119.GClass119_0.method_12(Class14.gclass1_0.Int64_0);
-                //Class14.action_0 = Class14.Action.RequestAccount;
                 return "banned_account";
             }
             else if (loginSession.error.messageId != "RATE_LIMITED")
@@ -189,9 +184,6 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.logger.Log(false, itsInterface.messages.ErrorLogin);
                     if (loginAttempt >= 3)
                     {
-                        // BURADA HESABI PANELE BİLDİR VE YENI HESAP İSTE
-                        //GClass115.GStruct0 gstruct0_2 = GClass119.GClass119_0.method_13(Class14.gclass1_0.Int64_0);
-                        //Class14.action_0 = Class14.Action.RequestAccount;
                         return "invalid_credentials";
                     }
                     else
@@ -199,12 +191,12 @@ namespace Evelynn_Bot.Account_Process
                         return "restart_client_error";
                     }
                 }
-                else if (loginSession.error.messageId == "LOGGED_IN_ELSEWHERE")
-                {
-                    // YENİ HESAP İSTE
-                    //Class14.action_0 = Class14.Action.RequestAccount;
-                    return "logged_in_from_another";
-                }
+                //else if (loginSession.error.messageId == "LOGGED_IN_ELSEWHERE")
+                //{
+                //    // YENİ HESAP İSTE
+                //    //Class14.action_0 = Class14.Action.RequestAccount;
+                //    return "logged_in_from_another";
+                //}
                 else if (loginSession.error.messageId == "CHANNEL_AUTH_FAILED")
                     return "restart_client_error";
             }
@@ -225,8 +217,8 @@ namespace Evelynn_Bot.Account_Process
                 if (isBanned.isPermaBan.Value)
                 {
                     // Account has perma banned!
-                    // TODO: BURDA HESABI PANELE GÖNDER SONRA YENİ HESAP AL ( SET LOL STATUS BANNED EKLENECEK PANELE )
-                    itsInterface.logger.Log(true,("Account Banned"));
+                    itsInterface.logger.Log(true, ("Account Banned"));
+                    await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Banned");
                     return Task.CompletedTask;
                 }
             }
@@ -270,8 +262,7 @@ namespace Evelynn_Bot.Account_Process
                 switch (session)
                 {
                     case "banned_account":
-                        // hesabı panele gönder ve yenisini al.
-                        Console.WriteLine("BANNED ACCOUNT, GETTING NEW ACCOUNT");
+                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Banned");
                         break;
                     case "new_player_set_account":
                         await itsInterface.lcuPlugins.CompleteNewAccountAsync();
@@ -286,7 +277,7 @@ namespace Evelynn_Bot.Account_Process
                         }
                         break;
                     case "invalid_credentials":
-                        Console.WriteLine("INVALID CREDENTIALS, GETTING NEW ACCOUNT");
+                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                         break;
                     case "restart_client_error":
                         Console.WriteLine("CLIENT ERROR! RESTART");
@@ -325,7 +316,6 @@ namespace Evelynn_Bot.Account_Process
             catch (Exception e)
             {
                 Console.WriteLine($"LOGIN HATA: {e}");
-                //TODO: EĞER GİRİŞ BAŞARISIZ İSE SİTEYE BU BİLGİYİ GÖNDER
                 itsInterface.clientKiller.KillAllLeague();
                 Dispose(true);
                 itsInterface.Result(false, itsInterface.messages.ErrorLogin);
@@ -497,15 +487,11 @@ namespace Evelynn_Bot.Account_Process
         {
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects)
                 GC.Collect();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
         }
 
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
         ~AccountProcess()
         {
             Dispose(disposing: false);

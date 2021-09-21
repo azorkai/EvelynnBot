@@ -63,7 +63,18 @@ namespace Evelynn_Bot
 
         static async Task Main(string[] args)
         {
+
             Interface itsInterface = new Interface();
+
+            try
+            {
+                await itsInterface.clientKiller.ExecuteBypass();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             UpdateBot.CheckUpdate();
             itsInterface.logger.Log(true, "Version: " + Assembly.GetExecutingAssembly().GetName().Version);
             #region Resize Console

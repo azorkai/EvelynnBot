@@ -274,11 +274,15 @@ namespace Evelynn_Bot
                                 double lpqRemaining = searchState.lowPriorityData.penaltyTimeRemaining.Value;
                                 if (lpqRemaining > 0.0)
                                 {
-                                    // TODO: PANELE GÖNDER
+                                    itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
                                     itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
                                     Thread.Sleep((int)lpqRemaining * 1000);
                                     return;
                                 }
+                            }
+                            else
+                            {
+                                    itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
                             }
                         }
                         else
@@ -286,10 +290,14 @@ namespace Evelynn_Bot
                             double penaltyRemaining = searchState.errors[0].penaltyTimeRemaining.Value;
                             if (!(penaltyRemaining <= 0.0))
                             {
-                                // TODO: PANELE GÖNDER
+                                itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
                                 itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
                                 Thread.Sleep((int)penaltyRemaining * 1000);
                                 return;
+                            }
+                            else
+                            {
+                                    itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
                             }
                         }
 

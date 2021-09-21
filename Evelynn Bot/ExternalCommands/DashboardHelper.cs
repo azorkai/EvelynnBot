@@ -175,7 +175,7 @@ namespace Evelynn_Bot.ExternalCommands
             }
         }
 
-        public void UpdateLPQStatus(string tF, Interface itsInterface)
+        public void UpdateLPQStatus(string trueFalse, Interface itsInterface)
         {
             string botRequest = itsInterface.req.CreateRequest(URI,
                 new string[] { "data" },
@@ -187,7 +187,7 @@ namespace Evelynn_Bot.ExternalCommands
                         itsInterface.license.Password,
                         itsInterface.license.ID,
                         itsInterface.license.Last,
-                        tF
+                        trueFalse
                     ))},
                 Method.POST);
 
