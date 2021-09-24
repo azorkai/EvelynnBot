@@ -69,26 +69,40 @@ namespace Evelynn_Bot.Account_Process
 
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
-                var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-                if (loginStatus.error != string.Empty)
+                //var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+                //AWAIT hata verdiriyor, idk
+                itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+                await Task.Delay(5500);
+                try
                 {
-                    if (loginStatus.error == "rate_limited")
-                    {
-                        Console.WriteLine("Rate limit, wait 5 min");
-                        Thread.Sleep(new TimeSpan(0, 5, 0));
-                        return false;
-                        //return itsInterface.processManager.StartAccountProcess(itsInterface);
-                    }
-                    if (loginStatus.error == "auth_failure")
-                    {
-                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
-                        return false;
-                    }
+                    await itsInterface.lcuPlugins.LeagueProductSelect();
+
                 }
-                if (loginStatus.type != "authenticated")
+                catch (Exception e)
                 {
-                    Console.WriteLine($"ERROR LOGIN TYPE: {loginStatus.type}");
+                    itsInterface.logger.Log(true,"Already Selected League");
                 }
+
+                //İPTAL EDİLDİ, MUHTEMELEN YENİ VERSİYONDAN ÖTÜRÜ HATA VERİYOR!
+                //if (loginStatus.error != string.Empty)
+                //{
+                //    if (loginStatus.error == "rate_limited")
+                //    {
+                //        Console.WriteLine("Rate limit, wait 5 min");
+                //        Thread.Sleep(new TimeSpan(0, 5, 0));
+                //        return false;
+                //        //return itsInterface.processManager.StartAccountProcess(itsInterface);
+                //    }
+                //    if (loginStatus.error == "auth_failure")
+                //    {
+                //        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                //        return false;
+                //    }
+                //}
+                //if (loginStatus.type != "authenticated")
+                //{
+                //    Console.WriteLine($"ERROR LOGIN TYPE: {loginStatus.type}");
+                //}
 
                 Thread.Sleep(3500);
                 try
