@@ -76,7 +76,7 @@ namespace Evelynn_Bot.Account_Process
                 try
                 {
                     await itsInterface.lcuPlugins.LeagueProductSelect();
-
+                    itsInterface.logger.Log(true,"League product selected!");
                 }
                 catch (Exception e)
                 {

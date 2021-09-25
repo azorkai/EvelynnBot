@@ -1609,26 +1609,16 @@ namespace Evelynn_Bot.GameAI
             point_2 = AnaPointAl(new Point(15, 47));
             point_3 = AnaPointAl(new Point(38, 180));
 
-            Thread.Sleep(10000);
+            Thread.Sleep(19000);
 
-            if (Process.GetProcessesByName("League of Legends").Length == 1)
-            {
-                itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
-                itsInterface.clientKiller.ActivateGame();
-                EkraniAyarla(point_4);
-                SolTiklat();
-                Thread.Sleep(5000);
-                EndBas();
-                RGBHazirla(itsInterface);
-                StartNewGameAI(itsInterface);
-            }
-
-            //Performans kaybı olabilir!![Test]
-            else
-            {
-                Dispose(true);
-                YeniAIBaslat(itsInterface);
-            }
+            itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
+            itsInterface.clientKiller.ActivateGame();
+            EkraniAyarla(point_4);
+            SolTiklat();
+            Thread.Sleep(5000);
+            EndBas();
+            RGBHazirla(itsInterface);
+            StartNewGameAI(itsInterface);
         }
 
         public void CurrentPlayerStats(Interface itsInterface)
@@ -1649,7 +1639,7 @@ namespace Evelynn_Bot.GameAI
             }
             catch (Exception e)
             {
-                itsInterface.logger.Log(false, "Error on Current Player Stats");
+                //ignored
             }
         }
 
