@@ -382,10 +382,11 @@ namespace Evelynn_Bot.Account_Process
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+
                 }
 
                 var name = RandomNameGenerator();
+
                 itsInterface.lcuPlugins.KillUXAsync();
 
                 if (await itsInterface.lcuPlugins.SetSummonerName(name))

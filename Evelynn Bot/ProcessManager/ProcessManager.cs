@@ -47,6 +47,8 @@ namespace Evelynn_Bot.ProcessManager
         {
             itsInterface.newQueue.bugTimer.Stop();
             itsInterface.clientKiller.KillAllLeague();
+            await Task.Delay(10000);
+
             // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)
             try
             {
@@ -63,20 +65,20 @@ namespace Evelynn_Bot.ProcessManager
                     if (isFromGame == false)
                     {
                         accountProcess.StartLeague(itsInterface, StartEnums.RiotClient);
-                        Thread.Sleep(15000);
+                        await Task.Delay(15000);
                         itsInterface.lcuApi.BeginTryInitRiotClient();
                     }
                     if (processExist("RiotClientServices", itsInterface))
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
-                        Thread.Sleep(5000);
+                        await Task.Delay(5000);
                         accountProcess.Initialize(itsInterface);
+
                         itsInterface.lcuPlugins.KillUXAsync();
 
                         try
                         {
                             string session = await accountProcess.VerifySession(itsInterface);
-                            itsInterface.logger.Log(false, session);
 
                             switch (session)
                             {
@@ -84,21 +86,14 @@ namespace Evelynn_Bot.ProcessManager
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Banned");
                                     break;
                                 case "new_player_set_account":
-                                    Console.WriteLine("NEW PLAYER, SETTING UP NEW PLAYER");
-                                    try
-                                    {
-                                        await itsInterface.lcuPlugins.CompleteNewAccountAsync();
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Console.WriteLine(e);
-                                    }
+                                    itsInterface.logger.Log(true ,"That's a new account");
 
                                     if (itsInterface.license.Lol_isEmptyNick == false)
                                     {
                                         Dispose(true);
                                         await accountProcess.CheckNewAccount(itsInterface);
                                     }
+
                                     break;
                                 case "invalid_credentials":
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
@@ -113,7 +108,7 @@ namespace Evelynn_Bot.ProcessManager
                                 //    Console.WriteLine("This account has logged in from somewhere else already!");
                                 //    break;
                                 default:
-                                    Console.WriteLine($"LOGIN SESSION: {session}");
+                                    itsInterface.logger.Log(true,$"LOGIN SESSION: {session}");
                                     break;
                             }
                         }
@@ -123,21 +118,8 @@ namespace Evelynn_Bot.ProcessManager
                             Console.WriteLine(e);
                         }
                         
-                        Thread.Sleep(3500);
-
-                        try
-                        {
-                            var eula = await itsInterface.lcuPlugins.GetEula("read");
-                            if (eula.Equals("\"AcceptanceRequired\""))
-                            {
-                                await itsInterface.lcuPlugins.GetEula("accept");
-                            }
-                        }
-                        catch
-                        {
-                            //ignored
-                        }
-
+                        await Task.Delay(3500);
+                        
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();

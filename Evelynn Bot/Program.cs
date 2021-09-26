@@ -40,10 +40,7 @@ namespace Evelynn_Bot
 
         public static IntPtr Handle
         {
-            get
-            {
-                return GetConsoleWindow();
-            }
+            get { return GetConsoleWindow(); }
         }
 
         const int SWP_NOZORDER = 0x4;
@@ -77,7 +74,9 @@ namespace Evelynn_Bot
 
             UpdateBot.CheckUpdate();
             itsInterface.logger.Log(true, "Version: " + Assembly.GetExecutingAssembly().GetName().Version);
+
             #region Resize Console
+
             //Console.WindowWidth = 80;
             //Console.WindowHeight = 15;
             //Console.BufferWidth = 80;
@@ -86,6 +85,7 @@ namespace Evelynn_Bot
             //var height = screen.Height;
             //var ustTaraf = height - (height - 30);
             ////SetWindowPosition(5, ustTaraf, 700, 200);
+
             #endregion
 
             //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
@@ -118,11 +118,12 @@ namespace Evelynn_Bot
             }
 
             Console.ReadLine();
-        }
+            }
 
-    }
+        }
     public static class Language
     {
         public static string language;
     }
 }
+
