@@ -79,6 +79,7 @@ namespace Evelynn_Bot
             try
             {
                 await Task.Delay(1000);
+                GameAiBool = true;
                 itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830});
                 itsInterface2.logger.Log(true, itsInterface2.messages.SuccessCreateGame);
             }

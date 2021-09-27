@@ -200,7 +200,7 @@ namespace Evelynn_Bot.ProcessManager
                             {
                                 if (item.type == "CARD" && item.status != "COMPLETED")
                                 {
-                                    Console.WriteLine(item.queueId);
+                                    itsInterface.newQueue.GameAiBool = true;
                                     itsInterface.gameAi.pickedTutoChamp = false;
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
