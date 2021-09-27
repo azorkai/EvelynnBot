@@ -390,6 +390,7 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> PlayAgain(Interface itsInterface)
         {
+            itsInterface.newQueue.GameAiBool = true;
             int pnC = 0;
             CHECKACTIONS:
             if (itsInterface.dashboard.IsStart) // Dashboard Action Start

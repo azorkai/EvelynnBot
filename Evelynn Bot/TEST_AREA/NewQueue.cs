@@ -365,6 +365,7 @@ namespace Evelynn_Bot
                     case "PreEndOfGame":
                         state = "Honor Screen";
                         itsInterface2.lcuPlugins.KillUXAsync();
+                        GameAiBool = true;
                         bugTimer.Stop();
                         BugTime = 0;
                         await itsInterface2.processManager.PlayAgain(itsInterface2);
