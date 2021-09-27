@@ -93,7 +93,6 @@ namespace Evelynn_Bot.ProcessManager
                                         Dispose(true);
                                         await accountProcess.CheckNewAccount(itsInterface);
                                     }
-
                                     break;
                                 case "invalid_credentials":
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");

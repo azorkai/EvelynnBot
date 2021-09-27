@@ -88,6 +88,43 @@ namespace Evelynn_Bot.ExternalCommands
             return "ok";
         }
 
+        private async Task<string> EnableAndDisableAdapter()
+        {
+            try
+            {
+                // Enable WMI Service
+                await RunCommand("sc config winmgmt start= demand");
+                // Start WMI Service
+                await RunCommand("net start winmgmt");
+                // Disable Adapter
+                await RunCommand("wmic path win32_networkadapter where index=7 call disable");
+                Thread.Sleep(750);
+                // Enable Adapter
+                await RunCommand("wmic path win32_networkadapter where index=7 call enable");
+                // Stop WMI Service
+                await RunCommand("net stop winmgmt");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"DISABLE ADAPTER {e}");
+            }
+            return "ok";
+        }
+
+        private async Task<string> RunCommand(string cmd)
+        {
+            using (StreamWriter text = File.CreateText("del.bat"))
+                text.WriteLine(cmd);
+            Process.Start(new ProcessStartInfo("del.bat")
+            {
+                UseShellExecute = true,
+                Verb = "runas"
+            });
+            Thread.Sleep(250);
+            File.Delete("del.bat");
+            return "ok";
+        }
+
         private async Task<string> GenerateAndChangeMACAddress()
         {
             Random random = new Random();
@@ -96,7 +133,8 @@ namespace Evelynn_Bot.ExternalCommands
             array[0] = (byte)(array[0] | 2u);
             array[0] = (byte)(array[0] & 0xFEu);
 
-            var randomMac = "00:50:56" + BitConverter.ToString(array).Replace("-", "").ToUpper();
+            //var randomMac = "00:50:56" + BitConverter.ToString(array).Replace("-", "").ToUpper();
+            var randomMac = "00:0C:29" + BitConverter.ToString(array).Replace("-", "").ToUpper();
 
             try
             {
@@ -108,13 +146,14 @@ namespace Evelynn_Bot.ExternalCommands
                         registryKey.SetValue("NetworkAddress", value, RegistryValueKind.String);
                     }
                 }
-                await DisableAdapter("Local Area Connection");
-                await EnableAdapter("Local Area Connection");
+                //await DisableAdapter("Local Area Connection");
+                //await EnableAdapter("Local Area Connection");
+                await EnableAndDisableAdapter();
                 Thread.Sleep(5000);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"MAC HATA: {ex}");
             }
             return "ok";
         }

@@ -159,7 +159,6 @@ namespace Evelynn_Bot
             Console.WriteLine("Done.");
         }
 
-
         public async Task EventExampleAsync()
         {
             //UxStateChanged += OnUxStateChanged;
@@ -314,11 +313,14 @@ namespace Evelynn_Bot
                         BugTime = 0;
 
                         await Task.Delay(1500);
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         itsInterface2.newQueue.PickChampion();
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         break;
 
                     case "GameStart":
                         state = "Game Started";
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         break;
 
                     case "ReadyCheck":
@@ -332,6 +334,7 @@ namespace Evelynn_Bot
 
                     case "InProgress":
                         state = "Game in Progress";
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
 
                         bugTimer.Stop();
@@ -354,13 +357,14 @@ namespace Evelynn_Bot
                         break;
                     case "Matchmaking":
                         state = "Matchmaking";
-
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         bugTimer.Stop();
                         BugTime = 0;
                         break;
 
                     case "PreEndOfGame":
                         state = "Honor Screen";
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         bugTimer.Stop();
                         BugTime = 0;
                         await itsInterface2.processManager.PlayAgain(itsInterface2);
