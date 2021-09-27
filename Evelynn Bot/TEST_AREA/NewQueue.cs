@@ -25,6 +25,7 @@ namespace Evelynn_Bot
         public System.Timers.Timer bugTimer = new System.Timers.Timer();
         private int BugTime;
         public bool GameAiBool;
+        public bool _playAgain;
 
 
         private event MessageHandlerDelegate<UxState> UxStateChanged;
@@ -202,7 +203,6 @@ namespace Evelynn_Bot
             }
         }
 
-
         private async void OnUxStateChanged(EventType sender, UxState result)
         {
             var state = string.Empty;
@@ -302,17 +302,16 @@ namespace Evelynn_Bot
                         }
 
                         await Task.Delay(2500);
-
                         GameAiBool = true;
                         bugTimer.Start();
-
                         itsInterface2.lcuPlugins.PostMatchmakingSearch();
                         break;
                     case "ChampSelect":
                         state = "Champ Select [Ignore this message if game is started!]";
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
-                        BugTime = 0;
 
+                        BugTime = 0;
+                        GameAiBool = true;
                         await Task.Delay(1500);
                         itsInterface2.lcuPlugins.KillUXAsync();
                         itsInterface2.newQueue.PickChampion();
@@ -328,6 +327,7 @@ namespace Evelynn_Bot
                         state = "Match Found";
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
 
+                        GameAiBool = true;
                         BugTime = 0;
 
                         itsInterface2.lcuPlugins.AcceptReadyCheck();
@@ -344,6 +344,7 @@ namespace Evelynn_Bot
                         if (GameAiBool)
                         {
                             GameAiBool = false;
+                            _playAgain = true;
                             //await itsInterface2.processManager.GameAi(itsInterface2);
                             itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
                         }
@@ -352,7 +353,7 @@ namespace Evelynn_Bot
                     case "WaitingForStats":
                         state = "Waiting for Stats";
                         itsInterface2.lcuPlugins.KillUXAsync();
-
+                        GameAiBool = true;
                         bugTimer.Start();
 
                         break;
@@ -369,14 +370,21 @@ namespace Evelynn_Bot
                         GameAiBool = true;
                         bugTimer.Stop();
                         BugTime = 0;
-                        await itsInterface2.processManager.PlayAgain(itsInterface2);
+
+                        //Bunu bir kere yapması gerekiyor, iki kere "PreEndOfGame" geldiği vakit üst üste biniyor.
+                        if (_playAgain)
+                        {
+                            _playAgain = false;
+                            await itsInterface2.processManager.PlayAgain(itsInterface2);
+                        }
+
                         break;
 
                     default:
                         state = $"unknown state: {result.Phase}";
                         break;
                 }
-                //itsInterface2.logger.Log(true, itsInterface2.messages.InfoQueueStats + " " + state);
+                itsInterface2.logger.Log(true, itsInterface2.messages.InfoQueueStats + " " + state);
             }
             catch (Exception e)
             {

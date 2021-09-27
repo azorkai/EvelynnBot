@@ -1160,11 +1160,13 @@ namespace Evelynn_Bot.GameAI
                                 {
                                     if (point_.X == -1) // EnemyMinion yoksa
                                     {
+                                        itsInterface.clientKiller.ActivateGame();
                                         EkraniAyarla(TowerHesapla(double_));
                                         TusuAyarla(GEnum8.KEY_A);
                                     }
                                     else
                                     {
+                                        itsInterface.clientKiller.ActivateGame();
                                         EkraniAyarla(AnaPointAl(point_));
                                         TusuAyarla(GEnum8.KEY_A);
                                         isItemHasBought = 0;
@@ -1366,7 +1368,6 @@ namespace Evelynn_Bot.GameAI
                 }
 
                 Console.WriteLine("YENI AI: GAME END");
-                Console.Clear();
                 Dispose(true);
                 Thread.Sleep(20000);
 
@@ -1594,6 +1595,7 @@ namespace Evelynn_Bot.GameAI
         }
         public void YeniAIBaslat(Interface itsInterface)
         {
+            itsInterface.newQueue._playAgain = true;
             isGameEnd = false;
             dateTime_1 = DateTime.Now;
             scrX = PointAl(true).X;
