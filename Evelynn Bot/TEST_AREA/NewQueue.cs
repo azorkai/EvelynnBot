@@ -311,7 +311,7 @@ namespace Evelynn_Bot
                                     {
                                         itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
                                         itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
-                                        Thread.Sleep((int)lpqRemaining * 1000);
+                                        await Task.Delay((int)lpqRemaining * 1000);
                                         return;
                                     }
                                 }
@@ -327,7 +327,7 @@ namespace Evelynn_Bot
                                 {
                                     itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
                                     itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
-                                    Thread.Sleep((int)penaltyRemaining * 1000);
+                                    await Task.Delay((int)penaltyRemaining * 1000);
                                     return;
                                 }
                                 else
@@ -419,13 +419,25 @@ namespace Evelynn_Bot
                             _playAgain = false;
                             await itsInterface2.processManager.PlayAgain(itsInterface2);
                         }
+
                         break;
                     case "Reconnect":
                         state = "Reconnect";
-                        await itsInterface2.lcuPlugins.ReconnectGameAsync();
+                        try
+                        {
+                            await itsInterface2.lcuPlugins.ReconnectGameAsync();
+
+                        }
+                        catch (Exception e)
+                        {
+                            itsInterface2.logger.Log(false, "Reconnect is not available.");
+                        }
+
                         itsInterface2.logger.Log(false, "Could not load game! Reconnecting...");
                         itsInterface2.lcuPlugins.KillUXAsync();
-                        Thread.Sleep(15000);
+
+                        await Task.Delay(15000);
+
                         if (Process.GetProcessesByName("League of Legends").Length == 1)
                         {
                             itsInterface2.logger.Log(true, "League Game Found");
