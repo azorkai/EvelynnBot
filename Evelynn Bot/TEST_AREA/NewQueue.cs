@@ -32,6 +32,7 @@ namespace Evelynn_Bot
         private event MessageHandlerDelegate<GameFlow> StateChanged;
         private event MessageHandlerDelegate<Search> OnSearchStateChanged;
         public Interface itsInterface2;
+        private bool isAlreadyConnected = false;
 
         private readonly TaskCompletionSource<bool> _work = new TaskCompletionSource<bool>(false);
         public async Task<Task> Test(Interface itsInterface, bool isTuto)
@@ -72,6 +73,7 @@ namespace Evelynn_Bot
             isDone = false;
 
             EventExampleAsync();
+            isAlreadyConnected = true;
             CreateLobby(itsInterface);
         }
 
@@ -166,17 +168,20 @@ namespace Evelynn_Bot
 
         public async Task EventExampleAsync()
         {
-            //UxStateChanged += OnUxStateChanged;
-            StateChanged += OnStateChanged;
-            OnSearchStateChanged += OnSearchChanged;
+            if (isAlreadyConnected == false)
+            {
+                //UxStateChanged += OnUxStateChanged;
+                StateChanged += OnStateChanged;
+                OnSearchStateChanged += OnSearchChanged;
 
-            itsInterface2.lcuApi.Socket.Subscribe("/lol-lobby/v2/lobby/matchmaking/search-state", OnSearchStateChanged);
-            //itsInterface2.lcuApi.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
-            itsInterface2.lcuApi.Socket.Subscribe("/lol-gameflow/v1/session", StateChanged);
+                itsInterface2.lcuApi.Socket.Subscribe("/lol-lobby/v2/lobby/matchmaking/search-state", OnSearchStateChanged);
+                //itsInterface2.lcuApi.Socket.Subscribe("/riotclient/ux-state/request", UxStateChanged);
+                itsInterface2.lcuApi.Socket.Subscribe("/lol-gameflow/v1/session", StateChanged);
 
-            // Wait until work is complete.
-            await _work.Task;
-            itsInterface2.logger.Log(true,"Done - Game State and Session");
+                // Wait until work is complete.
+                await _work.Task;
+                itsInterface2.logger.Log(true, "Done - Game State and Session");
+            }
         }
 
         private async void OnSearchChanged(EventType sender, Search result)
@@ -463,7 +468,7 @@ namespace Evelynn_Bot
             {
                 //Test-ReSubIfBug
                 itsInterface2.logger.Log(false, "Error State Checker: " + e);
-                EventExampleAsync();
+                //EventExampleAsync();
             }
         }
     }

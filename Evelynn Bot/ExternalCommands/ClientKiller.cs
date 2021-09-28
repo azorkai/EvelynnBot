@@ -307,6 +307,32 @@ namespace Evelynn_Bot.ExternalCommands
             return "ok";
         }
 
+        public async Task<string> StartFPSLimiter()
+        {
+
+            Process[] pBN = Process.GetProcessesByName("fpslimiter32");
+            foreach (Process p in pBN) { p.Kill(); }
+            Thread.Sleep(2000);
+
+            while (Process.GetProcessesByName("fpslimiter32").Length == 0)
+            {
+                string limiterPath = GetLeaguePath();
+                string fpsLimiter32 = "fpslimiter32.exe";
+                using (StreamWriter streamWriter = File.CreateText("del.bat"))
+                {
+                    streamWriter.WriteLine("cd " + limiterPath + " && start \"\" \"" + fpsLimiter32 + "\" --minimize");
+                }
+                Process.Start(new ProcessStartInfo("del.bat")
+                {
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+                Thread.Sleep(5000);
+            }
+            File.Delete("del.bat");
+            return "ok";
+        }
+
         #endregion
 
         public void LaunchLeagueFromLeagueClient(string path)
