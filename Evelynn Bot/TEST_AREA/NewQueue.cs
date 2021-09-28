@@ -425,6 +425,21 @@ namespace Evelynn_Bot
                         await itsInterface2.lcuPlugins.ReconnectGameAsync();
                         itsInterface2.logger.Log(false, "Could not load game! Reconnecting...");
                         itsInterface2.lcuPlugins.KillUXAsync();
+                        Thread.Sleep(15000);
+                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        {
+                            itsInterface2.logger.Log(true, "League Game Found");
+                            if (GameAiBool)
+                            {
+                                itsInterface2.lcuPlugins.KillUXAsync();
+                                itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
+                                bugTimer.Stop();
+                                BugTime = 0;
+                                GameAiBool = false;
+                                _playAgain = true;
+                                itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
+                            }
+                        }
                         break;
                     default:
                         state = $"unknown state: {result.Phase}";
