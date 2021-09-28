@@ -61,6 +61,8 @@ namespace Evelynn_Bot
         static async Task Main(string[] args)
         {
 
+            WIN32.SetWindowPos(Process.GetCurrentProcess().MainWindowHandle, 0, 0, 0, 0, 0, 1u | 4u);
+
             Interface itsInterface = new Interface();
 
             try

@@ -117,6 +117,8 @@ namespace Evelynn_Bot
                     var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
                     itsInterface2.player.CurrentGame_ChampName = champDetails.name;
                     itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
+                    itsInterface2.lcuPlugins.KillUXAsync();
+
                     break;
                 }
                 if (!isLocked)
@@ -136,6 +138,7 @@ namespace Evelynn_Bot
                         var champDetails = await itsInterface2.lcuPlugins.GetChampionDetails(summonerId, currentChampion);
                         itsInterface2.player.CurrentGame_ChampName = champDetails.name;
                         itsInterface2.logger.Log(true, itsInterface2.messages.SuccessChampionPick);
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         break;
                     }
                 }
@@ -281,6 +284,7 @@ namespace Evelynn_Bot
                 {
                     case "None":
                         state = "Main Menu";
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         if (Process.GetProcessesByName("LeagueClient").Length == 1)
                         {
                             itsInterface2.newQueue.CreateLobby(itsInterface2);
@@ -295,6 +299,7 @@ namespace Evelynn_Bot
                         state = "Lobby";
                         if (Process.GetProcessesByName("LeagueClient").Length == 1)
                         {
+                            itsInterface2.lcuPlugins.KillUXAsync();
                             itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
                             var searchState = await itsInterface2.lcuPlugins.GetSearchState();
                             if (searchState.errors.Count <= 0)
@@ -362,6 +367,7 @@ namespace Evelynn_Bot
                     case "ReadyCheck":
                         state = "Match Found";
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
+                        itsInterface2.lcuPlugins.KillUXAsync();
 
                         GameAiBool = true;
                         BugTime = 0;
@@ -416,7 +422,9 @@ namespace Evelynn_Bot
                         break;
                     case "Reconnect":
                         state = "Reconnect";
-                        RestartEverything();
+                        await itsInterface2.lcuPlugins.ReconnectGameAsync();
+                        itsInterface2.logger.Log(false, "Could not load game! Reconnecting...");
+                        itsInterface2.lcuPlugins.KillUXAsync();
                         break;
                     default:
                         state = $"unknown state: {result.Phase}";

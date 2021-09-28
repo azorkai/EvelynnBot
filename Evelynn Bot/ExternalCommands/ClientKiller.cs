@@ -94,15 +94,19 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 // Enable WMI Service
                 await RunCommand("sc config winmgmt start= demand");
+                Thread.Sleep(1500);
                 // Start WMI Service
                 await RunCommand("net start winmgmt");
+                Thread.Sleep(1500);
                 // Disable Adapter
                 await RunCommand("wmic path win32_networkadapter where index=7 call disable");
-                Thread.Sleep(750);
+                Thread.Sleep(3500);
                 // Enable Adapter
                 await RunCommand("wmic path win32_networkadapter where index=7 call enable");
+                Thread.Sleep(3500);
                 // Stop WMI Service
                 await RunCommand("net stop winmgmt");
+                Thread.Sleep(1500);
             }
             catch (Exception e)
             {
@@ -149,7 +153,7 @@ namespace Evelynn_Bot.ExternalCommands
                 //await DisableAdapter("Local Area Connection");
                 //await EnableAdapter("Local Area Connection");
                 await EnableAndDisableAdapter();
-                Thread.Sleep(5000);
+                Thread.Sleep(6000);
             }
             catch (Exception ex)
             {
@@ -435,8 +439,14 @@ namespace Evelynn_Bot.ExternalCommands
 
                 for (iP = 0; iP < proc.Length; iP++)
                 {
+                    SwitchToThisWindow(proc[iP].MainWindowHandle, true);
+                    WIN32.SetForegroundWindow(proc[iP].MainWindowHandle);
+
                     if (proc[iP].Id != currentProcess.Id)
-                        SwitchToThisWindow(proc[0].MainWindowHandle, true);
+                    {
+                        // Explain me why the fuck there is only 0 index is foreground!
+                    }
+
                 }
             }
             catch (Exception e)

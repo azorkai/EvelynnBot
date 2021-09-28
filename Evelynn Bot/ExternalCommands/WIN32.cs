@@ -10,6 +10,33 @@ namespace Evelynn_Bot.ExternalCommands
 {
     public class WIN32
     {
+        private const string LibraryName = "user32";
+        #region winuser.h
+
+        [DllImport(LibraryName, ExactSpelling = true)]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport(LibraryName, ExactSpelling = true)]
+        public static extern IntPtr GetTopWindow();
+
+        [DllImport(LibraryName, ExactSpelling = true)]
+        public static extern IntPtr GetNextWindow(IntPtr hwnd, uint wCmd);
+
+        [DllImport(LibraryName, ExactSpelling = true)]
+        public static extern IntPtr GetWindow(IntPtr hwnd, uint wCmd);
+
+        [DllImport(LibraryName, ExactSpelling = true)]
+        public static extern bool AllowSetForegroundWindow(uint dwProcessId);
+
+        [DllImport(LibraryName, ExactSpelling = true)]
+        public static extern bool SetForegroundWindow(IntPtr hwnd);
+
+        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        #endregion
+
+
         public static IntPtr intptr_0 = (IntPtr)1;
         public static IntPtr intptr_1 = (IntPtr)0;
         public static uint uint_0 = 1;
