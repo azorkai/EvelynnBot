@@ -207,7 +207,6 @@ namespace Evelynn_Bot.ProcessManager
                                     await itsInterface.newQueue.DoTutorials(itsInterface);
                                 }
                             }
-                            //accountProcess.TutorialMissions(itsInterface);
                         }
 
                         itsInterface.lcuPlugins.KillUXAsync();

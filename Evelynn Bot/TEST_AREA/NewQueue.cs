@@ -173,7 +173,7 @@ namespace Evelynn_Bot
 
             // Wait until work is complete.
             await _work.Task;
-            Console.WriteLine("Done.");
+            itsInterface2.logger.Log(true,"Done - Game State and Session");
         }
 
         private async void OnSearchChanged(EventType sender, Search result)
@@ -232,21 +232,43 @@ namespace Evelynn_Bot
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             Console.WriteLine("Bug Check!");
-            BugTime++;
+            if (Process.GetProcessesByName("League of Legends").Length == 1)
+            {
+                itsInterface2.logger.Log(true, "League Game Found");
+                if (GameAiBool)
+                {
+                    itsInterface2.lcuPlugins.KillUXAsync();
+                    itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
+                    bugTimer.Stop();
+                    BugTime = 0;
+                    GameAiBool = false;
+                    _playAgain = true;
+                    itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
+                }
+            }
+
             if (BugTime>=8)
             {
                 Console.WriteLine("Bug!Fix!");
                 BugTime = 0;
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface2.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
+                RestartEverything();
             }
+
+            BugTime++;
+        }
+
+        private void RestartEverything()
+        {
+            itsInterface2.clientKiller.KillAllLeague();
+            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface2.license)));
+            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process eBot = new Process();
+            eBot.StartInfo.FileName = exeDir;
+            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+            eBot.StartInfo.Arguments = licenseBase64String;
+            eBot.StartInfo.Verb = "runas";
+            eBot.Start();
+            Environment.Exit(0);
         }
 
         private async void OnStateChanged(EventType sender, GameFlow result)
@@ -259,52 +281,66 @@ namespace Evelynn_Bot
                 {
                     case "None":
                         state = "Main Menu";
-                        itsInterface2.newQueue.CreateLobby(itsInterface2);
+                        if (Process.GetProcessesByName("LeagueClient").Length == 1)
+                        {
+                            itsInterface2.newQueue.CreateLobby(itsInterface2);
+                        }
+                        else
+                        {
+                            RestartEverything();
+                        }
                         break;
 
                     case "Lobby":
                         state = "Lobby";
-                        itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
-                        var searchState = await itsInterface2.lcuPlugins.GetSearchState();
-
-                        if (searchState.errors.Count <= 0)
+                        if (Process.GetProcessesByName("LeagueClient").Length == 1)
                         {
-                            if (searchState.lowPriorityData.penaltyTimeRemaining.Value > 0)
+                            itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
+                            var searchState = await itsInterface2.lcuPlugins.GetSearchState();
+                            if (searchState.errors.Count <= 0)
                             {
-                                double lpqRemaining = searchState.lowPriorityData.penaltyTimeRemaining.Value;
-                                if (lpqRemaining > 0.0)
+                                if (searchState.lowPriorityData.penaltyTimeRemaining.Value > 0)
                                 {
-                                    itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
-                                    itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
-                                    Thread.Sleep((int)lpqRemaining * 1000);
-                                    return;
+                                    double lpqRemaining = searchState.lowPriorityData.penaltyTimeRemaining.Value;
+                                    if (lpqRemaining > 0.0)
+                                    {
+                                        itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
+                                        itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
+                                        Thread.Sleep((int)lpqRemaining * 1000);
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
                                 }
                             }
                             else
                             {
+                                double penaltyRemaining = searchState.errors[0].penaltyTimeRemaining.Value;
+                                if (!(penaltyRemaining <= 0.0))
+                                {
+                                    itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
+                                    itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
+                                    Thread.Sleep((int)penaltyRemaining * 1000);
+                                    return;
+                                }
+                                else
+                                {
                                     itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
+                                }
                             }
+
+                            await Task.Delay(2500);
+                            GameAiBool = true;
+                            bugTimer.Start();
+                            itsInterface2.lcuPlugins.PostMatchmakingSearch();
                         }
                         else
                         {
-                            double penaltyRemaining = searchState.errors[0].penaltyTimeRemaining.Value;
-                            if (!(penaltyRemaining <= 0.0))
-                            {
-                                itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
-                                itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
-                                Thread.Sleep((int)penaltyRemaining * 1000);
-                                return;
-                            }
-                            else
-                            {
-                                    itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
-                            }
+                            RestartEverything();
                         }
 
-                        await Task.Delay(2500);
-                        GameAiBool = true;
-                        bugTimer.Start();
-                        itsInterface2.lcuPlugins.PostMatchmakingSearch();
                         break;
                     case "ChampSelect":
                         state = "Champ Select [Ignore this message if game is started!]";
@@ -377,9 +413,11 @@ namespace Evelynn_Bot
                             _playAgain = false;
                             await itsInterface2.processManager.PlayAgain(itsInterface2);
                         }
-
                         break;
-
+                    case "Reconnect":
+                        state = "Reconnect";
+                        RestartEverything();
+                        break;
                     default:
                         state = $"unknown state: {result.Phase}";
                         break;

@@ -1367,7 +1367,7 @@ namespace Evelynn_Bot.GameAI
                     item.Join();
                 }
 
-                Console.WriteLine("YENI AI: GAME END");
+                itsInterface.logger.Log(true,"Game is done!");
                 Dispose(true);
                 Thread.Sleep(20000);
 
