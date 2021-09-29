@@ -206,6 +206,11 @@ namespace Evelynn_Bot.ProcessManager
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
                                     await itsInterface.newQueue.DoTutorials(itsInterface);
+                                    //Son tutorial oyunu oynandıysa restart
+                                    if (itsInterface.queueId == 2020)
+                                    {
+                                        await Restart(itsInterface);
+                                    }
                                 }
                             }
                         }
@@ -320,6 +325,21 @@ namespace Evelynn_Bot.ProcessManager
         {
             itsInterface.clientKiller.KillAllLeague();
             itsInterface.dashboardHelper.UpdateLolStatus(status, itsInterface);
+            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process eBot = new Process();
+            eBot.StartInfo.FileName = exeDir;
+            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+            eBot.StartInfo.Arguments = licenseBase64String;
+            eBot.StartInfo.Verb = "runas";
+            eBot.Start();
+            Environment.Exit(0);
+            return Task.CompletedTask;
+        }
+
+        public async Task<Task> Restart(Interface itsInterface)
+        {
+            itsInterface.clientKiller.KillAllLeague();
             var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
             var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Process eBot = new Process();
