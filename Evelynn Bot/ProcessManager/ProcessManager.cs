@@ -206,6 +206,7 @@ namespace Evelynn_Bot.ProcessManager
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
                                     await itsInterface.newQueue.DoTutorials(itsInterface);
+
                                     //Son tutorial oyunu oynandıysa restart
                                     if (itsInterface.queueId == 2020)
                                     {

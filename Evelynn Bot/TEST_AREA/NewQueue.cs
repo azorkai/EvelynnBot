@@ -51,11 +51,14 @@ namespace Evelynn_Bot
 
         public async Task DoTutorials(Interface itsInterface)
         {
-            await Task.Delay(1000);
+            await Task.Delay(4000);
             itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = itsInterface.queueId });
+            await Task.Delay(2000);
             itsInterface2.lcuPlugins.PostMatchmakingSearch();
+            await Task.Delay(2000);
             itsInterface2.lcuPlugins.AcceptReadyCheck();
-            itsInterface2.logger.Log(true, "Tutorial Game");
+            await Task.Delay(2000);
+            itsInterface2.logger.Log(true, "Tutorial Game - " + itsInterface.queueId);
             await Task.Delay(7000);
             itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
         }

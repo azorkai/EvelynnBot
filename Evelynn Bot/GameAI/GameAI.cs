@@ -1351,6 +1351,7 @@ namespace Evelynn_Bot.GameAI
         {
             try
             {
+                isGameEnd = false;
                 List<Thread> list = new List<Thread>();
                 Thread thread = new Thread(YeniAI_1); // Oyun AI
                 thread.Start(itsInterface);
@@ -1365,13 +1366,6 @@ namespace Evelynn_Bot.GameAI
                 foreach (Thread item in list)
                 {
                     item.Join();
-                }
-
-                if (Process.GetProcessesByName("League of Legends").Length == 0)
-                {
-                    itsInterface.logger.Log(true, "Game is done!");
-                    Dispose(true);
-                    Thread.Sleep(20000);
                 }
             }
             catch (Exception ex)
@@ -1613,7 +1607,7 @@ namespace Evelynn_Bot.GameAI
             point_2 = AnaPointAl(new Point(15, 47));
             point_3 = AnaPointAl(new Point(38, 180));
 
-            Thread.Sleep(19000);
+            Thread.Sleep(75000);
 
             isGameEnd = false;
             itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
