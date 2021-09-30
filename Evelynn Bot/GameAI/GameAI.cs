@@ -1373,11 +1373,6 @@ namespace Evelynn_Bot.GameAI
                     Dispose(true);
                     Thread.Sleep(20000);
                 }
-                else
-                {
-                    isGameEnd = false;
-                    YeniAIBaslat(itsInterface);
-                }
             }
             catch (Exception ex)
             {
@@ -1619,18 +1614,16 @@ namespace Evelynn_Bot.GameAI
             point_3 = AnaPointAl(new Point(38, 180));
 
             Thread.Sleep(19000);
-            if (Process.GetProcessesByName("League of Legends").Length == 1)
-            {
-                isGameEnd = false;
-                itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
-                itsInterface.clientKiller.ActivateGame();
-                EkraniAyarla(point_4);
-                SolTiklat();
-                Thread.Sleep(5000);
-                EndBas();
-                RGBHazirla(itsInterface);
-                StartNewGameAI(itsInterface);
-            }
+
+            isGameEnd = false;
+            itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
+            itsInterface.clientKiller.ActivateGame();
+            EkraniAyarla(point_4);
+            SolTiklat();
+            Thread.Sleep(5000);
+            EndBas();
+            RGBHazirla(itsInterface);
+            StartNewGameAI(itsInterface);
         }
 
         public void CurrentPlayerStats(Interface itsInterface)
