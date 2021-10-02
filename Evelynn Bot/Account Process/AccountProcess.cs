@@ -22,6 +22,7 @@ using EvelynnLCU.API_Models;
 using EvelynnLCU.Plugins.LoL;
 using EvelynnLCU;
 using EvelynnLCU.API_Models;
+using Newtonsoft.Json;
 
 namespace Evelynn_Bot.Account_Process
 {
@@ -362,7 +363,7 @@ namespace Evelynn_Bot.Account_Process
             }
             catch (Exception e)
             {
-                Console.WriteLine($"GET SET WALLET HATA | SRC: {e.Source} | SATIR {e.StackTrace}");
+                itsInterface.logger.Log(false, "Can not able to get-set wallet, restarting.");
                 return false;
             }
         }
@@ -393,7 +394,17 @@ namespace Evelynn_Bot.Account_Process
                 {
                     itsInterface.logger.Log(true, "Successfully used name! " + name);
                     Dispose(true);
-                    return itsInterface.processManager.Start(itsInterface);
+
+                    itsInterface.clientKiller.KillAllLeague();
+                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    Process eBot = new Process();
+                    eBot.StartInfo.FileName = exeDir;
+                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                    eBot.StartInfo.Arguments = licenseBase64String;
+                    eBot.StartInfo.Verb = "runas";
+                    eBot.Start();
+                    Environment.Exit(0);
                 }
                 else
                 {

@@ -125,14 +125,7 @@ namespace Evelynn_Bot.ProcessManager
                         itsInterface.newQueue.UxEventAsync();
                         accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh degil ihh yani
 
-                        try
-                        {
-                            await itsInterface.lcuPlugins.RemoveNotificationsAsync();
-                        }
-                        catch (Exception e)
-                        {
-                            
-                        }
+                        try { await itsInterface.lcuPlugins.RemoveNotificationsAsync(); } catch (Exception e) { }
 
                         await itsInterface.lcuPlugins.GetSetMissions();
 
@@ -143,7 +136,7 @@ namespace Evelynn_Bot.ProcessManager
                             return Start(itsInterface);
                         }
 
-                        await itsInterface.lcuPlugins.ChangeSummonerIconAsync();
+                        try { await itsInterface.lcuPlugins.ChangeSummonerIconAsync(); } catch (Exception e) { }
 
                         Dispose(true);
 
@@ -201,15 +194,23 @@ namespace Evelynn_Bot.ProcessManager
                             {
                                 if (item.type == "CARD" && item.status != "COMPLETED")
                                 {
+
+                                    await Task.Delay(15000);
+
                                     itsInterface.newQueue.GameAiBool = true;
                                     itsInterface.gameAi.pickedTutoChamp = false;
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
+
+                                    await Task.Delay(1500);
+
                                     await itsInterface.newQueue.DoTutorials(itsInterface);
 
                                     //Son tutorial oyunu oynandıysa restart
                                     if (itsInterface.queueId == 2020)
                                     {
+                                        itsInterface.logger.Log(true, "Tutorial Games are Completed");
+                                        await Task.Delay(10000);
                                         await Restart(itsInterface);
                                     }
                                 }

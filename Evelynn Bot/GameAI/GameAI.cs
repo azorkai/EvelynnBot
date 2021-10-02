@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -16,6 +17,7 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
 using EvelynnLCU.API_Models;
+using Newtonsoft.Json;
 
 namespace Evelynn_Bot.GameAI
 {
@@ -1016,6 +1018,8 @@ namespace Evelynn_Bot.GameAI
                 dateTime_0 = DateTime.Now;
             }
         }
+
+        private int tuto1ChampCount;
         public void YeniAI_1(object Interface)
         {
             Interface itsInterface = (Interface)Interface;
@@ -1051,24 +1055,32 @@ namespace Evelynn_Bot.GameAI
                     double num = PointerMath(point2, point_0);
                     bool flag2 = (num < 5.0 && list6.Count > 0) || point2.X == -1; // Base'demi diye kontrol et
                     bool flag3 = BirseyHesapla(point2);
+
+
                     if (point2.X != -1 || flag)
                     {
                         if (itsInterface.queueId != 2000 || !isTutorialAndMF) // Tutorial 1 değil ya da Miss Fortune ile 1 kill almadıysa
                         {
                             goto IL_03e7;
                         }
+
                         List<Point> list7 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "ChangeHero").pointerList;
                         if (list7.Count <= 0)
                         {
                             goto IL_03e7;
                         }
 
-                        pickedTutoChamp = true;
-                        Thread.Sleep(1500);
+                        //Tutorail 1 de sonsuza kadar şampiyon değiştiroyr ve kuleyi alması çok uzuyor. Ondan dolayı limit eklendi
+                        if (tuto1ChampCount <= 10)
+                        {
+                            tuto1ChampCount++;
+                            pickedTutoChamp = true;
+                            Thread.Sleep(1500);
 
-                        EkraniAyarla(AnaPointAl(list7[0]));
-                        SagTikla();
-                        Thread.Sleep(5000);
+                            EkraniAyarla(AnaPointAl(list7[0]));
+                            SagTikla();
+                            Thread.Sleep(2000);
+                        }
                     }
                     else
                     {
@@ -1589,35 +1601,155 @@ namespace Evelynn_Bot.GameAI
             pointsLists.Add(new RGBClass.PointlerClass(new Point(403, 241)));
             pointsLists.Add(new RGBClass.PointlerClass(new Point(406, 243)));
         }
+
+        private void Restart(Interface itsInterface)
+        {
+            itsInterface.clientKiller.KillAllLeague();
+            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process eBot = new Process();
+            eBot.StartInfo.FileName = exeDir;
+            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+            eBot.StartInfo.Arguments = licenseBase64String;
+            eBot.StartInfo.Verb = "runas";
+            eBot.Start();
+            Environment.Exit(0);
+        }
         public void YeniAIBaslat(Interface itsInterface)
         {
-            itsInterface.newQueue._playAgain = true;
-            isGameEnd = false;
-            dateTime_1 = DateTime.Now;
-            scrX = PointAl(true).X;
-            scrY = PointAl(true).Y;
-
-            point_5 = new Point(352, 294);
-            point_6 = new Point(405, 241);
-            point_4 = new Point(scrX + 200, scrY + 150);
-            double_3 = 2.0;
-            double_4 = -2.0;
-            point_0 = new Point(351, 301);
-            point_1 = AnaPointAl(new Point(70, 95));
-            point_2 = AnaPointAl(new Point(15, 47));
-            point_3 = AnaPointAl(new Point(38, 180));
+            itsInterface.logger.Log(true, "Starting NEW AI");
 
             Thread.Sleep(75000);
 
-            isGameEnd = false;
-            itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
-            itsInterface.clientKiller.ActivateGame();
-            EkraniAyarla(point_4);
-            SolTiklat();
-            Thread.Sleep(5000);
-            EndBas();
-            RGBHazirla(itsInterface);
-            StartNewGameAI(itsInterface);
+            if (Process.GetProcessesByName("League of Legends").Length == 1)
+            {
+                itsInterface.logger.Log(true, "League Game has Found");
+                itsInterface.newQueue._playAgain = true;
+                isGameEnd = false;
+                dateTime_1 = DateTime.Now;
+                scrX = PointAl(true).X;
+                scrY = PointAl(true).Y;
+
+                point_5 = new Point(352, 294);
+                point_6 = new Point(405, 241);
+                point_4 = new Point(scrX + 200, scrY + 150);
+                double_3 = 2.0;
+                double_4 = -2.0;
+                point_0 = new Point(351, 301);
+                point_1 = AnaPointAl(new Point(70, 95));
+                point_2 = AnaPointAl(new Point(15, 47));
+                point_3 = AnaPointAl(new Point(38, 180));
+
+                isGameEnd = false;
+                itsInterface.logger.Log(true, itsInterface.messages.GameStarted);
+                itsInterface.clientKiller.ActivateGame();
+                EkraniAyarla(point_4);
+                SolTiklat();
+                Thread.Sleep(5000);
+                EndBas();
+                RGBHazirla(itsInterface);
+                StartNewGameAI(itsInterface);
+            }
+            else
+            {
+                //TODO: Recursive kaldır.
+                //Recursive çok var. eğer sistem çalışıyorsa optimize edilcek.
+                itsInterface.logger.Log(false, "League Game is not found.");
+                itsInterface.newQueue.GameAiBool = true;
+
+                //Eğer socketten gelen bilgi oyunun başladığına işaret etmiyorsa ama lol yine de açıksa AI başlat.
+                if (itsInterface.newQueue.state != "Game in Progress")
+                {
+                    if (itsInterface.newQueue.state != "Game Started")
+                    {
+                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        {
+                            itsInterface.logger.Log(true, "API shows that game is not started but League Game is available.");
+                            YeniAIBaslat(itsInterface);
+                        }
+                    }
+                }
+
+                //Eğer socketten gelen bilgi oyunun başladığı yönünde ise biraz daha delay ekle.
+                if (itsInterface.newQueue.state == "Game in Progress" || itsInterface.newQueue.state == "Game Started")
+                {
+                    
+                    if (Process.GetProcessesByName("League of Legends").Length == 0)
+                    {
+                        itsInterface.logger.Log(true, "Waiting for The League - GameProgress/GameStarted");
+
+                        Thread.Sleep(65000);
+
+                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        {
+                            YeniAIBaslat(itsInterface);
+                        }
+                        else
+                        {
+                            itsInterface.logger.Log(false, "Waited too much, restarting...");
+                            Restart(itsInterface);
+                        }
+                    }
+
+                    //TODO: Belirli sayıda buraya gelindiyse yeniden başlat.
+                    else
+                    {
+                        YeniAIBaslat(itsInterface);
+                    }
+                }
+
+                //Eğer socketten gelen bilgi "Reconnect" ise biraz daha delay ekle
+                if (itsInterface.newQueue.state == "Reconnect")
+                {
+                    itsInterface.logger.Log(true, "Reconnect State has found");
+
+                    if (Process.GetProcessesByName("League of Legends").Length == 0)
+                    {
+                        itsInterface.logger.Log(true, "Waiting for The League - Reconnect");
+
+                        Thread.Sleep(65000);
+
+                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        {
+                            YeniAIBaslat(itsInterface);
+                        }
+                        else
+                        {
+                            itsInterface.logger.Log(false, "Waited too much, restarting...");
+                            Restart(itsInterface);
+                        }
+                    }
+                    else
+                    {
+                        YeniAIBaslat(itsInterface);
+                    }
+                }
+
+                if (itsInterface.queueId == 2000 || itsInterface.queueId == 2010 || itsInterface.queueId == 2020)
+                {
+                    if (Process.GetProcessesByName("League of Legends").Length == 0)
+                    {
+                        itsInterface.logger.Log(true, "Waiting for The League - Tutorial: " + itsInterface.queueId);
+
+                        Thread.Sleep(65000);
+
+                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        {
+                            YeniAIBaslat(itsInterface);
+                        }
+                        else
+                        {
+                            itsInterface.logger.Log(false, "Waited too much, restarting...");
+                            Restart(itsInterface);
+                        }
+                    }
+                    else
+                    {
+                        YeniAIBaslat(itsInterface);
+                    }
+                }
+            }
+            
         }
 
         public void CurrentPlayerStats(Interface itsInterface)

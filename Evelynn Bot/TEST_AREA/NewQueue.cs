@@ -23,9 +23,14 @@ namespace Evelynn_Bot
     public class NewQueue
     {
         public System.Timers.Timer bugTimer = new System.Timers.Timer();
-        private int BugTime;
+
         public bool GameAiBool;
         public bool _playAgain;
+        public string state;
+
+        private int _reconnectCount;
+        private int BugTime;
+
 
 
         private event MessageHandlerDelegate<UxState> UxStateChanged;
@@ -51,15 +56,15 @@ namespace Evelynn_Bot
 
         public async Task DoTutorials(Interface itsInterface)
         {
-            await Task.Delay(4000);
+            await Task.Delay(5000);
             itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = itsInterface.queueId });
-            await Task.Delay(2000);
+            await Task.Delay(5000);
             itsInterface2.lcuPlugins.PostMatchmakingSearch();
-            await Task.Delay(2000);
+            await Task.Delay(5000);
             itsInterface2.lcuPlugins.AcceptReadyCheck();
-            await Task.Delay(2000);
+            await Task.Delay(5000);
             itsInterface2.logger.Log(true, "Tutorial Game - " + itsInterface.queueId);
-            await Task.Delay(7000);
+            await Task.Delay(10000);
             itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
         }
 
@@ -302,8 +307,6 @@ namespace Evelynn_Bot
         {
             try
             {
-                var state = string.Empty;
-
                 switch (result.Phase)
                 {
                     case "None":
@@ -364,6 +367,7 @@ namespace Evelynn_Bot
                             GameAiBool = true;
                             bugTimer.Start();
                             itsInterface2.lcuPlugins.PostMatchmakingSearch();
+
                         }
                         else
                         {
@@ -386,6 +390,18 @@ namespace Evelynn_Bot
                     case "GameStart":
                         state = "Game Started";
                         itsInterface2.lcuPlugins.KillUXAsync();
+                        itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
+
+                        bugTimer.Stop();
+                        BugTime = 0;
+
+                        if (GameAiBool)
+                        {
+                            GameAiBool = false;
+                            _playAgain = true;
+                            itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
+                        }
+
                         break;
 
                     case "ReadyCheck":
@@ -402,19 +418,7 @@ namespace Evelynn_Bot
                     case "InProgress":
                         state = "Game in Progress";
                         itsInterface2.lcuPlugins.KillUXAsync();
-                        itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
-
-                        bugTimer.Stop();
-                        BugTime = 0;
-
-                        if (GameAiBool)
-                        {
-                            GameAiBool = false;
-                            _playAgain = true;
-                            //await itsInterface2.processManager.GameAi(itsInterface2);
-                            itsInterface2.gameAi.YeniAIBaslat(itsInterface2);
-                        }
-
+                        
                         break;
                     case "WaitingForStats":
                         state = "Waiting for Stats";
@@ -447,10 +451,13 @@ namespace Evelynn_Bot
                         break;
                     case "Reconnect":
                         state = "Reconnect";
+
+                        _reconnectCount++;
+                        itsInterface2.logger.Log(true, "Reconnect Count: " + _reconnectCount);
+
                         try
                         {
                             await itsInterface2.lcuPlugins.ReconnectGameAsync();
-
                         }
                         catch (Exception e)
                         {
@@ -460,15 +467,22 @@ namespace Evelynn_Bot
                         itsInterface2.logger.Log(false, "Could not load game! Reconnecting...");
                         itsInterface2.lcuPlugins.KillUXAsync();
 
-                        await Task.Delay(15000);
+                        await Task.Delay(25000);
+
+                        if (_reconnectCount !>= 2)
+                        {
+                            GameAiBool = true;
+                        }
 
                         if (Process.GetProcessesByName("League of Legends").Length == 1)
                         {
                             itsInterface2.logger.Log(true, "League Game Found");
                             if (GameAiBool)
                             {
+                                _reconnectCount = 0;
                                 itsInterface2.lcuPlugins.KillUXAsync();
                                 itsInterface2.dashboardHelper.UpdateLolStatus("In Game", itsInterface2);
+                                itsInterface2.logger.Log(true, "Starting Game AI - Reconnect");
                                 bugTimer.Stop();
                                 BugTime = 0;
                                 GameAiBool = false;

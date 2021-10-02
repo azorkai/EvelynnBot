@@ -75,6 +75,7 @@ namespace Evelynn_Bot
             }
 
             UpdateBot.CheckUpdate();
+            
             itsInterface.logger.Log(true, "Version: " + Assembly.GetExecutingAssembly().GetName().Version);
 
             #region Resize Console
