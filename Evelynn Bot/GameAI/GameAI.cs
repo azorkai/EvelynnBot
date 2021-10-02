@@ -1026,6 +1026,7 @@ namespace Evelynn_Bot.GameAI
             Point point = new Point(400, 300);
             while (!isGameEnd)
             {
+                itsInterface.logger.Log(true, "Game is Available - [TEST]");
                 try
                 {
                     Bitmap bitmap_;
@@ -1039,6 +1040,7 @@ namespace Evelynn_Bot.GameAI
                         Thread.Sleep(500);
                         continue;
                     }
+
                     HepsiniTarat(bitmap_, rgbLists);
                     List<Point> list = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Minimap").pointerList;
                     List<Point> list2 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "EnemyHero").pointerList;
@@ -1358,6 +1360,7 @@ namespace Evelynn_Bot.GameAI
             IL_0964:
                 Thread.Sleep(random_0.Next(400, 800));
             }
+            itsInterface.logger.Log(true, "Game is Done!");
         }
         public void StartNewGameAI(Interface itsInterface)
         {

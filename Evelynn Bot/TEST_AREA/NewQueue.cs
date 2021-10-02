@@ -380,7 +380,6 @@ namespace Evelynn_Bot
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
 
                         BugTime = 0;
-                        GameAiBool = true;
                         await Task.Delay(1500);
                         itsInterface2.lcuPlugins.KillUXAsync();
                         itsInterface2.newQueue.PickChampion();
