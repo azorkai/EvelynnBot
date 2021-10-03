@@ -1410,7 +1410,15 @@ namespace Evelynn_Bot.GameAI
                         var inGameData = itsInterface.player.Data;
                         canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
                         gameTime = inGameData.GameData.GameTime.Value;
-                        isGameEnd = inGameData.Events.EventsEvents.Count((Event details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
+
+                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        {
+                            isGameEnd = false;
+                        }
+                        else
+                        {
+                            isGameEnd = inGameData.Events.EventsEvents.Count((Event details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
+                        }
 
                         if (itsInterface.queueId != 2000)
                         {
@@ -1484,7 +1492,7 @@ namespace Evelynn_Bot.GameAI
                 }
                 if (DateTime.Now.Subtract(dateTime_1).TotalMinutes > 90.0)
                 {
-                    Console.WriteLine("Overtime playing");
+                    itsInterface.logger.Log(false,"Overtime playing");
                     isGameEnd = true;
                 }
                 Thread.Sleep(random_0.Next(400, 800));
