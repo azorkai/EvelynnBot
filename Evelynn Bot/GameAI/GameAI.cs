@@ -1026,7 +1026,6 @@ namespace Evelynn_Bot.GameAI
             Point point = new Point(400, 300);
             while (!isGameEnd)
             {
-                itsInterface.logger.Log(true, "Game is Available - [TEST]");
                 try
                 {
                     Bitmap bitmap_;
