@@ -201,6 +201,7 @@ namespace Evelynn_Bot.ProcessManager
                                     itsInterface.gameAi.pickedTutoChamp = false;
                                     itsInterface.queueId = int.Parse(item.queueId);
                                     itsInterface.logger.Log(true, $"Playing Tutorial: {item.stepNumber}");
+                                    itsInterface.dashboardHelper.UpdateLolStatus("Playing Tutorial", itsInterface);
 
                                     await Task.Delay(1500);
 
