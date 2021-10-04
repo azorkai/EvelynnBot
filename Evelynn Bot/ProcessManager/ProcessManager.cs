@@ -72,7 +72,9 @@ namespace Evelynn_Bot.ProcessManager
                     if (processExist("RiotClientServices", itsInterface))
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
-                        await Task.Delay(5000);
+
+                        await Task.Delay(20000);
+
                         accountProcess.Initialize(itsInterface);
 
                         itsInterface.lcuPlugins.KillUXAsync();

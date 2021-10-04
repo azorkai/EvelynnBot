@@ -105,7 +105,7 @@ namespace Evelynn_Bot.Account_Process
                 //    Console.WriteLine($"ERROR LOGIN TYPE: {loginStatus.type}");
                 //}
 
-                Thread.Sleep(3500);
+                await Task.Delay(3500);
                 try
                 {
                     var eula = await itsInterface.lcuPlugins.GetEula("read");
@@ -119,7 +119,9 @@ namespace Evelynn_Bot.Account_Process
                 {
                     //ignored
                 }
-                Thread.Sleep(22000);
+
+                await Task.Delay(35000);
+
                 Dispose(true);
                 itsInterface.lcuApi.Close();
                 itsInterface.lcuPlugins = null;
