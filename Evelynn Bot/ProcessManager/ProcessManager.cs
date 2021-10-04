@@ -133,7 +133,7 @@ namespace Evelynn_Bot.ProcessManager
                         {
                             itsInterface.clientKiller.KillAllLeague();
                             await Task.Delay(10000);
-                            return Start(itsInterface);
+                            await Restart(itsInterface);
                         }
 
                         try { await itsInterface.lcuPlugins.ChangeSummonerIconAsync(); } catch (Exception e) { }
@@ -343,6 +343,7 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> Restart(Interface itsInterface)
         {
             itsInterface.clientKiller.KillAllLeague();
+            await Task.Delay(25000);
             var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
             var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Process eBot = new Process();
@@ -471,7 +472,7 @@ namespace Evelynn_Bot.ProcessManager
                 if (!await accountProcess.GetSetWallet(itsInterface))
                 {
                     itsInterface.clientKiller.KillAllLeague();
-                    return Start(itsInterface);
+                    await Restart(itsInterface);
                 }
 
                 itsInterface.logger.Log(true,"Level: " + itsInterface.summoner.summonerLevel);

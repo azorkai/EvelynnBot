@@ -1035,7 +1035,7 @@ namespace Evelynn_Bot.GameAI
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine("Error while creating bitmap");
+                        itsInterface.logger.Log(false,"Error while creating bitmap");
                         Thread.Sleep(500);
                         continue;
                     }
