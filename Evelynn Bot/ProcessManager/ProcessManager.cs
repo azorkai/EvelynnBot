@@ -45,7 +45,9 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
-            await itsInterface.clientKiller.StartFPSLimiter();
+            //await itsInterface.clientKiller.StartFPSLimiter();
+            
+
             itsInterface.newQueue.bugTimer.Stop();
             itsInterface.clientKiller.KillAllLeague();
             await Task.Delay(10000);

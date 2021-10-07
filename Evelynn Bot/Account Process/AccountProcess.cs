@@ -70,9 +70,50 @@ namespace Evelynn_Bot.Account_Process
 
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
-                //var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-                //AWAIT hata verdiriyor, idk
-                itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+                var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+
+                itsInterface.logger.Log(false, loginStatus.error);
+                itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);
+
+                if (loginStatus.error != string.Empty)
+                {
+                    if (loginStatus.error == "rate_limited")
+                    {
+                        itsInterface.logger.Log(false,"Rate limit, wait 5 min");
+                        await Task.Delay(new TimeSpan(0, 5, 0));
+                        itsInterface.clientKiller.KillAllLeague();
+                        await Task.Delay(25000);
+                        var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                        var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                        Process eBot = new Process();
+                        eBot.StartInfo.FileName = exeDir;
+                        eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                        eBot.StartInfo.Arguments = licenseBase64String;
+                        eBot.StartInfo.Verb = "runas";
+                        eBot.Start();
+                        Environment.Exit(0);
+                    }
+                    if (loginStatus.error == "auth_failure")
+                    {
+                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                        return false;
+                    }
+                }
+                if (loginStatus.type != "authenticated")
+                {
+                    itsInterface.logger.Log(false, "Authenticated Error! Restart...");
+                    itsInterface.clientKiller.KillAllLeague();
+                    await Task.Delay(25000);
+                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    Process eBot = new Process();
+                    eBot.StartInfo.FileName = exeDir;
+                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                    eBot.StartInfo.Arguments = licenseBase64String;
+                    eBot.StartInfo.Verb = "runas";
+                    eBot.Start();
+                    Environment.Exit(0);
+                }
 
                 await Task.Delay(5500);
 
@@ -98,28 +139,8 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.logger.Log(true,"Already Selected League");
                 }
 
-                //İPTAL EDİLDİ, MUHTEMELEN YENİ VERSİYONDAN ÖTÜRÜ HATA VERİYOR!
-                //if (loginStatus.error != string.Empty)
-                //{
-                //    if (loginStatus.error == "rate_limited")
-                //    {
-                //        Console.WriteLine("Rate limit, wait 5 min");
-                //        Thread.Sleep(new TimeSpan(0, 5, 0));
-                //        return false;
-                //        //return itsInterface.processManager.StartAccountProcess(itsInterface);
-                //    }
-                //    if (loginStatus.error == "auth_failure")
-                //    {
-                //        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
-                //        return false;
-                //    }
-                //}
-                //if (loginStatus.type != "authenticated")
-                //{
-                //    Console.WriteLine($"ERROR LOGIN TYPE: {loginStatus.type}");
-                //}
-
                 await Task.Delay(3500);
+
                 try
                 {
                     var eula = await itsInterface.lcuPlugins.GetEula("read");
