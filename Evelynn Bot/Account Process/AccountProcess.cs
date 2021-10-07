@@ -73,7 +73,21 @@ namespace Evelynn_Bot.Account_Process
                 //var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
                 //AWAIT hata verdiriyor, idk
                 itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
+
                 await Task.Delay(5500);
+
+                try
+                {
+                    await itsInterface.lcuPlugins.UpdateRiotClient();
+                    itsInterface.logger.Log(true, "Updating League Product");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+                await Task.Delay(30000);
+
                 try
                 {
                     await itsInterface.lcuPlugins.LeagueProductSelect();
