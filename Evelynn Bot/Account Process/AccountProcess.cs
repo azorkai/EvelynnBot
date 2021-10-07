@@ -46,6 +46,7 @@ namespace Evelynn_Bot.Account_Process
                 {
                     itsInterface.clientKiller.StartRiotClient();
                 }
+
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -72,7 +73,6 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
 
-                itsInterface.logger.Log(false, loginStatus.error);
                 itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);
 
                 if (loginStatus.error != string.Empty)
@@ -124,7 +124,7 @@ namespace Evelynn_Bot.Account_Process
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    
                 }
 
                 await Task.Delay(30000);
@@ -164,9 +164,20 @@ namespace Evelynn_Bot.Account_Process
             }
             catch (Exception e)
             {
+                //Botu restartlamak yerine dashboarddan farklı bir hesap seçilebilri lakin eğer yanlış lol id ve pass girildiyse zaten yukarda action alınacak.
+
                 itsInterface.clientKiller.KillAllLeague();
-                Dispose(true);
-                return itsInterface.Result(false, itsInterface.messages.ErrorLogin);
+                await Task.Delay(25000);
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
+                return itsInterface.Result(true, e.Message);
             }
         }
         public async Task<Task> ChangeRegion(Interface itsInterface)

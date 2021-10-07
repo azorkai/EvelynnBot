@@ -45,11 +45,10 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
-            //await itsInterface.clientKiller.StartFPSLimiter();
-            
-
+            await itsInterface.clientKiller.StartFPSLimiter();
             itsInterface.newQueue.bugTimer.Stop();
             itsInterface.clientKiller.KillAllLeague();
+
             await Task.Delay(10000);
 
             // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)
@@ -68,7 +67,7 @@ namespace Evelynn_Bot.ProcessManager
                     if (isFromGame == false)
                     {
                         accountProcess.StartLeague(itsInterface, StartEnums.RiotClient);
-                        await Task.Delay(15000);
+                        await Task.Delay(18000);
                         itsInterface.lcuApi.BeginTryInitRiotClient();
                     }
                     if (processExist("RiotClientServices", itsInterface))
@@ -103,10 +102,10 @@ namespace Evelynn_Bot.ProcessManager
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                                     break;
                                 case "restart_client_error":
-                                    Console.WriteLine("CLIENT ERROR! RESTART");
+                                    itsInterface.logger.Log(false ,"Client Error. Restarting...");
                                     return itsInterface.processManager.StartAccountProcess(itsInterface);
                                 case "invalid_summoner_name":
-                                    Console.WriteLine("We have a invalid summoner name!");
+                                    itsInterface.logger.Log(false,"Invalid summoner name!");
                                     break;
                                 //case "logged_in_from_another":
                                 //    Console.WriteLine("This account has logged in from somewhere else already!");
@@ -315,7 +314,7 @@ namespace Evelynn_Bot.ProcessManager
                     }
                     else
                     {
-                        return StartAccountProcess(itsInterface);
+                        await Restart(itsInterface);
                     }
                 }
             }
