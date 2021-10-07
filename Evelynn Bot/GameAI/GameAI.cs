@@ -1490,10 +1490,13 @@ namespace Evelynn_Bot.GameAI
                     //Console.WriteLine(ec);
                     isGameEnd = isGameEnd || Process.GetProcessesByName("League of Legends").Length == 0;
                 }
+
+                //Burada bota restart atılmasının sebebi: Leageue process (oyun) açık kalıyor, arkada queue oluşturuluyor ve iki oyun üst üste binior (buglu) ve normal.
+                //Restart atmadan ise League process (oyun) kapanamıyor.
                 if (DateTime.Now.Subtract(dateTime_1).TotalMinutes > 90.0)
                 {
                     itsInterface.logger.Log(false,"Overtime playing");
-                    isGameEnd = true;
+                    Restart(itsInterface);
                 }
                 Thread.Sleep(random_0.Next(400, 800));
             }
