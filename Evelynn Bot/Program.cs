@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
@@ -58,6 +59,25 @@ namespace Evelynn_Bot
 
         #endregion
 
+        private static bool CheckInternet()
+        {
+            Thread.Sleep(3000);
+            try
+            {
+                Ping myPing = new Ping();
+                String host = "google.com";
+                byte[] buffer = new byte[32];
+                int timeout = 1000;
+                PingOptions pingOptions = new PingOptions();
+                PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
+                return (reply.Status == IPStatus.Success);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         static async Task Main(string[] args)
         {
 
@@ -74,8 +94,24 @@ namespace Evelynn_Bot
                 Console.WriteLine(e);
             }
 
+            Thread.Sleep(8000);
+
+            while (!CheckInternet())
+            {
+                Thread.Sleep(3500);
+                itsInterface.logger.Log(false, "No Internet!");
+                try
+                {
+                    await itsInterface.clientKiller.ExecuteBypass();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+
             UpdateBot.CheckUpdate();
-            
+
             itsInterface.logger.Log(true, "Version: " + Assembly.GetExecutingAssembly().GetName().Version);
 
             #region Resize Console
@@ -124,6 +160,8 @@ namespace Evelynn_Bot
             }
 
         }
+
+        
     public static class Language
     {
         public static string language;
