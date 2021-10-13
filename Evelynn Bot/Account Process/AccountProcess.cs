@@ -44,8 +44,11 @@ namespace Evelynn_Bot.Account_Process
                 }
                 else
                 {
+                    itsInterface.logger.Log(true, "Starting Riot Client - Test");
                     itsInterface.clientKiller.StartRiotClient();
                 }
+
+                Thread.Sleep(8000);
 
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }

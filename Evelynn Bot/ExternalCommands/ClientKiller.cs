@@ -38,7 +38,7 @@ namespace Evelynn_Bot.ExternalCommands
             KillLeagueOfLegends();
             KillLeagueClients();
             KillRiotClient();
-            Thread.Sleep(5000);
+            Thread.Sleep(8000);
             LaunchLeagueFromRiotClient(GetLeaguePath() + "\\..\\Riot Client\\RiotClientServices.exe"); //Start RiotClient
         }
 
@@ -153,7 +153,7 @@ namespace Evelynn_Bot.ExternalCommands
                 //await DisableAdapter("Local Area Connection");
                 //await EnableAdapter("Local Area Connection");
                 await EnableAndDisableAdapter();
-                Thread.Sleep(6000);
+                await Task.Delay(6000);
             }
             catch (Exception ex)
             {
@@ -297,13 +297,13 @@ namespace Evelynn_Bot.ExternalCommands
             await GenerateAndChangeMACAddress();
             // Bypass Step 1
             await DisableUserAssistLogging();
-            // Bypass Step 2
+            // Bypass Step 2    
             await ChangeDisplayParameters();
             // Bypass Step 3,4,5,6
             await DisableWMI();
             // Bypass Step 7
             await ChangeWinGUID();
-            Thread.Sleep(5000);
+            await Task.Delay(6000);
             return "ok";
         }
 
@@ -368,14 +368,14 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 using (StreamWriter streamWriter = File.CreateText("del.bat"))
                 {
-                    streamWriter.WriteLine("start \"\" \"" + path + "\" --launch-product=league_of_legends --launch-patchline=live");
+                    streamWriter.WriteLine("start \"\" \"" + path + "\"");
                 }
                 Process.Start(new ProcessStartInfo("del.bat")
                 {
                     UseShellExecute = true,
                     Verb = "runas"
                 });
-                Thread.Sleep(5000);
+                Thread.Sleep(13000);
             }
             File.Delete("del.bat");
         }
