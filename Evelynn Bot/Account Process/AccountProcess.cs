@@ -130,7 +130,7 @@ namespace Evelynn_Bot.Account_Process
                     
                 }
 
-                await Task.Delay(30000);
+                await Task.Delay(20000);
 
                 try
                 {

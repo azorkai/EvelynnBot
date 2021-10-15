@@ -1023,11 +1023,13 @@ namespace Evelynn_Bot.GameAI
         public void YeniAI_1(object Interface)
         {
             Interface itsInterface = (Interface)Interface;
+            itsInterface.clientKiller.KillRiotUxRender();
             Point point = new Point(400, 300);
             while (!isGameEnd)
             {
                 try
                 {
+
                     Bitmap bitmap_;
                     try
                     {

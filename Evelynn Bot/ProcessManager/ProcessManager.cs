@@ -169,6 +169,8 @@ namespace Evelynn_Bot.ProcessManager
                         //    await accountProcess.CheckNewAccount(itsInterface);
                         //}
 
+                        itsInterface.clientKiller.KillRiotUx();
+
                         if (itsInterface.license.Lol_disenchant)
                         {
                             try
