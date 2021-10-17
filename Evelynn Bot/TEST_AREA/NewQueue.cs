@@ -248,6 +248,7 @@ namespace Evelynn_Bot
                 case "ShowMain":
                     state = "show";
                     //await Task.Delay(4000);
+                    itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
                     itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 case "Quit":

@@ -417,7 +417,7 @@ namespace Evelynn_Bot.Account_Process
             try
             {
                 itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
-                itsInterface.lcuApi.Socket.DumpToDebug = true;
+                itsInterface.lcuApi.Socket.DumpToDebug = false;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 Thread.Sleep(3500);
                 return itsInterface.Result(true, itsInterface.messages.SuccessInitialize);

@@ -95,7 +95,7 @@ namespace Evelynn_Bot.ExternalCommands
                     SuspendProcess(process.Id);
                 }
 
-                itsInterface.logger.Log(true, "Suspended");
+                //itsInterface.logger.Log(true, "Suspended");
             }
             catch (Exception e)
             {
