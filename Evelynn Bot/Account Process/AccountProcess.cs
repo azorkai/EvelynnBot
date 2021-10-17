@@ -28,23 +28,37 @@ namespace Evelynn_Bot.Account_Process
 {
     public class AccountProcess : IAccountProcess
     {
-        public bool StartLeague(Interface itsInterface, StartEnums startEnums)
+        public void CopyConfig(Interface itsInterface)
         {
             try
-            { 
-                itsInterface.clientKiller.KillAllLeague();
+            {
                 string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
                 File.Delete($"{text}game.cfg");
                 File.Delete($"{text}PersistedSettings.json");
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\game.cfg", $"{text}game.cfg", overwrite: true);
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+        }
+
+        public bool StartLeague(Interface itsInterface, StartEnums startEnums)
+        {
+            try
+            { 
+                itsInterface.clientKiller.KillAllLeague();
+                Thread.Sleep(5000);
+                CopyConfig(itsInterface);
                 if (startEnums == StartEnums.LeagueClient)
                 {
                     itsInterface.clientKiller.StartLeague();
                 }
                 else
                 {
-                    itsInterface.logger.Log(true, "Starting Riot Client - Test");
+                    itsInterface.logger.Log(true, "Starting Riot Client");
                     itsInterface.clientKiller.StartRiotClient();
                 }
 
@@ -77,6 +91,8 @@ namespace Evelynn_Bot.Account_Process
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
 
                 itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);
+
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 if (loginStatus.error != string.Empty)
                 {
@@ -118,7 +134,9 @@ namespace Evelynn_Bot.Account_Process
                     Environment.Exit(0);
                 }
 
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 await Task.Delay(5500);
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 try
                 {
@@ -130,7 +148,9 @@ namespace Evelynn_Bot.Account_Process
                     
                 }
 
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 await Task.Delay(20000);
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 try
                 {
@@ -142,7 +162,9 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.logger.Log(true,"Already Selected League");
                 }
 
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 await Task.Delay(3500);
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 try
                 {
@@ -158,7 +180,9 @@ namespace Evelynn_Bot.Account_Process
                     //ignored
                 }
 
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 await Task.Delay(35000);
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 Dispose(true);
                 itsInterface.lcuApi.Close();
@@ -396,12 +420,12 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.lcuApi.Socket.DumpToDebug = true;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 Thread.Sleep(3500);
+                return itsInterface.Result(true, itsInterface.messages.SuccessInitialize);
             }
             catch (Exception e)
             {
                 return itsInterface.Result(false, itsInterface.messages.ErrorInitialize);
             }
-            return itsInterface.Result(true, itsInterface.messages.SuccessInitialize);
         }
         public async Task<bool> GetSetWallet(Interface itsInterface)
         {

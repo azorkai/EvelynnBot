@@ -39,6 +39,7 @@ namespace Evelynn_Bot.Constants
         public bSecurity sec = new bSecurity();
         public bHTTP req = new bHTTP();
         public bUtils u = new bUtils();
+        public ProcessController ProcessController = new ProcessController();
         public ApiVariables apiVariables = new ApiVariables();
         public HttpRequest request = new HttpRequest();
         public ImagePaths ImgPaths = new ImagePaths();

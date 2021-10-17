@@ -350,6 +350,7 @@
     <Compile Include="ExternalCommands\DashboardHelper.cs" />
     <Compile Include="ExternalCommands\JsonRead.cs" />
     <Compile Include="ExternalCommands\Logger.cs" />
+    <Compile Include="ExternalCommands\ProcessController.cs" />
     <Compile Include="ExternalCommands\UpdateBot.cs" />
     <Compile Include="ExternalCommands\WIN32.cs" />
     <Compile Include="GameAI\GameAI.cs" />

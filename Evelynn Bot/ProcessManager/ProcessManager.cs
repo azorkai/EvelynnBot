@@ -74,9 +74,22 @@ namespace Evelynn_Bot.ProcessManager
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
 
+                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+
                         await Task.Delay(20000);
 
-                        accountProcess.Initialize(itsInterface);
+                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+
+                        if (!accountProcess.Initialize(itsInterface))
+                        {
+                            itsInterface.logger.Log(false, "Restarting...");
+                            await Task.Delay(7000);
+                            await Restart(itsInterface);
+                        }
+
+                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+
+                        await Task.Delay(2000);
 
                         itsInterface.lcuPlugins.KillUXAsync();
 
@@ -170,6 +183,8 @@ namespace Evelynn_Bot.ProcessManager
                         //}
 
                         itsInterface.clientKiller.KillRiotUx();
+
+                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                         if (itsInterface.license.Lol_disenchant)
                         {
@@ -324,8 +339,9 @@ namespace Evelynn_Bot.ProcessManager
             {
                 Console.WriteLine($"START ACCOUNT PROCESS HATA {e}");
                 Dispose(true);
-                return StartAccountProcess(itsInterface);
+                await Restart(itsInterface);
             }
+
             return Task.CompletedTask;
         }
 
@@ -348,7 +364,7 @@ namespace Evelynn_Bot.ProcessManager
         public async Task<Task> Restart(Interface itsInterface)
         {
             itsInterface.clientKiller.KillAllLeague();
-            await Task.Delay(25000);
+            await Task.Delay(10000);
             var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
             var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
             Process eBot = new Process();
@@ -468,6 +484,7 @@ namespace Evelynn_Bot.ProcessManager
 
             using (AccountProcess accountProcess = new AccountProcess())
             {
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 itsInterface.logger.Log(true, itsInterface.messages.InfoStartingAgain);
                 //accountProcess.Initialize(itsInterface);
                 await itsInterface.lcuPlugins.RemoveNotificationsAsync();
