@@ -35,6 +35,7 @@ namespace Evelynn_Bot.Account_Process
                 string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
                 File.Delete($"{text}game.cfg");
                 File.Delete($"{text}PersistedSettings.json");
+                Thread.Sleep(1500);
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\game.cfg", $"{text}game.cfg", overwrite: true);
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
             }
@@ -52,8 +53,6 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.clientKiller.KillAllLeague();
                 Thread.Sleep(5000);
                 CopyConfig(itsInterface);
-                Thread.Sleep(5000);
-                CopyConfig(itsInterface);
 
                 if (startEnums == StartEnums.LeagueClient)
                 {
@@ -67,7 +66,7 @@ namespace Evelynn_Bot.Account_Process
 
                 Thread.Sleep(8000);
 
-                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                //itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -80,7 +79,7 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                 itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 if (itsInterface.license.Lol_username == "")
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
@@ -94,7 +93,7 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-
+                //await itsInterface.lcuPlugins.DeleteSplashScreen();
                 itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);
 
                 itsInterface.ProcessController.SuspendLeagueUx(itsInterface);

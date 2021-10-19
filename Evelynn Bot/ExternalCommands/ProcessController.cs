@@ -34,8 +34,8 @@ namespace Evelynn_Bot.ExternalCommands
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
         static extern bool CloseHandle(IntPtr handle);
 
-        [DllImport("User32.dll")]
-        private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+        [DllImport("user32.dll")]
+        private static extern Boolean ShowWindow(IntPtr hWnd, Int32 nCmdShow);
 
         [DllImport("User32.dll")]
         private static extern bool EnableWindow(IntPtr hwnd, bool enabled);
@@ -57,7 +57,6 @@ namespace Evelynn_Bot.ExternalCommands
                 }
 
                 ShowWindow(pOpenThread, 0);
-                EnableWindow(pOpenThread, true);
 
                 SuspendThread(pOpenThread);
 
@@ -96,7 +95,7 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 Process[] processesRender = Process.GetProcessesByName("LeagueClientUxRender");
                 Process[] processesUx = Process.GetProcessesByName("LeagueClientUx");
-
+                
                 HideLeagueProcess();
 
                 foreach (var process in processesRender)
@@ -108,13 +107,15 @@ namespace Evelynn_Bot.ExternalCommands
                 {
                     SuspendProcess(process.Id);
                 }
+                return Task.CompletedTask;
 
             }
             catch (Exception e)
             {
+
                 Console.WriteLine(e);
+                return Task.CompletedTask;
             }
-            return Task.CompletedTask;
         }
 
         public async Task<Task> SuspendRiotUx(Interface itsInterface)
@@ -141,29 +142,37 @@ namespace Evelynn_Bot.ExternalCommands
                 {
                     SuspendProcess(process.Id);
                 }
+                
+                return Task.CompletedTask;
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return Task.CompletedTask;
             }
-            return Task.CompletedTask;
+            
         }
 
         private void HideRiotClientProcess()
         {
-            IntPtr pOpenThread = FindWindow(null, "Riot Client Main");
+            IntPtr pOpenThread = FindWindow("RCLIENT", "Riot Client Main");
+            if (pOpenThread == IntPtr.Zero)
+            {
+                return;
+            }
             ShowWindow(pOpenThread, 0);
-            EnableWindow(pOpenThread, false);
         }
 
         private void HideLeagueProcess()
         {
-            IntPtr pOpenThread = FindWindow("RCLIENT", "League Of Legends");
+            IntPtr pOpenThread = FindWindow("SplashScreenClassName", "");
+            if (pOpenThread == IntPtr.Zero)
+            {
+                return;
+            }
             ShowWindow(pOpenThread, 0);
-            EnableWindow(pOpenThread, false);
         }
-
 
     }
 }

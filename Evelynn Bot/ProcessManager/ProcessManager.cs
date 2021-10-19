@@ -135,7 +135,8 @@ namespace Evelynn_Bot.ProcessManager
                         }
                         
                         await Task.Delay(3500);
-                        
+
+                        itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
