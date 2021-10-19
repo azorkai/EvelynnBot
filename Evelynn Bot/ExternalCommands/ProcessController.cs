@@ -78,7 +78,7 @@ namespace Evelynn_Bot.ExternalCommands
             }
         }
 
-        public void SuspendLeagueUx(Interface itsInterface)
+        public async Task<Task> SuspendLeagueUx(Interface itsInterface)
         {
             try
             {
@@ -95,13 +95,37 @@ namespace Evelynn_Bot.ExternalCommands
                     SuspendProcess(process.Id);
                 }
 
-                //itsInterface.logger.Log(true, "Suspended");
             }
             catch (Exception e)
             {
-                itsInterface.logger.Log(false, "Error on suspending ux!");
+                itsInterface.logger.Log(false, "Error on suspending LeagueUx!");
             }    
-            
+            return Task.CompletedTask;
+        }
+
+        public async Task<Task> SuspendRiotUx(Interface itsInterface)
+        {
+            try
+            {
+                Process[] processesRender = Process.GetProcessesByName("RiotClientUxRender");
+                Process[] processesUx = Process.GetProcessesByName("RiotClientUx");
+
+                foreach (var process in processesRender)
+                {
+                    SuspendProcess(process.Id);
+                }
+
+                foreach (var process in processesUx)
+                {
+                    SuspendProcess(process.Id);
+                }
+
+            }
+            catch (Exception e)
+            {
+                itsInterface.logger.Log(false, "Error on suspending RiotUx!");
+            }
+            return Task.CompletedTask;
         }
     }
 }

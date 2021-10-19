@@ -1020,8 +1020,10 @@ namespace Evelynn_Bot.GameAI
         }
 
         private int tuto1ChampCount;
+        private int bugfixCount;
         public void YeniAI_1(object Interface)
         {
+            bugfixCount = 0;
             Interface itsInterface = (Interface)Interface;
             itsInterface.clientKiller.KillRiotUxRender();
             Point point = new Point(400, 300);
@@ -1029,6 +1031,14 @@ namespace Evelynn_Bot.GameAI
             {
                 try
                 {
+                    if (itsInterface.queueId == 2000)
+                    {
+                        if (bugfixCount < 7)
+                        {
+                            bugfixCount++;
+                            SagTikla();
+                        }
+                    }
 
                     Bitmap bitmap_;
                     try
@@ -1165,7 +1175,7 @@ namespace Evelynn_Bot.GameAI
                                 break;
                         }
                     }
-                    if (healthPercentage >= 38.0)
+                    if (healthPercentage >= 25.0)
                     {
                         if (point_2.X != -1 && list4.Count >= 2) // En az 2 veya daha fazla AllyMinion varsa
                         {

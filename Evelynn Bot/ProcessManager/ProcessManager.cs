@@ -347,33 +347,50 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> TakeActionAndRestart(Interface itsInterface, string status)
         {
-            itsInterface.clientKiller.KillAllLeague();
-            itsInterface.dashboardHelper.UpdateLolStatus(status, itsInterface);
-            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            Process eBot = new Process();
-            eBot.StartInfo.FileName = exeDir;
-            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-            eBot.StartInfo.Arguments = licenseBase64String;
-            eBot.StartInfo.Verb = "runas";
-            eBot.Start();
-            Environment.Exit(0);
+            try
+            {
+                itsInterface.clientKiller.KillAllLeague();
+                await Task.Delay(10000);
+                itsInterface.dashboardHelper.UpdateLolStatus(status, itsInterface);
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             return Task.CompletedTask;
         }
 
         public async Task<Task> Restart(Interface itsInterface)
         {
-            itsInterface.clientKiller.KillAllLeague();
-            await Task.Delay(10000);
-            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            Process eBot = new Process();
-            eBot.StartInfo.FileName = exeDir;
-            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-            eBot.StartInfo.Arguments = licenseBase64String;
-            eBot.StartInfo.Verb = "runas";
-            eBot.Start();
-            Environment.Exit(0);
+            try
+            {
+                itsInterface.clientKiller.KillAllLeague();
+                await Task.Delay(10000);
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
             return Task.CompletedTask;
         }
 
