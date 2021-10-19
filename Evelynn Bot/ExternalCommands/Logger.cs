@@ -16,9 +16,9 @@ namespace Evelynn_Bot.ExternalCommands
             try
             {
                 string directoryName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                using (StreamWriter streamWriter = new StreamWriter(directoryName + "\\log.txt", true))
+                using (StreamWriter streamWriter = new StreamWriter(directoryName + "\\ErrorLog.txt", true))
                 {
-                    streamWriter.WriteLine("[" + DateTime.Now.ToString() + "]" + logtext);
+                    streamWriter.WriteLine("[" + DateTime.Now.ToString() + "] " + logtext);
                 }
             }
             catch

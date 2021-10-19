@@ -36,7 +36,6 @@ namespace Evelynn_Bot.ExternalCommands
 
         #endregion
 
-
         public static IntPtr intptr_0 = (IntPtr)1;
         public static IntPtr intptr_1 = (IntPtr)0;
         public static uint uint_0 = 1;
@@ -53,14 +52,14 @@ namespace Evelynn_Bot.ExternalCommands
             uint uint_2);
 
         [DllImport("Kernel32")]
-        public static extern bool SetConsoleCtrlHandler(GDelegate0 gdelegate0_0, bool bool_0);
+        public static extern bool SetConsoleCtrlHandler(ControlDelegate cDelegate, bool tf);
 
         [DllImport("Kernel32")]
-        public static extern bool TerminateProcess(IntPtr intptr_2, uint uint_2);
+        public static extern bool TerminateProcess(IntPtr ipr, uint ui);
 
-        public delegate bool GDelegate0(GEnum0 CtrlType);
+        public delegate bool ControlDelegate(CtrlTypes CtrlType);
 
-        public enum GEnum0
+        public enum CtrlTypes
         {
             CTRL_C_EVENT = 0,
             CTRL_BREAK_EVENT = 1,

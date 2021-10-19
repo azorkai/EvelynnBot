@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -78,9 +79,30 @@ namespace Evelynn_Bot
             }
         }
 
+        private static void ExceptionHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            Logger rL = new Logger();
+            rL.ReportLog($"Error: {e.Message} | Source: {e.Source} | ST: {e.StackTrace}");
+            Environment.Exit(0);
+        }
+
+        private static bool ExitHandler(WIN32.CtrlTypes cEnum)
+        {
+            Process.Start("C:\\Windows\\explorer.exe");
+            Console.WriteLine("Good Bye!");
+            Thread.Sleep(2500);
+            return true;
+        }
+
+
+        [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
         static async Task Main(string[] args)
         {
 
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
+            WIN32.ControlDelegate gControlDelegate = new WIN32.ControlDelegate(ExitHandler);
+            WIN32.SetConsoleCtrlHandler(gControlDelegate, true);
             WIN32.SetWindowPos(Process.GetCurrentProcess().MainWindowHandle, 0, 0, 0, 0, 0, 1u | 4u);
 
             Interface itsInterface = new Interface();
@@ -156,12 +178,13 @@ namespace Evelynn_Bot
                 itsInterface.dashboardHelper.LoginAndStartBot(itsInterface.jsonRead.Id(), itsInterface.jsonRead.Password(), itsInterface);
             }
 
+            GC.KeepAlive(gControlDelegate);
             Console.ReadLine();
-            }
-
         }
 
-        
+    }
+
+
     public static class Language
     {
         public static string language;
