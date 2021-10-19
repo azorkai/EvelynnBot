@@ -1025,7 +1025,7 @@ namespace Evelynn_Bot.GameAI
         {
             bugfixCount = 0;
             Interface itsInterface = (Interface)Interface;
-            itsInterface.clientKiller.KillRiotUxRender();
+            itsInterface.clientKiller.KillRiotUx();
             Point point = new Point(400, 300);
             while (!isGameEnd)
             {

@@ -34,6 +34,15 @@ namespace Evelynn_Bot.ExternalCommands
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
         static extern bool CloseHandle(IntPtr handle);
 
+        [DllImport("User32.dll")]
+        private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+
+        [DllImport("User32.dll")]
+        private static extern bool EnableWindow(IntPtr hwnd, bool enabled);
+
+        [DllImport("User32.dll", SetLastError = true)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
         private void SuspendProcess(int pid)
         {
             var process = Process.GetProcessById(pid); // throws exception if process does not exist
@@ -46,6 +55,9 @@ namespace Evelynn_Bot.ExternalCommands
                 {
                     continue;
                 }
+
+                ShowWindow(pOpenThread, 0);
+                EnableWindow(pOpenThread, true);
 
                 SuspendThread(pOpenThread);
 
@@ -85,6 +97,8 @@ namespace Evelynn_Bot.ExternalCommands
                 Process[] processesRender = Process.GetProcessesByName("LeagueClientUxRender");
                 Process[] processesUx = Process.GetProcessesByName("LeagueClientUx");
 
+                HideLeagueProcess();
+
                 foreach (var process in processesRender)
                 {
                     SuspendProcess(process.Id);
@@ -98,8 +112,8 @@ namespace Evelynn_Bot.ExternalCommands
             }
             catch (Exception e)
             {
-                itsInterface.logger.Log(false, "Error on suspending LeagueUx!");
-            }    
+                Console.WriteLine(e);
+            }
             return Task.CompletedTask;
         }
 
@@ -109,6 +123,14 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 Process[] processesRender = Process.GetProcessesByName("RiotClientUxRender");
                 Process[] processesUx = Process.GetProcessesByName("RiotClientUx");
+                Process[] processesRch = Process.GetProcessesByName("RiotClientCrashHandler");
+
+                HideRiotClientProcess();
+
+                foreach (var process in processesRch)
+                {
+                    SuspendProcess(process.Id);
+                }
 
                 foreach (var process in processesRender)
                 {
@@ -123,9 +145,25 @@ namespace Evelynn_Bot.ExternalCommands
             }
             catch (Exception e)
             {
-                itsInterface.logger.Log(false, "Error on suspending RiotUx!");
+                Console.WriteLine(e);
             }
             return Task.CompletedTask;
         }
+
+        private void HideRiotClientProcess()
+        {
+            IntPtr pOpenThread = FindWindow(null, "Riot Client Main");
+            ShowWindow(pOpenThread, 0);
+            EnableWindow(pOpenThread, false);
+        }
+
+        private void HideLeagueProcess()
+        {
+            IntPtr pOpenThread = FindWindow("RCLIENT", "League Of Legends");
+            ShowWindow(pOpenThread, 0);
+            EnableWindow(pOpenThread, false);
+        }
+
+
     }
 }

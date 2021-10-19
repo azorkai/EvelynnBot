@@ -55,22 +55,14 @@ namespace Evelynn_Bot.ExternalCommands
             Thread.Sleep(5000);
         }
 
-        public void KillRiotUxRender()
-        {
-            Process[] processesByName = Process.GetProcessesByName("RiotClientUxRender");
-            foreach (Process process in processesByName)
-            {
-                WIN32.TerminateProcess(process.Handle, 1u);
-            }
-            Thread.Sleep(5000);
-        }
         public void KillRiotUx()
         {
             Process[] processesByName = Process.GetProcessesByName("RiotClientUx");
-            foreach (Process process in processesByName)
-            {
-                WIN32.TerminateProcess(process.Handle, 1u);
-            }
+            foreach (Process process1 in processesByName){ WIN32.TerminateProcess(process1.Handle, 1u); }
+            Process[] pbN2 = Process.GetProcessesByName("RiotClientUxRender");
+            foreach (Process process2 in pbN2){ WIN32.TerminateProcess(process2.Handle, 1u); }
+            Process[] pbN3 = Process.GetProcessesByName("RiotClientCrashHandler");
+            foreach (Process process3 in pbN3) { WIN32.TerminateProcess(process3.Handle, 1u); }
             Thread.Sleep(5000);
         }
 
