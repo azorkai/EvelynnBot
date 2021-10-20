@@ -79,7 +79,6 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 if (itsInterface.license.Lol_username == "")
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
@@ -90,23 +89,20 @@ namespace Evelynn_Bot.Account_Process
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullPassword);
                 }
 
-                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
 
-                try
-                {
-                    await itsInterface.lcuPlugins.DeleteSplashScreen();
-                }
-                catch (Exception e)
-                {
+                //try
+                //{
+                //    await itsInterface.lcuPlugins.DeleteSplashScreen();
+                //}
+                //catch (Exception e)
+                //{
                     
-                }
+                //}
 
                 itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);
-
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 if (loginStatus.error != string.Empty)
                 {
@@ -147,29 +143,23 @@ namespace Evelynn_Bot.Account_Process
                     eBot.Start();
                     Environment.Exit(0);
                 }
-
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+                
                 await Task.Delay(5500);
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 try
                 {
-                    itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                     await itsInterface.lcuPlugins.UpdateRiotClient();
                     itsInterface.logger.Log(true, "Updating League Product");
                 }
                 catch (Exception e)
                 {
-                    
+
                 }
 
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 await Task.Delay(20000);
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
                 try
                 {
-                    //itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                     await itsInterface.lcuPlugins.LeagueProductSelect();
                     itsInterface.logger.Log(true,"League product selected!");
                 }
@@ -182,8 +172,7 @@ namespace Evelynn_Bot.Account_Process
 
                 try
                 {
-
-                    itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                    
                     var eula = await itsInterface.lcuPlugins.GetEula("read");
                     if (eula == "AcceptanceRequired")
                     {
@@ -198,12 +187,6 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.logger.Log(true, "All done for Riot Client");
 
-                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
-                await Task.Delay(35000);
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
-
-                itsInterface.logger.Log(true, "Enough wait time for Riot Clients");
 
                 Dispose(true);
                 itsInterface.lcuApi.Close();

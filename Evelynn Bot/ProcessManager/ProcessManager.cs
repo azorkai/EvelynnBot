@@ -51,7 +51,7 @@ namespace Evelynn_Bot.ProcessManager
 
             await Task.Delay(10000);
 
-            // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)
+            // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)s
             try
             {
                 itsInterface.logger.Log(true, "ID: " + itsInterface.license.Lol_username);
@@ -74,24 +74,12 @@ namespace Evelynn_Bot.ProcessManager
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
 
-                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
-
-                        await Task.Delay(20000);
-
-                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
-
                         if (!accountProcess.Initialize(itsInterface))
                         {
                             itsInterface.logger.Log(false, "Restarting...");
                             await Task.Delay(7000);
                             await Restart(itsInterface);
                         }
-
-                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
-
-                        await Task.Delay(2000);
-
-                        itsInterface.lcuPlugins.KillUXAsync();
 
                         try
                         {
@@ -115,7 +103,7 @@ namespace Evelynn_Bot.ProcessManager
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                                     break;
                                 //case "restart_client_error":
-                                //    itsInterface.logger.Log(false ,"Client Error. Restarting...");
+                                //    itsInterface.logger.Log(false ,"Client Error.");
                                 //    return itsInterface.processManager.StartAccountProcess(itsInterface);
                                 case "invalid_summoner_name":
                                     itsInterface.logger.Log(false,"Invalid summoner name!");
@@ -136,6 +124,13 @@ namespace Evelynn_Bot.ProcessManager
                         
                         await Task.Delay(3500);
 
+                        if (!await accountProcess.GetSetWallet(itsInterface))
+                        {
+                            itsInterface.clientKiller.KillAllLeague();
+                            await Task.Delay(10000);
+                            await Restart(itsInterface);
+                        }
+
                         itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
@@ -145,13 +140,6 @@ namespace Evelynn_Bot.ProcessManager
                         try { await itsInterface.lcuPlugins.RemoveNotificationsAsync(); } catch (Exception e) { }
 
                         await itsInterface.lcuPlugins.GetSetMissions();
-
-                        if (!await accountProcess.GetSetWallet(itsInterface))
-                        {
-                            itsInterface.clientKiller.KillAllLeague();
-                            await Task.Delay(10000);
-                            await Restart(itsInterface);
-                        }
 
                         try { await itsInterface.lcuPlugins.ChangeSummonerIconAsync(); } catch (Exception e) { }
 

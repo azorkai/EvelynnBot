@@ -95,7 +95,8 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 Process[] processesRender = Process.GetProcessesByName("LeagueClientUxRender");
                 Process[] processesUx = Process.GetProcessesByName("LeagueClientUx");
-                
+
+                HideLeagueProcessSplash();
                 HideLeagueProcess();
 
                 foreach (var process in processesRender)
@@ -125,7 +126,6 @@ namespace Evelynn_Bot.ExternalCommands
                 Process[] processesRender = Process.GetProcessesByName("RiotClientUxRender");
                 Process[] processesUx = Process.GetProcessesByName("RiotClientUx");
                 Process[] processesRch = Process.GetProcessesByName("RiotClientCrashHandler");
-
 
                 //Buglu piç
                 //HideRiotClientProcess();
@@ -166,9 +166,19 @@ namespace Evelynn_Bot.ExternalCommands
             ShowWindow(pOpenThread, 0);
         }
 
-        private void HideLeagueProcess()
+        private void HideLeagueProcessSplash()
         {
             IntPtr pOpenThread = FindWindow("SplashScreenClassName", "");
+            if (pOpenThread == IntPtr.Zero)
+            {
+                return;
+            }
+            ShowWindow(pOpenThread, 0);
+        }
+
+        private void HideLeagueProcess()
+        {
+            IntPtr pOpenThread = FindWindow("RCLIENT", "League of Legends");
             if (pOpenThread == IntPtr.Zero)
             {
                 return;
