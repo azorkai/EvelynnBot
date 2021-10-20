@@ -126,7 +126,9 @@ namespace Evelynn_Bot.ExternalCommands
                 Process[] processesUx = Process.GetProcessesByName("RiotClientUx");
                 Process[] processesRch = Process.GetProcessesByName("RiotClientCrashHandler");
 
-                HideRiotClientProcess();
+
+                //Buglu piç
+                //HideRiotClientProcess();
 
                 foreach (var process in processesRch)
                 {

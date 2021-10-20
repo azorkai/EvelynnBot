@@ -114,9 +114,9 @@ namespace Evelynn_Bot.ProcessManager
                                 case "invalid_credentials":
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                                     break;
-                                case "restart_client_error":
-                                    itsInterface.logger.Log(false ,"Client Error. Restarting...");
-                                    return itsInterface.processManager.StartAccountProcess(itsInterface);
+                                //case "restart_client_error":
+                                //    itsInterface.logger.Log(false ,"Client Error. Restarting...");
+                                //    return itsInterface.processManager.StartAccountProcess(itsInterface);
                                 case "invalid_summoner_name":
                                     itsInterface.logger.Log(false,"Invalid summoner name!");
                                     break;

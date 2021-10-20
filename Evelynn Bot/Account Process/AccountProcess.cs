@@ -64,9 +64,9 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.clientKiller.StartRiotClient();
                 }
 
-                Thread.Sleep(8000);
+                Thread.Sleep(4000);
 
-                //itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -79,7 +79,7 @@ namespace Evelynn_Bot.Account_Process
         {
             try
             {
-                 itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 if (itsInterface.license.Lol_username == "")
                 {
                     return itsInterface.Result(false, itsInterface.messages.ErrorNullUsername);
@@ -91,9 +91,19 @@ namespace Evelynn_Bot.Account_Process
                 }
 
                 itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-                //await itsInterface.lcuPlugins.DeleteSplashScreen();
+
+                try
+                {
+                    await itsInterface.lcuPlugins.DeleteSplashScreen();
+                }
+                catch (Exception e)
+                {
+                    
+                }
+
                 itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);
 
                 itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
@@ -159,7 +169,7 @@ namespace Evelynn_Bot.Account_Process
 
                 try
                 {
-                    itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                    //itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                     await itsInterface.lcuPlugins.LeagueProductSelect();
                     itsInterface.logger.Log(true,"League product selected!");
                 }
@@ -449,6 +459,7 @@ namespace Evelynn_Bot.Account_Process
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 itsInterface.logger.Log(false, "Can not able to get-set wallet, restarting.");
                 return false;
             }
