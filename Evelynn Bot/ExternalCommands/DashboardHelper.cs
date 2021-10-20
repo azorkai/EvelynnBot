@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ using Evelynn_Bot.Constants;
 using Evelynn_Bot.Entities;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API.GameData;
+using Newtonsoft.Json;
 using Quartz;
 using Quartz.Impl;
 
@@ -256,6 +258,24 @@ namespace Evelynn_Bot.ExternalCommands
             // Read the random line
             string line = musicList.Skip(randomNumber - 1).Take(1).First();
             Program.SetWindowText(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, line);
+
+            //Check restart command
+            if (itsInterface.dashboard.IsRestart && Process.GetProcessesByName("League of Legends").Length == 0) // Dashboard Action Restart
+            {
+                itsInterface.dashboard.IsRestart = false;
+                itsInterface.dashboard.IsStop = false;
+                itsInterface.dashboard.IsStart = true;
+                itsInterface.clientKiller.KillAllLeague();
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
+            }
         }
     }
 

@@ -79,11 +79,21 @@ namespace Evelynn_Bot
             }
         }
 
-        private static void ExceptionHandler(object sender, UnhandledExceptionEventArgs args)
+        private static void ExceptionHandler(object sender, UnhandledExceptionEventArgs args, Interface itsInterface)
         {
             Exception e = (Exception)args.ExceptionObject;
-            Logger rL = new Logger();
-            rL.ReportLog($"Error: {e.Message} | Source: {e.Source} | ST: {e.StackTrace}");
+            itsInterface.logger.ReportLog($"Error: {e.Message} | Source: {e.Source} | ST: {e.StackTrace}");
+            itsInterface.clientKiller.KillAllLeague();
+            itsInterface.logger.Log(false, "Unhandled Error! Restarting...");
+            Thread.Sleep(5000);
+            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process eBot = new Process();
+            eBot.StartInfo.FileName = exeDir;
+            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+            eBot.StartInfo.Arguments = licenseBase64String;
+            eBot.StartInfo.Verb = "runas";
+            eBot.Start();
             Environment.Exit(0);
         }
 
@@ -99,13 +109,11 @@ namespace Evelynn_Bot
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
         static async Task Main(string[] args)
         {
-
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
+            Interface itsInterface = new Interface();
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, e) => ExceptionHandler(sender, e, itsInterface));
             WIN32.ControlDelegate gControlDelegate = new WIN32.ControlDelegate(ExitHandler);
             WIN32.SetConsoleCtrlHandler(gControlDelegate, true);
             WIN32.SetWindowPos(Process.GetCurrentProcess().MainWindowHandle, 0, 0, 0, 0, 0, 1u | 4u);
-
-            Interface itsInterface = new Interface();
 
             try
             {
