@@ -123,12 +123,15 @@ namespace Evelynn_Bot.ProcessManager
                         }
                         
                         await Task.Delay(3500);
+
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
                             itsInterface.clientKiller.KillAllLeague();
                             await Task.Delay(10000);
                             await Restart(itsInterface);
                         }
+
+                        InjectConfigPersist(itsInterface);
 
                         itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                         await accountProcess.CheckLeagueBan(itsInterface);
@@ -414,29 +417,21 @@ namespace Evelynn_Bot.ProcessManager
             return itsInterface.Result(Convert.ToBoolean(Process.GetProcessesByName(win).Length != 0), "");
         }
 
-        //private void DamageChecker(object source, ElapsedEventArgs e, Interface itsInterface, GameAi gameAi)
-        //{
-        //    danger = false;
-        //    gameAi.CurrentPlayerStats(itsInterface);
-        //    lastHealth = itsInterface.player.CurrentHealth;
-
-        //    Thread.Sleep(2500);
-
-        //    gameAi.CurrentPlayerStats(itsInterface);
-        //    currentHealth = itsInterface.player.CurrentHealth;
-
-        //    if (lastHealth - currentHealth > 180)
-        //    {
-        //        Console.WriteLine("Tehlikeli Durum! Büyük Can Kaybı Yaşandı!");
-        //        danger = true;
-        //        Dispose(true);
-        //        Thread.Sleep(1000);
-        //    }
-        //    else
-        //    {
-        //        danger = false;
-        //    }
-        //}
+        public void InjectConfigPersist(Interface itsInterface)
+        {
+            try
+            {
+                string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
+                File.Delete($"{text}PersistedSettings.json");
+                Thread.Sleep(1500);
+                File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
+                itsInterface.logger.Log(true, "Config Updated");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
 
         public async Task<Task> PlayAgain(Interface itsInterface)
         {
