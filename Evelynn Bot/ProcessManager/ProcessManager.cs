@@ -131,7 +131,8 @@ namespace Evelynn_Bot.ProcessManager
                             await Restart(itsInterface);
                         }
 
-                        InjectConfigPersist(itsInterface);
+                        accountProcess.CopyConfig(itsInterface);
+                        //InjectConfigPersist(itsInterface);
 
                         itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                         await accountProcess.CheckLeagueBan(itsInterface);
@@ -417,21 +418,21 @@ namespace Evelynn_Bot.ProcessManager
             return itsInterface.Result(Convert.ToBoolean(Process.GetProcessesByName(win).Length != 0), "");
         }
 
-        public void InjectConfigPersist(Interface itsInterface)
-        {
-            try
-            {
-                string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
-                File.Delete($"{text}PersistedSettings.json");
-                Thread.Sleep(1500);
-                File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
-                itsInterface.logger.Log(true, "Config Updated");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
+        //public void InjectConfigPersist(Interface itsInterface)
+        //{
+        //    try
+        //    {
+        //        string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
+        //        File.Delete($"{text}PersistedSettings.json");
+        //        Thread.Sleep(1500);
+        //        File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
+        //        itsInterface.logger.Log(true, "Config Updated");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //    }
+        //}
 
         public async Task<Task> PlayAgain(Interface itsInterface)
         {

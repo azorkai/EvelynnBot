@@ -34,8 +34,10 @@ namespace Evelynn_Bot.Account_Process
             {
                 string text = itsInterface.clientKiller.GetLeaguePath() + "Config\\";
                 File.Delete($"{text}game.cfg");
+                File.Delete($"{text}PersistedSettings.json");
                 Thread.Sleep(1500);
                 File.Copy(Directory.GetCurrentDirectory() + "\\Config\\game.cfg", $"{text}game.cfg", overwrite: true);
+                File.Copy(Directory.GetCurrentDirectory() + "\\Config\\PersistedSettings.json", $"{text}PersistedSettings.json", overwrite: true);
             }
             catch (Exception e)
             {
