@@ -449,48 +449,64 @@ namespace Evelynn_Bot.Account_Process
         }
         public async Task<Task> CheckNewAccount(Interface itsInterface)
         {
-            if (string.IsNullOrEmpty(itsInterface.summoner.displayName))
+            try
             {
-                itsInterface.lcuPlugins.KillUXAsync();
-
-                itsInterface.logger.Log(true, "New account!");
-
-                await Task.Delay(5000);
-
-                try
+                if (string.IsNullOrEmpty(itsInterface.summoner.displayName))
                 {
-                    await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                    itsInterface.lcuPlugins.KillUXAsync();
+
+                    itsInterface.logger.Log(true, "New account!");
+
+                    await Task.Delay(5000);
+
+                    try
+                    {
+                        await itsInterface.lcuPlugins.CompleteNewAccountAsync();
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+
+                    var name = RandomNameGenerator();
+
+                    itsInterface.lcuPlugins.KillUXAsync();
+
+                    if (await itsInterface.lcuPlugins.SetSummonerName(name))
+                    {
+                        itsInterface.logger.Log(true, "Successfully used name! " + name);
+                        Dispose(true);
+
+                        itsInterface.clientKiller.KillAllLeague();
+                        var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                        var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                        Process eBot = new Process();
+                        eBot.StartInfo.FileName = exeDir;
+                        eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                        eBot.StartInfo.Arguments = licenseBase64String;
+                        eBot.StartInfo.Verb = "runas";
+                        eBot.Start();
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        itsInterface.logger.Log(true, "Error on creating nickname. Trying again!");
+                        return CheckNewAccount(itsInterface);
+                    }
                 }
-                catch (Exception e)
-                {
 
-                }
-
-                var name = RandomNameGenerator();
-
-                itsInterface.lcuPlugins.KillUXAsync();
-
-                if (await itsInterface.lcuPlugins.SetSummonerName(name))
-                {
-                    itsInterface.logger.Log(true, "Successfully used name! " + name);
-                    Dispose(true);
-
-                    itsInterface.clientKiller.KillAllLeague();
-                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                    Process eBot = new Process();
-                    eBot.StartInfo.FileName = exeDir;
-                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                    eBot.StartInfo.Arguments = licenseBase64String;
-                    eBot.StartInfo.Verb = "runas";
-                    eBot.Start();
-                    Environment.Exit(0);
-                }
-                else
-                {
-                    itsInterface.logger.Log(true, "Error on creating nickname. Trying again!");
-                    return CheckNewAccount(itsInterface);
-                }
+            }
+            catch (Exception e)
+            {
+                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Process eBot = new Process();
+                eBot.StartInfo.FileName = exeDir;
+                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                eBot.StartInfo.Arguments = licenseBase64String;
+                eBot.StartInfo.Verb = "runas";
+                eBot.Start();
+                Environment.Exit(0);
             }
             return Task.CompletedTask;
         }

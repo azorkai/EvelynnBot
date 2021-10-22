@@ -144,7 +144,7 @@ namespace Evelynn_Bot.ExternalCommands
                 {
                     SuspendProcess(process.Id);
                 }
-                
+
                 return Task.CompletedTask;
 
             }
@@ -153,7 +153,6 @@ namespace Evelynn_Bot.ExternalCommands
                 Console.WriteLine(e);
                 return Task.CompletedTask;
             }
-            
         }
 
         private void HideRiotClientProcess()

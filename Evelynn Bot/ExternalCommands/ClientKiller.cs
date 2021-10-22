@@ -322,7 +322,7 @@ namespace Evelynn_Bot.ExternalCommands
         {
 
             Process[] pBN = Process.GetProcessesByName("fpslimiter32");
-            foreach (Process p in pBN) { p.Kill(); }
+            foreach (Process p in pBN) { WIN32.TerminateProcess(p.Handle, 1u); }
             Thread.Sleep(2000);
 
             while (Process.GetProcessesByName("fpslimiter32").Length == 0)
@@ -379,7 +379,7 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 using (StreamWriter streamWriter = File.CreateText("del.bat"))
                 {
-                    streamWriter.WriteLine("start \"\" \"" + path + "\"");
+                    streamWriter.WriteLine("start \"\" \"" + path + "\" --launch-product=league_of_legends --launch-patchline=live");
                 }
                 Process.Start(new ProcessStartInfo("del.bat")
                 {
@@ -421,24 +421,36 @@ namespace Evelynn_Bot.ExternalCommands
             if (File.Exists(riotLockFilePath)) { File.Delete(riotLockFilePath); }
         }
 
-        public void KillRiotClient()
+        public async void KillRiotClient()
         {
+            //await RunCommand("taskkill /f /im RiotClientServices.exe");
+            //await RunCommand("taskkill /f /im RiotClientUx.exe");
+            //await RunCommand("taskkill /f /im RiotClientUxRender.exe");
+            //await RunCommand("taskkill /f /im RiotClientUxRender.exe");
+            //await RunCommand("taskkill /f /im RiotClientCrashHandler.exe");
             Process[] pbN = Process.GetProcessesByName("RiotClientServices");
-            foreach (Process p in pbN) { p.Kill(); }
+            foreach (Process p in pbN) { WIN32.TerminateProcess(p.Handle, 1u); }
             pbN = Process.GetProcessesByName("RiotClientUx");
-            foreach (Process p2 in pbN) { p2.Kill();}
+            foreach (Process p2 in pbN) { WIN32.TerminateProcess(p2.Handle, 1u); }
             pbN = Process.GetProcessesByName("RiotClientUxRender");
-            foreach (Process p3 in pbN) { p3.Kill(); }
+            foreach (Process p3 in pbN) { WIN32.TerminateProcess(p3.Handle, 1u); }
             pbN = Process.GetProcessesByName("RiotClientCrashHandler");
-            foreach (Process p4 in pbN) { p4.Kill(); }
+            foreach (Process p4 in pbN) { WIN32.TerminateProcess(p4.Handle, 1u); }
             KillRiotLockFile();
         }
 
         public void KillAllLeague()
         {
-            KillLeagueOfLegends();
-            KillLeagueClients();
-            KillRiotClient();
+            try
+            {
+                KillLeagueOfLegends();
+                KillLeagueClients();
+                KillRiotClient();
+            }
+            catch (Exception e)
+            {
+                //
+            }
         }
 
         public void DeleteLockFile()
@@ -450,19 +462,24 @@ namespace Evelynn_Bot.ExternalCommands
         public void KillLeagueOfLegends()
         {
             Process[] pBN = Process.GetProcessesByName("League of Legends");
-            foreach (Process p in pBN) { p.Kill(); }
+            foreach (Process p in pBN) { WIN32.TerminateProcess(p.Handle, 1u); }
         }
 
-        public void KillLeagueClients()
+        public async void KillLeagueClients()
         {
+            //await RunCommand("taskkill /f /im LeagueClient.exe");
+            //await RunCommand("taskkill /f /im LeagueClientUx.exe");
+            //await RunCommand("taskkill /f /im LeagueClientUxRender.exe");
+            //await RunCommand("taskkill /f /im LeagueClientUxRender.exe");
+            //await RunCommand("taskkill /f /im LeagueCrashHandler.exe");
             Process[] pBN = Process.GetProcessesByName("LeagueClient");
-            foreach (Process p in pBN) { p.Kill(); }
+            foreach (Process p in pBN) { WIN32.TerminateProcess(p.Handle, 1u); }
             pBN = Process.GetProcessesByName("LeagueClientUx");
-            foreach (Process p2 in pBN) { p2.Kill(); }
+            foreach (Process p2 in pBN) { WIN32.TerminateProcess(p2.Handle, 1u); }
             pBN = Process.GetProcessesByName("LeagueClientUxRender");
-            foreach (Process p3 in pBN) { p3.Kill(); }
+            foreach (Process p3 in pBN) { WIN32.TerminateProcess(p3.Handle, 1u); }
             pBN = Process.GetProcessesByName("LeagueCrashHandler");
-            foreach (Process p4 in pBN) { p4.Kill(); }
+            foreach (Process p4 in pBN) { WIN32.TerminateProcess(p4.Handle, 1u); }
             DeleteLockFile();
         }
 

@@ -47,7 +47,7 @@ namespace Evelynn_Bot.ProcessManager
         {
             await itsInterface.clientKiller.StartFPSLimiter();
             itsInterface.newQueue.bugTimer.Stop();
-            itsInterface.clientKiller.KillAllLeague();
+            //itsInterface.clientKiller.KillAllLeague();
 
             await Task.Delay(10000);
 
@@ -67,7 +67,7 @@ namespace Evelynn_Bot.ProcessManager
                     if (isFromGame == false)
                     {
                         accountProcess.StartLeague(itsInterface, StartEnums.RiotClient);
-                        await Task.Delay(18000);
+                        await Task.Delay(13000);
                         itsInterface.lcuApi.BeginTryInitRiotClient();
                     }
                     if (processExist("RiotClientServices", itsInterface))
@@ -102,9 +102,9 @@ namespace Evelynn_Bot.ProcessManager
                                 case "invalid_credentials":
                                     await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                                     break;
-                                //case "restart_client_error":
-                                //    itsInterface.logger.Log(false ,"Client Error.");
-                                //    return itsInterface.processManager.StartAccountProcess(itsInterface);
+                                case "restart_client_error":
+                                    itsInterface.logger.Log(false, "Client Error.");
+                                    return itsInterface.processManager.StartAccountProcess(itsInterface);
                                 case "invalid_summoner_name":
                                     itsInterface.logger.Log(false,"Invalid summoner name!");
                                     break;
@@ -123,7 +123,6 @@ namespace Evelynn_Bot.ProcessManager
                         }
                         
                         await Task.Delay(3500);
-
                         if (!await accountProcess.GetSetWallet(itsInterface))
                         {
                             itsInterface.clientKiller.KillAllLeague();
