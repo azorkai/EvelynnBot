@@ -83,6 +83,7 @@ namespace Evelynn_Bot.ProcessManager
 
                         try
                         {
+                            await Task.Delay(1000);
                             string session = await accountProcess.VerifySession(itsInterface);
 
                             switch (session)
