@@ -185,7 +185,7 @@ namespace Evelynn_Bot.ProcessManager
                                 DisenchantAgain:
                                 await itsInterface.lcuPlugins.CraftKeysAsync();
                                 bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
-                                await itsInterface.lcuPlugins.CraftChampionShardAsync();
+                                await itsInterface.lcuPlugins.CraftEventTokenAsync();
                                 await itsInterface.lcuPlugins.DisenchantChampionsAsync();
                                 if (isMoreChest)
                                 {
@@ -284,15 +284,22 @@ namespace Evelynn_Bot.ProcessManager
 
                         if (itsInterface.license.Lol_disenchant)
                         {
-                            DisenchantAgain:
-                            await itsInterface.lcuPlugins.CraftKeysAsync();
-                            bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
-                            await itsInterface.lcuPlugins.CraftChampionShardAsync();
-                            await itsInterface.lcuPlugins.DisenchantChampionsAsync();
-                            if (isMoreChest)
+                            try
                             {
-                                Thread.Sleep(5000);
-                                goto DisenchantAgain;
+                                DisenchantAgain:
+                                await itsInterface.lcuPlugins.CraftKeysAsync();
+                                bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
+                                await itsInterface.lcuPlugins.CraftEventTokenAsync();
+                                await itsInterface.lcuPlugins.DisenchantChampionsAsync();
+                                if (isMoreChest)
+                                {
+                                    Thread.Sleep(5000);
+                                    goto DisenchantAgain;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                itsInterface.logger.Log(true, itsInterface.messages.ErrorDisenchant);
                             }
                         }
 
@@ -525,7 +532,7 @@ namespace Evelynn_Bot.ProcessManager
                         DisenchantAgain:
                         await itsInterface.lcuPlugins.CraftKeysAsync();
                         bool isMoreChest = await itsInterface.lcuPlugins.OpenChestsAsync();
-                        await itsInterface.lcuPlugins.CraftChampionShardAsync();
+                        await itsInterface.lcuPlugins.CraftEventTokenAsync();
                         await itsInterface.lcuPlugins.DisenchantChampionsAsync();
                         if (isMoreChest)
                         {
@@ -535,7 +542,7 @@ namespace Evelynn_Bot.ProcessManager
                     }
                     catch (Exception e)
                     {
-                        itsInterface.logger.Log(false, itsInterface.messages.ErrorDisenchant);
+                        itsInterface.logger.Log(true, itsInterface.messages.ErrorDisenchant);
                     }
                 }
                 

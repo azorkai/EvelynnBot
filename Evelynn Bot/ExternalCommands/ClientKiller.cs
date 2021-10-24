@@ -50,7 +50,7 @@ namespace Evelynn_Bot.ExternalCommands
             Process[] processesByName = Process.GetProcessesByName("explorer");
             foreach (Process process in processesByName)
             {
-                WIN32.TerminateProcess(process.Handle, 1u);
+                try {WIN32.TerminateProcess(process.Handle, 1u);}catch{/* ignroed */}
             }
             Thread.Sleep(5000);
         }
@@ -58,11 +58,11 @@ namespace Evelynn_Bot.ExternalCommands
         public void KillRiotUx()
         {
             Process[] processesByName = Process.GetProcessesByName("RiotClientUx");
-            foreach (Process process1 in processesByName){ WIN32.TerminateProcess(process1.Handle, 1u); }
+            foreach (Process process1 in processesByName){ try { WIN32.TerminateProcess(process1.Handle, 1u); }catch { /* ignored */ } }
             Process[] pbN2 = Process.GetProcessesByName("RiotClientUxRender");
-            foreach (Process process2 in pbN2){ WIN32.TerminateProcess(process2.Handle, 1u); }
+            foreach (Process process2 in pbN2){ try { WIN32.TerminateProcess(process2.Handle, 1u); }catch { /* ignored */ } }
             Process[] pbN3 = Process.GetProcessesByName("RiotClientCrashHandler");
-            foreach (Process process3 in pbN3) { WIN32.TerminateProcess(process3.Handle, 1u); }
+            foreach (Process process3 in pbN3) { try { WIN32.TerminateProcess(process3.Handle, 1u); }catch { /* ignored */ } }
             Thread.Sleep(5000);
         }
 
@@ -105,19 +105,19 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 // Enable WMI Service
                 await RunCommand("sc config winmgmt start= demand");
-                Thread.Sleep(1500);
+                Thread.Sleep(3000);
                 // Start WMI Service
                 await RunCommand("net start winmgmt");
-                Thread.Sleep(1500);
+                Thread.Sleep(3000);
                 // Disable Adapter
                 await RunCommand("wmic path win32_networkadapter where index=7 call disable");
-                Thread.Sleep(3500);
+                Thread.Sleep(7000);
                 // Enable Adapter
                 await RunCommand("wmic path win32_networkadapter where index=7 call enable");
-                Thread.Sleep(3500);
+                Thread.Sleep(7000);
                 // Stop WMI Service
                 await RunCommand("net stop winmgmt");
-                Thread.Sleep(1500);
+                Thread.Sleep(3000);
             }
             catch (Exception e)
             {
@@ -322,7 +322,7 @@ namespace Evelynn_Bot.ExternalCommands
         {
 
             Process[] pBN = Process.GetProcessesByName("fpslimiter32");
-            foreach (Process p in pBN) { WIN32.TerminateProcess(p.Handle, 1u); }
+            foreach (Process p in pBN) { try{ WIN32.TerminateProcess(p.Handle, 1u); } catch{ /* ignored */} }
             Thread.Sleep(2000);
 
             while (Process.GetProcessesByName("fpslimiter32").Length == 0)
@@ -429,13 +429,13 @@ namespace Evelynn_Bot.ExternalCommands
             //await RunCommand("taskkill /f /im RiotClientUxRender.exe");
             //await RunCommand("taskkill /f /im RiotClientCrashHandler.exe");
             Process[] pbN = Process.GetProcessesByName("RiotClientServices");
-            foreach (Process p in pbN) { WIN32.TerminateProcess(p.Handle, 1u); }
+            foreach (Process p in pbN) { try { WIN32.TerminateProcess(p.Handle, 1u); }catch{/*ignored*/} }
             pbN = Process.GetProcessesByName("RiotClientUx");
-            foreach (Process p2 in pbN) { WIN32.TerminateProcess(p2.Handle, 1u); }
+            foreach (Process p2 in pbN) { try{WIN32.TerminateProcess(p2.Handle, 1u);} catch {/*ignored*/} }
             pbN = Process.GetProcessesByName("RiotClientUxRender");
-            foreach (Process p3 in pbN) { WIN32.TerminateProcess(p3.Handle, 1u); }
+            foreach (Process p3 in pbN) { try{WIN32.TerminateProcess(p3.Handle, 1u);} catch {/*ignored*/} }
             pbN = Process.GetProcessesByName("RiotClientCrashHandler");
-            foreach (Process p4 in pbN) { WIN32.TerminateProcess(p4.Handle, 1u); }
+            foreach (Process p4 in pbN) { try{WIN32.TerminateProcess(p4.Handle, 1u);} catch {/*ignored*/} }
             KillRiotLockFile();
         }
 
@@ -462,7 +462,7 @@ namespace Evelynn_Bot.ExternalCommands
         public void KillLeagueOfLegends()
         {
             Process[] pBN = Process.GetProcessesByName("League of Legends");
-            foreach (Process p in pBN) { WIN32.TerminateProcess(p.Handle, 1u); }
+            foreach (Process p in pBN) { try{WIN32.TerminateProcess(p.Handle, 1u);} catch {/*ignored*/} }
         }
 
         public async void KillLeagueClients()
@@ -473,13 +473,13 @@ namespace Evelynn_Bot.ExternalCommands
             //await RunCommand("taskkill /f /im LeagueClientUxRender.exe");
             //await RunCommand("taskkill /f /im LeagueCrashHandler.exe");
             Process[] pBN = Process.GetProcessesByName("LeagueClient");
-            foreach (Process p in pBN) { WIN32.TerminateProcess(p.Handle, 1u); }
+            foreach (Process p in pBN) { try{WIN32.TerminateProcess(p.Handle, 1u);} catch {/*ignored*/} }
             pBN = Process.GetProcessesByName("LeagueClientUx");
-            foreach (Process p2 in pBN) { WIN32.TerminateProcess(p2.Handle, 1u); }
+            foreach (Process p2 in pBN) { try{WIN32.TerminateProcess(p2.Handle, 1u);} catch {/*ignored*/} }
             pBN = Process.GetProcessesByName("LeagueClientUxRender");
-            foreach (Process p3 in pBN) { WIN32.TerminateProcess(p3.Handle, 1u); }
+            foreach (Process p3 in pBN) { try{WIN32.TerminateProcess(p3.Handle, 1u);} catch {/*ignored*/} }
             pBN = Process.GetProcessesByName("LeagueCrashHandler");
-            foreach (Process p4 in pBN) { WIN32.TerminateProcess(p4.Handle, 1u); }
+            foreach (Process p4 in pBN) { try{WIN32.TerminateProcess(p4.Handle, 1u);} catch {/*ignored*/} }
             DeleteLockFile();
         }
 

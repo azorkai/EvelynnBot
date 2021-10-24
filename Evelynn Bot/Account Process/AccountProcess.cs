@@ -577,8 +577,10 @@ namespace Evelynn_Bot.Account_Process
             try
             {
                 int tryNum = 1;
+                bool isPatchDone = false;
                 while (LeagueIsPatchAvailable(itsInterface))
                 {
+                    isPatchDone = true;
                     itsInterface.logger.Log(true, itsInterface.messages.Patch);
                     Thread.Sleep(60000);
                     Dispose(true);
@@ -588,6 +590,21 @@ namespace Evelynn_Bot.Account_Process
                         break;
                     }
                 }
+
+                if (isPatchDone)
+                {
+                    itsInterface.clientKiller.KillAllLeague();
+                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    Process eBot = new Process();
+                    eBot.StartInfo.FileName = exeDir;
+                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+                    eBot.StartInfo.Arguments = licenseBase64String;
+                    eBot.StartInfo.Verb = "runas";
+                    eBot.Start();
+                    Environment.Exit(0);
+                }
+
                 return itsInterface.Result(true, "");
             }
             catch (Exception e)
