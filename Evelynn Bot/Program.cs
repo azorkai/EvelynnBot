@@ -85,16 +85,8 @@ namespace Evelynn_Bot
             itsInterface.logger.ReportLog($"Error: {e.Message} | Source: {e.Source} | ST: {e.StackTrace}");
             itsInterface.clientKiller.KillAllLeague();
             itsInterface.logger.Log(false, "Unhandled Error! Restarting...");
-            Thread.Sleep(5000);
-            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            Process eBot = new Process();
-            eBot.StartInfo.FileName = exeDir;
-            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-            eBot.StartInfo.Arguments = licenseBase64String;
-            eBot.StartInfo.Verb = "runas";
-            eBot.Start();
-            Environment.Exit(0);
+            Thread.Sleep(10000);
+            itsInterface.clientKiller.RestartAndExit(itsInterface);
         }
 
         private static bool ExitHandler(WIN32.CtrlTypes cEnum)

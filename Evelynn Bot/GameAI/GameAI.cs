@@ -1630,15 +1630,7 @@ namespace Evelynn_Bot.GameAI
         private void Restart(Interface itsInterface)
         {
             itsInterface.clientKiller.KillAllLeague();
-            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            Process eBot = new Process();
-            eBot.StartInfo.FileName = exeDir;
-            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-            eBot.StartInfo.Arguments = licenseBase64String;
-            eBot.StartInfo.Verb = "runas";
-            eBot.Start();
-            Environment.Exit(0);
+            itsInterface.clientKiller.RestartAndExit(itsInterface);
         }
         public void YeniAIBaslat(Interface itsInterface)
         {

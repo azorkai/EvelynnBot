@@ -11,5 +11,6 @@ namespace Evelynn_Bot.Entities
         public bool IsStop { get; set; }
         public bool IsRestart { get; set; }
         public bool IsStart { get; set; }
+        public bool IsNoAccount { get; set; }
     }
 }

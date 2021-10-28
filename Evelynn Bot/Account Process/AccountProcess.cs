@@ -112,17 +112,15 @@ namespace Evelynn_Bot.Account_Process
                         await Task.Delay(new TimeSpan(0, 5, 0));
                         itsInterface.clientKiller.KillAllLeague();
                         await Task.Delay(25000);
-                        var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                        var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                        Process eBot = new Process();
-                        eBot.StartInfo.FileName = exeDir;
-                        eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                        eBot.StartInfo.Arguments = licenseBase64String;
-                        eBot.StartInfo.Verb = "runas";
-                        eBot.Start();
-                        Environment.Exit(0);
+                        itsInterface.clientKiller.RestartAndExit(itsInterface);
                     }
                     if (loginStatus.error == "auth_failure")
+                    {
+                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                        return false;
+                    }
+
+                    if (loginStatus.error == "needs_credentials")
                     {
                         await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
                         return false;
@@ -133,17 +131,9 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.logger.Log(false, "Authenticated Error! Restart...");
                     itsInterface.clientKiller.KillAllLeague();
                     await Task.Delay(25000);
-                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                    Process eBot = new Process();
-                    eBot.StartInfo.FileName = exeDir;
-                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                    eBot.StartInfo.Arguments = licenseBase64String;
-                    eBot.StartInfo.Verb = "runas";
-                    eBot.Start();
-                    Environment.Exit(0);
+                    itsInterface.clientKiller.RestartAndExit(itsInterface);
                 }
-                
+
                 await Task.Delay(5500);
 
                 try
@@ -199,15 +189,7 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.clientKiller.KillAllLeague();
                 await Task.Delay(25000);
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
+                itsInterface.clientKiller.RestartAndExit(itsInterface);
                 return itsInterface.Result(true, e.Message);
             }
         }
@@ -478,15 +460,7 @@ namespace Evelynn_Bot.Account_Process
                         Dispose(true);
 
                         itsInterface.clientKiller.KillAllLeague();
-                        var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                        var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                        Process eBot = new Process();
-                        eBot.StartInfo.FileName = exeDir;
-                        eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                        eBot.StartInfo.Arguments = licenseBase64String;
-                        eBot.StartInfo.Verb = "runas";
-                        eBot.Start();
-                        Environment.Exit(0);
+                        itsInterface.clientKiller.RestartAndExit(itsInterface);
                     }
                     else
                     {
@@ -498,15 +472,7 @@ namespace Evelynn_Bot.Account_Process
             }
             catch (Exception e)
             {
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
+                itsInterface.clientKiller.RestartAndExit(itsInterface);
             }
             return Task.CompletedTask;
         }
@@ -594,15 +560,7 @@ namespace Evelynn_Bot.Account_Process
                 if (isPatchDone)
                 {
                     itsInterface.clientKiller.KillAllLeague();
-                    var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                    var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                    Process eBot = new Process();
-                    eBot.StartInfo.FileName = exeDir;
-                    eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                    eBot.StartInfo.Arguments = licenseBase64String;
-                    eBot.StartInfo.Verb = "runas";
-                    eBot.Start();
-                    Environment.Exit(0);
+                    itsInterface.clientKiller.RestartAndExit(itsInterface);
                 }
 
                 return itsInterface.Result(true, "");

@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Evelynn_Bot.Constants;
+using Evelynn_Bot.Entities;
+using System;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
@@ -7,10 +8,6 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Evelynn_Bot;
-using Evelynn_Bot.Constants;
-using Evelynn_Bot.Entities;
-using Evelynn_Bot.ExternalCommands;
 
 namespace bAUTH
 {
@@ -128,7 +125,7 @@ namespace bAUTH
         }
 
 
-        public License GetNewLoLAccount(string t, Interface itsInterface)
+        public bool GetNewLoLAccount(string t, Interface itsInterface)
         {
             try
             {
@@ -138,28 +135,48 @@ namespace bAUTH
                 switch (p[1])
                 {
                     case "SUCCESS":
-                        itsInterface.license.Lol_username = p[2];
-                        itsInterface.license.Lol_password = p[3];
-                        itsInterface.license.Lol_maxLevel = Convert.ToInt32(p[4]);
-                        itsInterface.license.Lol_maxBlueEssences = Convert.ToInt32(p[5]);
-                        itsInterface.license.Lol_disenchant = Convert.ToBoolean(p[6] == "0" ? "false" : "true");
-                        itsInterface.license.Lol_doTutorial = Convert.ToBoolean(p[7] == "0" ? "false" : "true");
-                        itsInterface.license.Lol_isEmptyNick = Convert.ToBoolean(p[8] == "0" ? "false" : "true");
-                        itsInterface.license.Lol_region = p[9];
+                        if (String.IsNullOrEmpty(p[2]) || String.IsNullOrEmpty(p[3])) // Check If NULL
+                        {
+                            itsInterface.isBotStarted = false;
+                            itsInterface.logger.Log(false, itsInterface.messages.LookingForNewAccount);
+                            itsInterface.dashboard.IsStop = true;
+                            itsInterface.dashboard.IsNoAccount = true;
+                            itsInterface.dashboardHelper.UpdateLolStatus("No Account", itsInterface);
+                            return false;
+                        }
+                        else
+                        {
+                            itsInterface.isBotStarted = true;
+                            itsInterface.dashboard.IsStop = false;
+                            itsInterface.dashboard.IsNoAccount = false;
+                            itsInterface.license.Lol_username = p[2];
+                            itsInterface.license.Lol_password = p[3];
+                            itsInterface.license.Lol_maxLevel = Convert.ToInt32(p[4]);
+                            itsInterface.license.Lol_maxBlueEssences = Convert.ToInt32(p[5]);
+                            itsInterface.license.Lol_disenchant = Convert.ToBoolean(p[6] == "0" ? "false" : "true");
+                            itsInterface.license.Lol_doTutorial = Convert.ToBoolean(p[7] == "0" ? "false" : "true");
+                            itsInterface.license.Lol_isEmptyNick = Convert.ToBoolean(p[8] == "0" ? "false" : "true");
+                            itsInterface.license.Lol_region = p[9];
+                            return true;
+                        }
                         break;
                     case "NO_ACCOUNT":
+                        itsInterface.isBotStarted = false;
                         itsInterface.logger.Log(false, itsInterface.messages.LookingForNewAccount);
+                        itsInterface.dashboard.IsNoAccount = true;
                         itsInterface.dashboard.IsStop = true;
+                        itsInterface.dashboardHelper.UpdateLolStatus("No Account", itsInterface);
+                        return false;
                         break;
-                    default: itsInterface.license.Status = false; break;
+                    default: itsInterface.license.Status = false; return false; break;
                 }
-                return itsInterface.license;
+                return false;
             }
             catch (Exception e)
             {
                 //Console.WriteLine(e.Message);
                 itsInterface.license.Status = false;
-                return itsInterface.license;
+                return false;
             }
         }
 

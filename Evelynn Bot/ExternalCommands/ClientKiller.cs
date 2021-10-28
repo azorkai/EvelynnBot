@@ -13,6 +13,7 @@ using Evelynn_Bot.Account_Process;
 using Microsoft.Win32;
 using Evelynn_Bot.Constants;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace Evelynn_Bot.ExternalCommands
 {
@@ -125,6 +126,7 @@ namespace Evelynn_Bot.ExternalCommands
             }
             return "ok";
         }
+
 
         private async Task<string> RunCommand(string cmd)
         {
@@ -346,6 +348,18 @@ namespace Evelynn_Bot.ExternalCommands
 
         #endregion
 
+        public void RestartAndExit(Interface itsInterface)
+        {
+            var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
+            var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process eBot = new Process();
+            eBot.StartInfo.FileName = exeDir;
+            eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
+            eBot.StartInfo.Arguments = licenseBase64String;
+            eBot.StartInfo.Verb = "runas";
+            eBot.Start();
+            Environment.Exit(0);
+        }
         public void LaunchLeagueFromLeagueClient(string path)
         {
             while (Process.GetProcessesByName("LeagueClient").Length == 0)
@@ -409,7 +423,6 @@ namespace Evelynn_Bot.ExternalCommands
                     continue;
                 }
                 Thread.Sleep(5000);
-                //Environment.Exit(0);
                 return string.Empty;
             }
             return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
@@ -417,8 +430,16 @@ namespace Evelynn_Bot.ExternalCommands
 
         public void KillRiotLockFile()
         {
-            string riotLockFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Riot Games\\Riot Client\\Config\\lockfile";
-            if (File.Exists(riotLockFilePath)) { File.Delete(riotLockFilePath); }
+            try
+            {
+                string riotLockFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Riot Games\\Riot Client\\Config\\lockfile";
+                if (File.Exists(riotLockFilePath)) { File.Delete(riotLockFilePath); }
+
+            }
+            catch (Exception exception)
+            {
+                //ignored
+            }
         }
 
         public async void KillRiotClient()
@@ -437,26 +458,27 @@ namespace Evelynn_Bot.ExternalCommands
             pbN = Process.GetProcessesByName("RiotClientCrashHandler");
             foreach (Process p4 in pbN) { try{WIN32.TerminateProcess(p4.Handle, 1u);} catch {/*ignored*/} }
             KillRiotLockFile();
+
         }
 
         public void KillAllLeague()
         {
-            try
-            {
-                KillLeagueOfLegends();
-                KillLeagueClients();
-                KillRiotClient();
-            }
-            catch (Exception e)
-            {
-                //
-            }
+                try { KillLeagueOfLegends(); }catch (Exception e) { /*ignored*/ }
+                try { KillLeagueClients(); }catch (Exception e) { /*ignored*/ }
+                try { KillRiotClient(); }catch (Exception e) { /*ignored*/ }
         }
 
         public void DeleteLockFile()
         {
-            string lockfilePath = $"{GetLeaguePath()}lockfile";
-            if (File.Exists(lockfilePath)) { File.Delete(lockfilePath); }
+            try
+            {
+                string lockfilePath = $"{GetLeaguePath()}lockfile";
+                if (File.Exists(lockfilePath)) { File.Delete(lockfilePath); }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
         }
 
         public void KillLeagueOfLegends()

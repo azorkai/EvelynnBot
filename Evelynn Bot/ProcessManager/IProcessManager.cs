@@ -9,6 +9,5 @@ namespace Evelynn_Bot.ProcessManager
         Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame);
         Task<object> CheckInGame(Interface itsInterface);
         Task<Task> PlayAgain(Interface itsInterface);
-        Task<Task> TakeActionAndRestart(Interface itsInterface, string status);
     }
 }

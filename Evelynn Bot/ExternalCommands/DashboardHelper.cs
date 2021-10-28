@@ -171,10 +171,27 @@ namespace Evelynn_Bot.ExternalCommands
                     ))},
                 Method.POST);
 
-            if (status == "Finished")
+
+            switch (status)
             {
-                itsInterface.req.GetNewLoLAccount(botRequest, itsInterface);
+                case "Finished":
+                    FC:
+                    var isThereAccountF =  itsInterface.req.GetNewLoLAccount(botRequest, itsInterface);
+                    if (isThereAccountF == false) { Thread.Sleep(20000); goto FC; }
+                    break;
+                case "Wrong":
+                    WC:
+                    var isThereAccountW = itsInterface.req.GetNewLoLAccount(botRequest, itsInterface);
+                    if (isThereAccountW == false) { Thread.Sleep(20000); goto WC; }
+
+                    break;
+                case "Banned":
+                    BC:
+                    var isThereAccountB = itsInterface.req.GetNewLoLAccount(botRequest, itsInterface);
+                    if (isThereAccountB == false) { Thread.Sleep(20000); goto BC; }
+                    break;
             }
+
         }
 
         public void UpdateLPQStatus(string trueFalse, Interface itsInterface)
@@ -266,15 +283,7 @@ namespace Evelynn_Bot.ExternalCommands
                 itsInterface.dashboard.IsStop = false;
                 itsInterface.dashboard.IsStart = true;
                 itsInterface.clientKiller.KillAllLeague();
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
+                itsInterface.clientKiller.RestartAndExit(itsInterface);
             }
         }
     }

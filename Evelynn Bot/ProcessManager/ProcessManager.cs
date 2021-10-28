@@ -54,6 +54,14 @@ namespace Evelynn_Bot.ProcessManager
             // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)s
             try
             {
+                CHECKACTIONS:
+                if (itsInterface.dashboard.IsStop && itsInterface.dashboard.IsNoAccount) // No Account Found
+                {
+                    itsInterface.isBotStarted = false;
+                    Thread.Sleep(20000);
+                    goto CHECKACTIONS;
+                }
+
                 itsInterface.logger.Log(true, "ID: " + itsInterface.license.Lol_username);
                 itsInterface.logger.Log(true, "Password: " + itsInterface.license.Lol_password);
                 itsInterface.logger.Log(true, "Max Level: " + itsInterface.license.Lol_maxLevel.ToString());
@@ -89,7 +97,10 @@ namespace Evelynn_Bot.ProcessManager
                             switch (session)
                             {
                                 case "banned_account":
-                                    await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Banned");
+                                    itsInterface.clientKiller.KillAllLeague();
+                                    await Task.Delay(10000);
+                                    itsInterface.dashboardHelper.UpdateLolStatus("Banned", itsInterface);
+                                    return Start(itsInterface);
                                     break;
                                 case "new_player_set_account":
                                     itsInterface.logger.Log(true ,"That's a new account");
@@ -101,7 +112,10 @@ namespace Evelynn_Bot.ProcessManager
                                     }
                                     break;
                                 case "invalid_credentials":
-                                    await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                                    itsInterface.clientKiller.KillAllLeague();
+                                    await Task.Delay(10000);
+                                    itsInterface.dashboardHelper.UpdateLolStatus("Wrong", itsInterface);
+                                    return Start(itsInterface);
                                     break;
                                 case "restart_client_error":
                                     itsInterface.logger.Log(false, "Client Error.");
@@ -152,14 +166,18 @@ namespace Evelynn_Bot.ProcessManager
                         if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
                         {
                             itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
-                            await TakeActionAndRestart(itsInterface, "Finished");
+                            itsInterface.clientKiller.KillAllLeague();
+                            await Task.Delay(10000);
+                            itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                             return Start(itsInterface);
                         }
 
                         if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
                         {
                             itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
-                            await TakeActionAndRestart(itsInterface, "Finished");
+                            itsInterface.clientKiller.KillAllLeague();
+                            await Task.Delay(10000);
+                            itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                             return Start(itsInterface);
                         }
 
@@ -260,14 +278,18 @@ namespace Evelynn_Bot.ProcessManager
                         if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
                         {
                             itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
-                            await TakeActionAndRestart(itsInterface, "Finished");
+                            itsInterface.clientKiller.KillAllLeague();
+                            await Task.Delay(10000);
+                            itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                             return Start(itsInterface);
                         }
 
                         if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
                         {
                             itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
-                            await TakeActionAndRestart(itsInterface, "Finished");
+                            itsInterface.clientKiller.KillAllLeague();
+                            await Task.Delay(10000);
+                            itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                             return Start(itsInterface);
                         }
 
@@ -345,46 +367,13 @@ namespace Evelynn_Bot.ProcessManager
             return Task.CompletedTask;
         }
 
-        public async Task<Task> TakeActionAndRestart(Interface itsInterface, string status)
-        {
-            try
-            {
-                itsInterface.clientKiller.KillAllLeague();
-                await Task.Delay(10000);
-                itsInterface.dashboardHelper.UpdateLolStatus(status, itsInterface);
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            return Task.CompletedTask;
-        }
-
         public async Task<Task> Restart(Interface itsInterface)
         {
             try
             {
                 itsInterface.clientKiller.KillAllLeague();
                 await Task.Delay(10000);
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
+                itsInterface.clientKiller.RestartAndExit(itsInterface);
             }
             catch (Exception e)
             {
@@ -468,15 +457,7 @@ namespace Evelynn_Bot.ProcessManager
                 itsInterface.dashboard.IsStart = true;
                 itsInterface.clientKiller.KillAllLeague();
                 if (pnC == 0) { Console.WriteLine("Panelden Restart Geldi!"); }
-                var licenseBase64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(itsInterface.license)));
-                var exeDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                Process eBot = new Process();
-                eBot.StartInfo.FileName = exeDir;
-                eBot.StartInfo.WorkingDirectory = Path.GetDirectoryName(exeDir);
-                eBot.StartInfo.Arguments = licenseBase64String;
-                eBot.StartInfo.Verb = "runas";
-                eBot.Start();
-                Environment.Exit(0);
+                itsInterface.clientKiller.RestartAndExit(itsInterface);
                 return Task.CompletedTask;
             }
 
@@ -515,14 +496,18 @@ namespace Evelynn_Bot.ProcessManager
                 if (itsInterface.license.Lol_maxLevel != 0 && itsInterface.summoner.summonerLevel >= itsInterface.license.Lol_maxLevel)
                 {
                     itsInterface.logger.Log(true, itsInterface.messages.AccountDoneXP);
-                    await TakeActionAndRestart(itsInterface, "Finished");
+                    itsInterface.clientKiller.KillAllLeague();
+                    await Task.Delay(10000);
+                    itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     return Start(itsInterface);
                 }
 
                 if (itsInterface.license.Lol_maxBlueEssences != 0 && itsInterface.wallet.ip >= itsInterface.license.Lol_maxBlueEssences)
                 {
                     itsInterface.logger.Log(true, itsInterface.messages.AccountDoneBE);
-                    await TakeActionAndRestart(itsInterface, "Finished");
+                    itsInterface.clientKiller.KillAllLeague();
+                    await Task.Delay(10000);
+                    itsInterface.dashboardHelper.UpdateLolStatus("Finished", itsInterface);
                     return Start(itsInterface);
                 }
 
