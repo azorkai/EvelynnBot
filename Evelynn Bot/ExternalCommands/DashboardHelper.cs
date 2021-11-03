@@ -106,7 +106,7 @@ namespace Evelynn_Bot.ExternalCommands
                 {
                     itsInterface.logger.Log(false, itsInterface.messages.WaitingForStart);
                     CHECKSTART:
-                    Thread.Sleep(10000);
+                    await Task.Delay(10000);
                     GC.Collect();
                     GC.Collect();
                     if (itsInterface.dashboard.IsStart)

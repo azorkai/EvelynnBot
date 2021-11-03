@@ -91,6 +91,10 @@ namespace Evelynn_Bot.Account_Process
 
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
+
+                // GEL BURAYA
+                await itsInterface.processManager.RiotUpdateCheck(itsInterface);
+
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
 
                 //try
@@ -116,13 +120,13 @@ namespace Evelynn_Bot.Account_Process
                     }
                     if (loginStatus.error == "auth_failure")
                     {
-                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                        itsInterface.dashboardHelper.UpdateLolStatus("Wrong", itsInterface);
                         return false;
                     }
 
                     if (loginStatus.error == "needs_credentials")
                     {
-                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                        itsInterface.dashboardHelper.UpdateLolStatus("Wrong", itsInterface);
                         return false;
                     }
                 }
@@ -203,7 +207,7 @@ namespace Evelynn_Bot.Account_Process
             if (clientRegion.region != region)
             {
                 await itsInterface.lcuPlugins.SetRegionAsync(region);
-                Thread.Sleep(10000);
+                await Task.Delay(10000);
                 return itsInterface.processManager.StartAccountProcess(itsInterface);
             }
 
@@ -249,7 +253,7 @@ namespace Evelynn_Bot.Account_Process
                 if (loginSession.error.messageId == "LOGIN_QUEUE_BUSY")
                 {
                     Console.WriteLine("We have a rate limit on league side.");
-                    Thread.Sleep(300000);
+                    await Task.Delay(300000);
                     return "restart_client_error";
                 }
                 else if (loginSession.error.messageId == "UNSPECIFIED_ERROR") { return "restart_client_error"; }
@@ -280,7 +284,7 @@ namespace Evelynn_Bot.Account_Process
             {
                 // RATE LIMIT WAIT 5 MINUTES
                 Console.WriteLine("We have a rate limit on league side.");
-                Thread.Sleep(300000);
+                await Task.Delay(300000);
                 return "restart_client_error";
             }
             return(loginSession.error.messageId);
@@ -294,7 +298,7 @@ namespace Evelynn_Bot.Account_Process
                 {
                     // Account has perma banned!
                     itsInterface.logger.Log(true, ("Account Banned"));
-                    await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Banned");
+                    itsInterface.dashboardHelper.UpdateLolStatus("Banned", itsInterface);
                     return Task.CompletedTask;
                 }
             }
@@ -326,7 +330,7 @@ namespace Evelynn_Bot.Account_Process
                 itsInterface.lcuApi.BeginTryInit(InitializeMethod.Lockfile);
                 itsInterface.lcuApi.Socket.DumpToDebug = false;
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
-                Thread.Sleep(3500);
+                await Task.Delay(3500);
                 await ChangeRegion(itsInterface);
 
                 string logins = await itsInterface.lcuPlugins.LoginSessionAsync(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
@@ -338,7 +342,7 @@ namespace Evelynn_Bot.Account_Process
                 switch (session)
                 {
                     case "banned_account":
-                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Banned");
+                        itsInterface.dashboardHelper.UpdateLolStatus("Banned", itsInterface);
                         break;
                     case "new_player_set_account":
                         await itsInterface.lcuPlugins.CompleteNewAccountAsync();
@@ -353,7 +357,7 @@ namespace Evelynn_Bot.Account_Process
                         }
                         break;
                     case "invalid_credentials":
-                        await itsInterface.processManager.TakeActionAndRestart(itsInterface, "Wrong");
+                        itsInterface.dashboardHelper.UpdateLolStatus("Wrong", itsInterface);
                         break;
                     case "restart_client_error":
                         Console.WriteLine("CLIENT ERROR! RESTART");
@@ -369,8 +373,8 @@ namespace Evelynn_Bot.Account_Process
                         Console.WriteLine($"LOGIN SESSION: {session}");
                         break;
                 }
-                
-                Thread.Sleep(3500);
+
+                await Task.Delay(3500);
 
                 try
                 {
@@ -538,17 +542,17 @@ namespace Evelynn_Bot.Account_Process
                 return RandomName(6, false);
             }
         }
-        public bool PatchCheck(Interface itsInterface)
+        public async Task<bool> PatchCheck(Interface itsInterface)
         {
             try
             {
                 int tryNum = 1;
                 bool isPatchDone = false;
-                while (LeagueIsPatchAvailable(itsInterface))
+                while (await LeagueIsPatchAvailable(itsInterface))
                 {
                     isPatchDone = true;
                     itsInterface.logger.Log(true, itsInterface.messages.Patch);
-                    Thread.Sleep(60000);
+                    await Task.Delay(60000);
                     Dispose(true);
                     tryNum++;
                     if (tryNum >= 15)
@@ -570,14 +574,17 @@ namespace Evelynn_Bot.Account_Process
                 Console.WriteLine("PATCH CHECK HATASI");
                 return itsInterface.Result(false, "");
             }
-
         }
-        public bool LeagueIsPatchAvailable(Interface itsInterface)
+
+
+
+        public async Task<bool> LeagueIsPatchAvailable(Interface itsInterface)
         {
-            LeaguePatch lolPatchNew = itsInterface.lcuPlugins.GetLeaguePatchAsync().Result;
+            LeaguePatch lolPatchNew = await itsInterface.lcuPlugins.GetLeaguePatchAsync();
             //Logger.Status($@"Is there a new league patch: {lolPatchNew.isUpdateAvailable}");
             return itsInterface.Result(lolPatchNew.isCorrupted.Value || lolPatchNew.isUpdateAvailable.Value || !lolPatchNew.isUpToDate.Value, "");
         }
+
 
         #region Dispose
         protected virtual void Dispose(bool disposing)

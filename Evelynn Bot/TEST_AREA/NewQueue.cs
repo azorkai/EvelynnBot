@@ -136,7 +136,7 @@ namespace Evelynn_Bot
                     int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
                     if (currentChampion == 0)
                     {
-                        Thread.Sleep(2500);
+                        await Task.Delay(2500);
                         continue;
                     }
                     //Console.WriteLine($"Playing {championId}");
@@ -158,7 +158,7 @@ namespace Evelynn_Bot
                         int currentChampion = await itsInterface2.lcuPlugins.GetCurrentChampion();
                         if (currentChampion == 0)
                         {
-                            Thread.Sleep(2500);
+                            await Task.Delay(2500);
                             continue;
                         }
                         //Console.WriteLine($"Locked {championId2}");

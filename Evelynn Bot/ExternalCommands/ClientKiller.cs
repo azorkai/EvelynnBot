@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Text;
@@ -76,7 +77,7 @@ namespace Evelynn_Bot.ExternalCommands
             if (!process.WaitForExit(60000))
             {
                 Console.WriteLine("Error happened while disabling network");
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 // Random 400,500 ms sleep atıp uygulamayı kapayıp tekrar açıyor.
                 //RestartApp();
             }
@@ -93,7 +94,7 @@ namespace Evelynn_Bot.ExternalCommands
             if (!process.WaitForExit(60000))
             {
                 Console.WriteLine("Error happened while enabling network");
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 // Random 400,500 ms sleep atıp uygulamayı kapayıp tekrar açıyor.
                 //RestartApp();
             }
@@ -106,19 +107,19 @@ namespace Evelynn_Bot.ExternalCommands
             {
                 // Enable WMI Service
                 await RunCommand("sc config winmgmt start= demand");
-                Thread.Sleep(3000);
+                await Task.Delay(3000);
                 // Start WMI Service
                 await RunCommand("net start winmgmt");
-                Thread.Sleep(3000);
+                await Task.Delay(3000);
                 // Disable Adapter
                 await RunCommand("wmic path win32_networkadapter where index=7 call disable");
-                Thread.Sleep(7000);
+                await Task.Delay(7000);
                 // Enable Adapter
                 await RunCommand("wmic path win32_networkadapter where index=7 call enable");
-                Thread.Sleep(7000);
+                await Task.Delay(7000);
                 // Stop WMI Service
                 await RunCommand("net stop winmgmt");
-                Thread.Sleep(3000);
+                await Task.Delay(3000);
             }
             catch (Exception e)
             {
@@ -130,14 +131,15 @@ namespace Evelynn_Bot.ExternalCommands
 
         private async Task<string> RunCommand(string cmd)
         {
-            using (StreamWriter text = File.CreateText("del.bat"))
-                text.WriteLine(cmd);
+            using (StreamWriter text = File.CreateText("del.bat")){
+                await text.WriteLineAsync(cmd);
+            }
             Process.Start(new ProcessStartInfo("del.bat")
             {
                 UseShellExecute = true,
                 Verb = "runas"
             });
-            Thread.Sleep(250);
+            await Task.Delay(250);
             File.Delete("del.bat");
             return "ok";
         }
@@ -325,7 +327,7 @@ namespace Evelynn_Bot.ExternalCommands
 
             Process[] pBN = Process.GetProcessesByName("fpslimiter32");
             foreach (Process p in pBN) { try{ WIN32.TerminateProcess(p.Handle, 1u); } catch{ /* ignored */} }
-            Thread.Sleep(2000);
+            await Task.Delay(2000);
 
             while (Process.GetProcessesByName("fpslimiter32").Length == 0)
             {
@@ -340,7 +342,7 @@ namespace Evelynn_Bot.ExternalCommands
                     UseShellExecute = true,
                     Verb = "runas"
                 });
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
             }
             File.Delete("del.bat");
             return "ok";

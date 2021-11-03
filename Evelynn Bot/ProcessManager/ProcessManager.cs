@@ -18,17 +18,14 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.ProcessManager;
+using EvelynnLCU.API_Models;
 using EvelynnLCU.Plugins.LoL;
 using Newtonsoft.Json;
-using Timer = System.Threading.Timer;
 
 namespace Evelynn_Bot.ProcessManager
 {
     public class ProcessManager : IProcessManager
     {
-        public static System.Timers.Timer DamageCheckerTimer = new System.Timers.Timer();
-        public static System.Timers.Timer ExtremeGameTimer = new System.Timers.Timer();
-
         public async Task<Task> Start(Interface itsInterface)
         {
             await StartAccountProcess(itsInterface);
@@ -42,6 +39,59 @@ namespace Evelynn_Bot.ProcessManager
             //}
             return Task.CompletedTask;
         }
+
+        public async Task<bool> RiotUpdateCheck(Interface itsInterface)
+        {
+            try
+            {
+                int tryNum = 1;
+                bool isPatchDone = false;
+                while (await RiotIsUpdateAvailable(itsInterface))
+                {
+                    isPatchDone = true;
+                    itsInterface.logger.Log(true, itsInterface.messages.Patch);
+                    await Task.Delay(60000);
+                    Dispose(true);
+                    tryNum++;
+                    if (tryNum >= 60)
+                    {
+                        break;
+                    }
+                }
+
+                if (isPatchDone)
+                {
+                    itsInterface.clientKiller.KillAllLeague();
+                    itsInterface.clientKiller.RestartAndExit(itsInterface);
+                }
+
+                return itsInterface.Result(true, "");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"PATCH CHECK HATASI {e}");
+                return itsInterface.Result(false, "");
+            }
+        }
+
+        public async Task<bool> RiotIsUpdateAvailable(Interface itsInterface)
+        {
+            RiotUpdateResponse riotUpdateNew = await itsInterface.lcuPlugins.GetRiotClientUpdateAsync();
+            try
+            {
+                if (riotUpdateNew.PatchRequested != null && !riotUpdateNew.PatchRequested.Value)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                //TODO: BELKI HATA CIKARABILIR | RESTART GEREKEBILIR
+                return false;
+            }
+        }
+
 
         public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
@@ -58,7 +108,7 @@ namespace Evelynn_Bot.ProcessManager
                 if (itsInterface.dashboard.IsStop && itsInterface.dashboard.IsNoAccount) // No Account Found
                 {
                     itsInterface.isBotStarted = false;
-                    Thread.Sleep(20000);
+                    await Task.Delay(20000);
                     goto CHECKACTIONS;
                 }
 
@@ -153,7 +203,7 @@ namespace Evelynn_Bot.ProcessManager
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
-                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh degil ihh yani
+                        await accountProcess.PatchCheck(itsInterface);
 
                         try { await itsInterface.lcuPlugins.RemoveNotificationsAsync(); } catch (Exception e) { }
 
@@ -208,7 +258,7 @@ namespace Evelynn_Bot.ProcessManager
                                 await itsInterface.lcuPlugins.DisenchantChampionsAsync();
                                 if (isMoreChest)
                                 {
-                                    Thread.Sleep(5000);
+                                    await Task.Delay(5000);
                                     goto DisenchantAgain;
                                 }
                             }
@@ -261,7 +311,7 @@ namespace Evelynn_Bot.ProcessManager
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
-                        accountProcess.PatchCheck(itsInterface); //websocket subscribe olunacak _work işi done koyulacak \\ Gereksiz belki ıh yani
+                        await accountProcess.PatchCheck(itsInterface);
                         await itsInterface.lcuPlugins.RemoveNotificationsAsync();
                         await itsInterface.lcuPlugins.GetSetMissions();
                         if (!await accountProcess.GetSetWallet(itsInterface))
@@ -316,7 +366,7 @@ namespace Evelynn_Bot.ProcessManager
                                 await itsInterface.lcuPlugins.DisenchantChampionsAsync();
                                 if (isMoreChest)
                                 {
-                                    Thread.Sleep(5000);
+                                    await Task.Delay(5000);
                                     goto DisenchantAgain;
                                 }
                             }
@@ -398,7 +448,7 @@ namespace Evelynn_Bot.ProcessManager
                 var queueId = JsonConvert.DeserializeObject<EvelynnLCU.API_Models.LolGameFlowSession>(gameFlowPhase).gameData.queue.id.Value;
                 if (queueId != 830)
                 {
-                    Thread.Sleep(30000);
+                    await Task.Delay(30000);
                     return (Task<Task>)itsInterface.processManager.StartAccountProcess(itsInterface);
                 }
                 await itsInterface.lcuPlugins.ReconnectGameAsync();
@@ -466,7 +516,7 @@ namespace Evelynn_Bot.ProcessManager
                 if(pnC==0) { Console.WriteLine("Panelden Stop Geldi!") ; }
                 itsInterface.isBotStarted = false;
                 pnC++;
-                Thread.Sleep(10000);
+                await Task.Delay(10000);
                 goto CHECKACTIONS;
             }
 
@@ -522,7 +572,7 @@ namespace Evelynn_Bot.ProcessManager
                         await itsInterface.lcuPlugins.DisenchantChampionsAsync();
                         if (isMoreChest)
                         {
-                            Thread.Sleep(5000);
+                            await Task.Delay(5000);
                             goto DisenchantAgain;
                         }
                     }

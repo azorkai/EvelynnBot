@@ -116,11 +116,11 @@ namespace Evelynn_Bot
                 Console.WriteLine(e);
             }
 
-            Thread.Sleep(8000);
+            await Task.Delay(8000);
 
             while (!CheckInternet())
             {
-                Thread.Sleep(3500);
+                await Task.Delay(3500);
                 itsInterface.logger.Log(false, "No Internet!");
                 try
                 {
