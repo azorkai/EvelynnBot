@@ -1372,6 +1372,8 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(random_0.Next(400, 800));
             }
             itsInterface.logger.Log(true, "Game is Done!");
+            Thread.Sleep(5000);
+            itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
         }
         public void StartNewGameAI(Interface itsInterface)
         {

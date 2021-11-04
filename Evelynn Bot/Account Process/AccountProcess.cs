@@ -64,7 +64,7 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.clientKiller.StartRiotClient();
                 }
 
-                Thread.Sleep(4000);
+                Thread.Sleep(3000);
 
                 itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
@@ -92,8 +92,6 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.lcuPlugins = new Plugins(itsInterface.lcuApi);
 
-                // GEL BURAYA
-                await itsInterface.processManager.RiotUpdateCheck(itsInterface);
 
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
 
@@ -138,19 +136,20 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.clientKiller.RestartAndExit(itsInterface);
                 }
 
-                await Task.Delay(5500);
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
 
-                try
-                {
-                    await itsInterface.lcuPlugins.UpdateRiotClient();
-                    itsInterface.logger.Log(true, "Updating League Product");
-                }
-                catch (Exception e)
-                {
+                //BURDA LOOPA GİRİYOR BU ASLAK KOD
+                //try
+                //{
+                //    await itsInterface.lcuPlugins.UpdateRiotClient();
+                //    itsInterface.logger.Log(true, "Updating League Product");
+                //}
+                //catch (Exception e)
+                //{
 
-                }
+                //}
 
-                await Task.Delay(20000);
+                await Task.Delay(15000);
 
                 try
                 {
@@ -163,6 +162,9 @@ namespace Evelynn_Bot.Account_Process
                 }
 
                 await Task.Delay(3500);
+
+                // GEL BURAYA
+                await itsInterface.processManager.RiotUpdateCheck(itsInterface);
 
                 try
                 {
@@ -181,7 +183,7 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.logger.Log(true, "All done for Riot Client");
 
-
+                await itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 Dispose(true);
                 itsInterface.lcuApi.Close();
                 itsInterface.lcuPlugins = null;

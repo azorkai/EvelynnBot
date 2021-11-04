@@ -58,7 +58,7 @@ namespace Evelynn_Bot.ProcessManager
                         break;
                     }
                 }
-
+                itsInterface.logger.Log(true, "Patch done for RiotClient.");
                 if (isPatchDone)
                 {
                     itsInterface.clientKiller.KillAllLeague();
@@ -95,7 +95,25 @@ namespace Evelynn_Bot.ProcessManager
 
         public async Task<Task> StartAccountProcess(Interface itsInterface, bool isFromGame = false)
         {
-            await itsInterface.clientKiller.StartFPSLimiter();
+            //await itsInterface.clientKiller.StartFPSLimiter();
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            //HEy
+            
+            
+            
+            
+            
             itsInterface.newQueue.bugTimer.Stop();
             //itsInterface.clientKiller.KillAllLeague();
 
@@ -199,7 +217,7 @@ namespace Evelynn_Bot.ProcessManager
                         accountProcess.CopyConfig(itsInterface);
                         //InjectConfigPersist(itsInterface);
 
-                        itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
