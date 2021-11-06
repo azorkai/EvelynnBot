@@ -94,14 +94,14 @@ namespace Evelynn_Bot.Account_Process
 
 
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-
+                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
                 //try
                 //{
                 //    await itsInterface.lcuPlugins.DeleteSplashScreen();
                 //}
                 //catch (Exception e)
                 //{
-                    
+
                 //}
 
                 itsInterface.logger.Log(true, "Login Type: " + loginStatus.type);

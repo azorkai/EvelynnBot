@@ -61,6 +61,7 @@ namespace Evelynn_Bot.ExternalCommands
                 SuspendThread(pOpenThread);
 
                 CloseHandle(pOpenThread);
+
             }
         }
         private void ResumeProcess(int pid)

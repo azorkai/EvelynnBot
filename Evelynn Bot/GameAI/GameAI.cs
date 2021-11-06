@@ -959,10 +959,12 @@ namespace Evelynn_Bot.GameAI
                 TusuAyarla(GEnum8.KEY_P);
                 Thread.Sleep(8000);
                 dateTime_0 = DateTime.Now;
+                Dispose(true);
             }
             else
             {
                 TusuAyarla(GEnum8.KEY_P);
+                Dispose(true);
                 Thread.Sleep(8000);
             }
         }
@@ -991,6 +993,7 @@ namespace Evelynn_Bot.GameAI
                 TusuAyarla(GEnum8.KEY_P);
                 Thread.Sleep(8000);
                 dateTime_0 = DateTime.Now;
+                Dispose(true);
             }
             else
             {
@@ -1016,6 +1019,7 @@ namespace Evelynn_Bot.GameAI
                 TusuAyarla(GEnum8.KEY_P);
                 Thread.Sleep(8000);
                 dateTime_0 = DateTime.Now;
+                Dispose(true);
             }
         }
 
@@ -1255,6 +1259,7 @@ namespace Evelynn_Bot.GameAI
                                         break;
                                 }
                                 TusuAyarla(GEnum8.KEY_A);
+
                             }
                             else if (point_.X != -1)
                             {
@@ -1360,19 +1365,24 @@ namespace Evelynn_Bot.GameAI
                         TusuAyarla(GEnum8.KEY_P);
                         Thread.Sleep(3000);
                     }
-                end_IL_0035:;
+                    Dispose(true);
+                    end_IL_0035:;
                 }
+
                 catch (Exception ex2)
                 {
                     Console.WriteLine($"HATA: {ex2}");
                     goto IL_0964;
                 }
+                Dispose(true);
                 continue;
             IL_0964:
                 Thread.Sleep(random_0.Next(400, 800));
+                Dispose(true);
             }
+            Dispose(true);
             itsInterface.logger.Log(true, "Game is Done!");
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
             itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
         }
         public void StartNewGameAI(Interface itsInterface)
