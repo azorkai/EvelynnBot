@@ -582,9 +582,14 @@ namespace Evelynn_Bot.GameAI
 
         private int summonerItemCount;
 
+        public bool pickedTutoChamp;
+
+        private int tuto1ChampCount;
+
+        private int bugfixCount;
+
         #endregion
 
-        public bool pickedTutoChamp;
         public Point AnaPointAl(Point point_7)
         {
             return new Point(point_7.X + scrX, point_7.Y + scrY);
@@ -1022,9 +1027,6 @@ namespace Evelynn_Bot.GameAI
                 Dispose(true);
             }
         }
-
-        private int tuto1ChampCount;
-        private int bugfixCount;
         public void YeniAI_1(object Interface)
         {
             bugfixCount = 0;
@@ -1638,7 +1640,6 @@ namespace Evelynn_Bot.GameAI
             pointsLists.Add(new RGBClass.PointlerClass(new Point(403, 241)));
             pointsLists.Add(new RGBClass.PointlerClass(new Point(406, 243)));
         }
-
         private void Restart(Interface itsInterface)
         {
             itsInterface.clientKiller.KillAllLeague();
@@ -1789,7 +1790,6 @@ namespace Evelynn_Bot.GameAI
                 throw;
             }
         }
-
         public void CurrentPlayerStats(Interface itsInterface)
         {
             try

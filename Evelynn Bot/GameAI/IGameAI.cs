@@ -12,7 +12,6 @@ namespace Evelynn_Bot.GameAI
 {
     public interface IGameAI:IDisposable
     {
-        void CurrentPlayerStats(Interface itInterface);
         Point AnaPointAl(Point point_7);
         Point PointAl(bool is43);
         Bitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY);
@@ -43,7 +42,6 @@ namespace Evelynn_Bot.GameAI
         void AraliEndGonder();
         void RGBHazirla(Interface itsInterface);
         void YeniAIBaslat(Interface itsInterface);
-
-
+        void CurrentPlayerStats(Interface itsInterface);
     }
 }

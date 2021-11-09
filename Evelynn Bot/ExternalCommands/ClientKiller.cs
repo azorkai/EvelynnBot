@@ -165,9 +165,10 @@ namespace Evelynn_Bot.ExternalCommands
                         registryKey.SetValue("NetworkAddress", value, RegistryValueKind.String);
                     }
                 }
-                //await DisableAdapter("Local Area Connection");
-                //await EnableAdapter("Local Area Connection");
-                await EnableAndDisableAdapter();
+                await DisableAdapter("Local Area Connection");
+                await Task.Delay(250);
+                await EnableAdapter("Local Area Connection");
+                //await EnableAndDisableAdapter();
                 await Task.Delay(6000);
             }
             catch (Exception ex)
