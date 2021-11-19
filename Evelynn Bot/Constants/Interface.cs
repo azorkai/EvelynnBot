@@ -9,6 +9,7 @@ using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.GameAI;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
+using Evelynn_Bot.TEST_AREA;
 using EvelynnLCU.Plugins.LoL;
 using EvelynnLCU;
 using Leaf.xNet;
@@ -30,6 +31,7 @@ namespace Evelynn_Bot.Constants
         public GameAi gameAi = new GameAi();
         public LolSummonerSummoner summoner = new LolSummonerSummoner();
         public EvelynnLCU.Wallet wallet = new EvelynnLCU.Wallet();
+        public TestAI testAi = new TestAI();
         public Player player = new Player();
         public JsonRead jsonRead = new JsonRead();
         public ProcessManager.ProcessManager processManager = new ProcessManager.ProcessManager();

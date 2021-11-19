@@ -16,7 +16,9 @@ using Evelynn_Bot.Entities;
 using Evelynn_Bot.ExternalCommands;
 using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
+using Evelynn_Bot.TEST_AREA;
 using EvelynnLCU.API_Models;
+using FastBitmapLib;
 using Newtonsoft.Json;
 
 namespace Evelynn_Bot.GameAI
@@ -609,20 +611,57 @@ namespace Evelynn_Bot.GameAI
         public Bitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY)
         {
             Rectangle rectangle = new Rectangle(screenX, screenY, rectangleX, rectangleY);
-            Bitmap bitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format24bppRgb);
+            Bitmap bitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppArgb);
             Graphics.FromImage(bitmap).CopyFromScreen(screenX, screenY, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
             return bitmap;
         }
+        public double abs(double a)
+        {
+            return (a <= 0.0D) ? 0.0D - a : a;
+        }
+        public double MyPow(double num, double expp)
+        {
+            double result = 1.0;
+            int exp = (int)expp;
+            while (exp > 0)
+            {
+                if (exp % 2 == 1)
+                    result *= num;
+                exp >>= 1;
+                num *= num;
+            }
+
+            return result;
+        }
+
+        public double Isqrt(double num)
+        {
+            if (0 == num) { return 0; }
+            double n = (num / 2) + 1;
+            double n1 = (n + (num / n)) / 2;
+            while (n1 < n)
+            {
+                n = n1;
+                n1 = (n + (num / n)) / 2;
+            }
+            return n;
+        }
+
         public void HepsiniTarat(Bitmap bmp, List<RGBClass.PointerClass> rgbLists)
         {
             rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
             {
                 pClass.tmpB = 0;
             });
+
             rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
             {
                 pClass.pointerList = new List<Point>();
             });
+
+            //var bitmapData = new FastBitmap(bmp);
+            //bitmapData.Lock();
+
             BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Size.Width, bmp.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             IntPtr scan = bitmapData.Scan0;
             int num = bitmapData.Stride * bmp.Height;
@@ -633,17 +672,20 @@ namespace Evelynn_Bot.GameAI
             Marshal.Copy(scan, array, 0, num);
             int int_ = 0;
             int stride = bitmapData.Stride;
-            for (int int_2 = 0; int_2 < bmp.Height; int_2++)
+
+
+            for (int i = 0; i < bmp.Height; i++)
             {
-                int int_0;
-                for (int_0 = 0; int_0 < bmp.Width; int_0++)
+                for (int i2 = 0; i2 < bmp.Width; i2++)
                 {
-                    byte_0[int_] = array[int_2 * stride + int_0 * 3];
-                    byte_1[int_] = array[int_2 * stride + int_0 * 3 + 1];
-                    byte_2[int_] = array[int_2 * stride + int_0 * 3 + 2];
+                    
+                    byte_0[int_] = array[i * stride + i2 * 3];
+                    byte_1[int_] = array[i * stride + i2 * 3 + 1];
+                    byte_2[int_] = array[i * stride + i2 * 3 + 2];
                     rgbLists.ForEach(delegate (RGBClass.PointerClass pClass)
                     {
-                        if (Math.Abs(pClass.rgbLists[pClass.tmpB].B - byte_0[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].G - byte_1[int_]) <= 5 && Math.Abs(pClass.rgbLists[pClass.tmpB].R - byte_2[int_]) <= 5)
+                        ////TODO: Huge CPU - Fix!
+                        if (abs(pClass.rgbLists[pClass.tmpB].B - byte_0[int_]) <= 5 && abs(pClass.rgbLists[pClass.tmpB].G - byte_1[int_]) <= 5 && abs(pClass.rgbLists[pClass.tmpB].R - byte_2[int_]) <= 5)
                         {
                             pClass.tmpB++;
                         }
@@ -653,7 +695,7 @@ namespace Evelynn_Bot.GameAI
                         }
                         if (pClass.tmpB == pClass.rgbLists.Count)
                         {
-                            pClass.pointerList.Add(new Point(int_0, int_2));
+                            pClass.pointerList.Add(new Point(i2, i));
                             pClass.tmpB = 0;
                         }
                     });
@@ -661,15 +703,17 @@ namespace Evelynn_Bot.GameAI
                     int_ = num2 + 1;
                 }
             }
-            bmp.UnlockBits(bitmapData);
+
+            bmp.Dispose();
+            Dispose(true);
         }
         public double Hesap1(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3)
         {
-            return Math.Sqrt(Math.Pow(gameTime - healthPercentage, 2.0) + Math.Pow(double_3 - prevHealthPercentage, 2.0));
+            return Isqrt(MyPow(gameTime - healthPercentage, 2.0) + MyPow(double_3 - prevHealthPercentage, 2.0));
         }
         public double Hesap0(double healthPercentage, double prevHealthPercentage)
         {
-            return Math.Sqrt(Math.Pow(healthPercentage, 2.0) + Math.Pow(prevHealthPercentage, 2.0));
+            return Isqrt(MyPow(healthPercentage, 2.0) + MyPow(prevHealthPercentage, 2.0));
         }
         public void PosHesapla(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3, double double_4, double double_5, double double_6, double double_7, double double_8)
         {
@@ -678,9 +722,9 @@ namespace Evelynn_Bot.GameAI
             double num2 = 0.0;
             double num3 = 0.0;
             double num4 = 0.0;
-            double num5 = Math.Sqrt(2.0);
-            double num6 = Math.Sqrt(3.0);
-            double num7 = Math.Sqrt(5.0);
+            double num5 = 1.41;
+            double num6 = 1.73;
+            double num7 = 2.23;
             int num8 = (int)Hesap1(Math.Round(healthPercentage), Math.Round(prevHealthPercentage), Math.Round(gameTime), Math.Round(double_3));
             uint num9 = (uint)(Environment.TickCount + 10000);
             int num10 = 0;
@@ -723,7 +767,7 @@ namespace Evelynn_Bot.GameAI
                 if (Hesap0(num, num2) > num13)
                 {
                     double num14 = num13 / 2.0 + (double)random.Next((int)(Math.Round(num13) / 2.0));
-                    double num15 = Math.Sqrt(num * num + num2 * num2);
+                    double num15 = Isqrt(num * num + num2 * num2);
                     num = num / num15 * num14;
                     num2 = num2 / num15 * num14;
                 }
@@ -831,14 +875,14 @@ namespace Evelynn_Bot.GameAI
                 }
                 if (!(num >= 0f))
                 {
-                    return Math.Sqrt(num * num + num2 * num2) * -1.0;
+                    return Isqrt(num * num + num2 * num2) * -1.0;
                 }
-                return Math.Sqrt(num * num + num2 * num2);
+                return Isqrt(num * num + num2 * num2);
             }
             pointF = pointF_1;
             num = pointF_0.X - pointF_1.X;
             num2 = pointF_0.Y - pointF_1.Y;
-            return Math.Sqrt(num * num + num2 * num2);
+            return Isqrt(num * num + num2 * num2);
         }
         public void KodTarat(GEnum8 genum8_0)
         {
@@ -868,12 +912,17 @@ namespace Evelynn_Bot.GameAI
             TusuAyarla(GEnum8.END);
             TusBas(GEnum8.CONTROL);
         }
-        public double PointerMath(Point point_0, Point point_1) => Math.Sqrt(Math.Pow((double)(point_1.X - point_0.X), 2.0) + Math.Pow((double)(point_1.Y - point_0.Y), 2.0) * 1.0);
-        public bool BirseyHesapla(Point point_7)
+
+        public double PointerMath(Point mapPoint, Point towerPoint)
         {
-            foreach (RGBClass.PointlerClass item in pointsLists)
+            var a = Isqrt(MyPow((double)(towerPoint.X - mapPoint.X), 2.0) + MyPow((double)(towerPoint.Y - mapPoint.Y), 2.0) * 1.0);
+            return a;
+        } 
+        public bool BirseyHesapla(Point mapPoint)
+        {
+            foreach (RGBClass.PointlerClass pointList in pointsLists)
             {
-                if (!item.Boolean_0 && !(PointerMath(point_7, item.Point_0) >= (double)6))
+                if (!pointList.Boolean_0 && !(PointerMath(mapPoint, pointList.Point_0) >= 6.0))
                 {
                     return true;
                 }
@@ -1027,6 +1076,9 @@ namespace Evelynn_Bot.GameAI
                 Dispose(true);
             }
         }
+
+        private bool flaggo;
+
         public void YeniAI_1(object Interface)
         {
             bugfixCount = 0;
@@ -1053,10 +1105,11 @@ namespace Evelynn_Bot.GameAI
                     }
                     catch (Exception)
                     {
-                        itsInterface.logger.Log(false,"Error while creating bitmap");
+                        itsInterface.logger.Log(false, "Error while creating bitmap");
                         Thread.Sleep(500);
                         continue;
                     }
+
 
                     HepsiniTarat(bitmap_, rgbLists);
                     List<Point> list = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Minimap").pointerList;
@@ -1066,6 +1119,7 @@ namespace Evelynn_Bot.GameAI
                     List<Point> list5 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Shop").pointerList;
                     List<Point> list6 = rgbLists.First((RGBClass.PointerClass class30_0) => class30_0.mode == "Fountain").pointerList;
                     bool flag = list5.Count > 9;
+
                     Point point2 = ((list.Count == 0) ? new Point(-1, -1) : new Point(list[0].X + 20, list[0].Y + 15));
                     Point point_ = ((list3.Count == 0) ? new Point(-1, -1) : new Point(list3[list3.Count - 1].X + 30, list3[list3.Count - 1].Y + 30));
                     Point point_2 = ((list4.Count == 0) ? new Point(-1, -1) : new Point(list4[0].X + 30, list4[0].Y + 30));
@@ -1075,6 +1129,130 @@ namespace Evelynn_Bot.GameAI
                     bool flag2 = (num < 5.0 && list6.Count > 0) || point2.X == -1; // Base'demi diye kontrol et
                     bool flag3 = BirseyHesapla(point2);
 
+                    //////////////
+
+                    //int count;
+                    //count = 0;
+                    //while (count < 7)
+                    //{
+                    //    var a = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 255, 255), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 255, 255), bitmap_).Y);
+                    //    Console.WriteLine(a);
+                    //}
+
+                    //Point point2 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 255, 255), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 255, 255), bitmap_).Y);
+                    //Point point_ = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 119, 56, 54), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 119, 56, 54), bitmap_).Y);
+
+                    //Point point_2 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 44, 89, 119), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 44, 89, 119), bitmap_).Y);
+                    //Point allyMinion2 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 8, 12, 16), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 8, 12, 16), bitmap_).Y);
+
+                    //Point point_3 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 48, 3, 0), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 48, 3, 0), bitmap_).Y);
+                    //Point enemyMinion2 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 8, 8, 8), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 8, 8, 8), bitmap_).Y);
+
+                    //Point Fountain = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 103, 103, 65), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 103, 103, 65), bitmap_).Y);
+                    //Point Fountain2 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 64, 75, 52), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 64, 75, 52), bitmap_).Y);
+                    //Point Fountain3 = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 22, 126, 127), bitmap_).X, TestAI.GetColorPosition(Color.FromArgb(255, 22, 126, 127), bitmap_).Y);
+
+                    //Point Shop = new Point(TestAI.GetColorPosition(Color.FromArgb(255, 141, 121, 83), bitmap_).X, (TestAI.GetColorPosition(Color.FromArgb(255, 141, 121, 83), bitmap_).Y));
+
+                    //if (point2.X == 0 || point2.Y == 0)
+                    //{
+                    //    point2.X = -1;
+                    //    point2.Y = -1;
+                    //}
+                    //else
+                    //{
+                    //    point2.X += 20;
+                    //    point2.Y += 15;
+                    //}
+
+                    //if (point_.X == 0 || point_.Y == 0)
+                    //{
+                    //    point_.X = -1;
+                    //    point_.Y = -1;
+                    //}
+                    //else
+                    //{
+                    //    point_.X += 30;
+                    //    point_.Y += 30;
+                    //}
+
+                    //if ((point_2.X == 0 || point_2.Y == 0) || (allyMinion2.X == 0 || allyMinion2.Y == 0))
+                    //{
+                    //    point_2.X = -1;
+                    //    point_2.Y = -1;
+                    //}
+                    //if ((point_2.X != -1 || point_2.Y != -1) && (allyMinion2.X != -1 || allyMinion2.Y != -1))
+                    //{
+                    //    point_2.X += 30;
+                    //    point_2.Y += 30;
+                    //}
+
+
+                    //if ((point_3.X == 0 || point_3.Y == 0) || (enemyMinion2.X == 0 || enemyMinion2.Y == 0))
+                    //{
+                    //    point_3.X = -1;
+                    //    point_3.Y = -1;
+                    //}
+                    //if ((point_3.X != -1 || point_3.Y != -1) && (enemyMinion2.X != -1 || enemyMinion2.Y != -1))
+                    //{
+                    //    point_3.X += 65;
+                    //    point_3.Y += 45;
+                    //}
+
+                    //if (Fountain.X != 0 || Fountain.Y != 0)
+                    //{
+                    //    Fountain.X += 20;
+                    //    Fountain.Y += 15;
+                    //}
+
+                    //if (Fountain2.X != 0 || Fountain2.Y != 0)
+                    //{
+                    //    Fountain2.X += 20;
+                    //    Fountain2.Y += 15;
+                    //}
+
+                    //if (Fountain3.X != 0 || Fountain3.Y != 0)
+                    //{
+                    //    Fountain3.X += 20;
+                    //    Fountain3.Y += 15;
+                    //}
+
+                    ////Console.WriteLine("---------------------");
+
+                    ////Console.WriteLine("Map: " + point2);
+                    ////Console.WriteLine("EnemyMinion: " + point_);
+                    ////Console.WriteLine("AllyMinion: " + point_2);
+                    ////Console.WriteLine("Enemy: " + point_3);
+                    ////Console.WriteLine("Fountain1: " + Fountain);
+                    ////Console.WriteLine("Fountain2: " + Fountain2);
+                    ////Console.WriteLine("Fountain3: " + Fountain3);
+
+                    ////Console.WriteLine("---------------------");
+
+                    //double double_ = PointHesapla(point2, point_5, point_6);
+                    //double num = PointerMath(point2, point_0);
+
+                    //bool flag = Shop.X != 0;
+
+                    //if (Fountain.X != 0 || Fountain.Y != 0 || Fountain2.X != 0 || Fountain2.Y != 0 || Fountain3.X != 0 || Fountain.Y != 0)
+                    //{
+                    //    flaggo = true;
+                    //}
+
+                    //bool flag2 = (num < 5.0 && flaggo) || point2.X == -1;
+                    //bool flag3 = BirseyHesapla(point2);
+
+                    //Console.WriteLine(point2);
+                    /////////////
+
+
+                    bool debug;
+                    debug = false;
+                    while (debug)
+                    {
+                        Thread.Sleep(5000);
+                    }
+                    
 
                     if (point2.X != -1 || flag)
                     {
@@ -1183,12 +1361,14 @@ namespace Evelynn_Bot.GameAI
                     }
                     if (healthPercentage >= 25.0)
                     {
+                        //point_2.X != -1 && list4.Count >= 2
                         if (point_2.X != -1 && list4.Count >= 2) // En az 2 veya daha fazla AllyMinion varsa
                         {
                             if (!flag3)
                             {
                                 if (point_3.X == -1) // EnemyHero yoksa
                                 {
+                                    
                                     if (point_.X == -1) // EnemyMinion yoksa
                                     {
                                         itsInterface.clientKiller.ActivateGame();
@@ -1270,6 +1450,7 @@ namespace Evelynn_Bot.GameAI
                             }
                             else
                             {
+                                //Burası
                                 EkraniAyarla(TowerHesapla(double_));
                                 TusuAyarla(GEnum8.KEY_A);
                             }
@@ -1425,7 +1606,7 @@ namespace Evelynn_Bot.GameAI
 
                     string tutoChampName = "Miss Fortune";
                     string cGame_championName = itsInterface.player.CurrentGame_ChampName;
-
+                    
                     if (cGame_championName == null)
                     {
                         cGame_championName = tutoChampName;
@@ -1659,6 +1840,7 @@ namespace Evelynn_Bot.GameAI
                     itsInterface.newQueue._playAgain = true;
                     isGameEnd = false;
                     dateTime_1 = DateTime.Now;
+
                     scrX = PointAl(true).X;
                     scrY = PointAl(true).Y;
 

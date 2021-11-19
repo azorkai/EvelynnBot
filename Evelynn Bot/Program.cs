@@ -22,6 +22,7 @@ using bAUTH;
 using Evelynn_Bot.Account_Process;
 using Evelynn_Bot.Constants;
 using Evelynn_Bot.ExternalCommands;
+using Evelynn_Bot.TEST_AREA;
 using EvelynnLCU;
 using EvelynnLCU.Plugins.LoL;
 using Newtonsoft.Json;
