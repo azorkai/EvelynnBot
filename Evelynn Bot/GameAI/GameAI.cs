@@ -911,12 +911,12 @@ namespace Evelynn_Bot.GameAI
             KodTarat(GEnum8.CONTROL);
             TusuAyarla(GEnum8.END);
             TusBas(GEnum8.CONTROL);
+            Dispose(true);
         }
 
         public double PointerMath(Point mapPoint, Point towerPoint)
         {
-            var a = Isqrt(MyPow((double)(towerPoint.X - mapPoint.X), 2.0) + MyPow((double)(towerPoint.Y - mapPoint.Y), 2.0) * 1.0);
-            return a;
+            return Isqrt(MyPow((double)(towerPoint.X - mapPoint.X), 2.0) + MyPow((double)(towerPoint.Y - mapPoint.Y), 2.0) * 1.0);
         } 
         public bool BirseyHesapla(Point mapPoint)
         {
@@ -1563,6 +1563,7 @@ namespace Evelynn_Bot.GameAI
                 Thread.Sleep(random_0.Next(400, 800));
                 Dispose(true);
             }
+
             Dispose(true);
             itsInterface.logger.Log(true, "Game is Done!");
             Thread.Sleep(3000);
@@ -1588,6 +1589,8 @@ namespace Evelynn_Bot.GameAI
                 {
                     item.Join();
                 }
+
+                Dispose(true);
             }
             catch (Exception ex)
             {
@@ -1705,8 +1708,11 @@ namespace Evelynn_Bot.GameAI
                     itsInterface.logger.Log(false,"Overtime playing");
                     Restart(itsInterface);
                 }
+
+                Dispose(true);
                 Thread.Sleep(random_0.Next(400, 800));
             }
+            Dispose(true);
         }
         public void AraliEndGonder()
         {
