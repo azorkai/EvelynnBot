@@ -97,17 +97,11 @@ namespace Evelynn_Bot.ProcessManager
         {
             await itsInterface.clientKiller.StartFPSLimiter();
             
-            
-            //HEy
-            
-            
-            
             itsInterface.newQueue.bugTimer.Stop();
             //itsInterface.clientKiller.KillAllLeague();
 
             await Task.Delay(10000);
 
-            // BURASI YENI AI'E GÖRE GÜZELCE Bİ REFACTOR EDİLECEK (isFromGame true)s
             try
             {
                 CHECKACTIONS:
@@ -131,7 +125,7 @@ namespace Evelynn_Bot.ProcessManager
                     if (isFromGame == false)
                     {
                         accountProcess.StartLeague(itsInterface, StartEnums.RiotClient);
-                        await Task.Delay(13000);
+                        await Task.Delay(8000);
                         itsInterface.lcuApi.BeginTryInitRiotClient();
                     }
                     if (processExist("RiotClientServices", itsInterface))

@@ -15,6 +15,8 @@ using Microsoft.Win32;
 using Evelynn_Bot.Constants;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Evelynn_Bot.ExternalCommands
 {
@@ -166,7 +168,7 @@ namespace Evelynn_Bot.ExternalCommands
                     }
                 }
                 await DisableAdapter("Local Area Connection");
-                await Task.Delay(250);
+                await Task.Delay(500);
                 await EnableAdapter("Local Area Connection");
                 //await EnableAndDisableAdapter();
                 await Task.Delay(6000);
@@ -410,25 +412,17 @@ namespace Evelynn_Bot.ExternalCommands
 
         public string GetLeaguePath()
         {
-            DriveInfo[] drivesArray = DriveInfo.GetDrives();
-            int counter = 0;
-            DriveInfo driveInfo;
-            while (true)
+            try
             {
-                if (counter < drivesArray.Length)
-                {
-                    driveInfo = drivesArray[counter];
-                    if (File.Exists($"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\LeagueClient.exe"))
-                    {
-                        break;
-                    }
-                    counter++;
-                    continue;
-                }
-                Thread.Sleep(5000);
-                return string.Empty;
+                string settingsPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\\Riot Games\\Metadata\\league_of_legends.live\\league_of_legends.live.product_settings.yaml";
+                var deserializer = new YamlDotNet.Serialization.DeserializerBuilder().IgnoreUnmatchedProperties().Build();
+                var productSettings = deserializer.Deserialize<LeagueYAML>(File.ReadAllText(settingsPath));
+                return $@"{productSettings.LeaguePath}\";
             }
-            return $"{driveInfo.RootDirectory.ToString()}Riot Games\\League of Legends\\";
+            catch (Exception e)
+            {
+                return "no_league_found";
+            }
         }
 
         public void KillRiotLockFile()
@@ -534,4 +528,14 @@ namespace Evelynn_Bot.ExternalCommands
             }
         }
     }
+
+    #region League Settings YAML
+
+    class LeagueYAML
+    {
+        [YamlMember(Alias = "product_install_full_path", ApplyNamingConventions = false)]
+        public string LeaguePath { get; set; }
+    }
+
+    #endregion
 }

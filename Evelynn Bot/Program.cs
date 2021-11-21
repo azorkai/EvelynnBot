@@ -103,37 +103,39 @@ namespace Evelynn_Bot
         static async Task Main(string[] args)
         {
             Interface itsInterface = new Interface();
+
+            //WIN32.SetErrorMode(WIN32.ErrorModes.SEM_NOGPFAULTERRORBOX);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, e) => ExceptionHandler(sender, e, itsInterface));
             WIN32.ControlDelegate gControlDelegate = new WIN32.ControlDelegate(ExitHandler);
             WIN32.SetConsoleCtrlHandler(gControlDelegate, true);
             WIN32.SetWindowPos(Process.GetCurrentProcess().MainWindowHandle, 0, 0, 0, 0, 0, 1u | 4u);
 
-            try
-            {
-                await itsInterface.clientKiller.ExecuteBypass();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            //try
+            //{
+            //    await itsInterface.clientKiller.ExecuteBypass();
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //}
 
-            await Task.Delay(8000);
+            //await Task.Delay(8000);
 
-            while (!CheckInternet())
-            {
-                await Task.Delay(3500);
-                itsInterface.logger.Log(false, "No Internet!");
-                try
-                {
-                    await itsInterface.clientKiller.ExecuteBypass();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
+            //while (!CheckInternet())
+            //{
+            //    await Task.Delay(3500);
+            //    itsInterface.logger.Log(false, "No Internet!");
+            //    try
+            //    {
+            //        await itsInterface.clientKiller.ExecuteBypass();
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        Console.WriteLine(e);
+            //    }
+            //}
 
-            UpdateBot.CheckUpdate();
+            //UpdateBot.CheckUpdate();
 
             itsInterface.logger.Log(true, "Version: " + Assembly.GetExecutingAssembly().GetName().Version);
 

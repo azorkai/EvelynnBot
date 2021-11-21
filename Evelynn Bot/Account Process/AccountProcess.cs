@@ -220,7 +220,7 @@ namespace Evelynn_Bot.Account_Process
             int loginAttempt = 0;
             LolLoginLoginSession loginSession = await itsInterface.lcuPlugins.GetSessionAsync();
             bool? isConnected = loginSession.connected;
-            if (isConnected.Value)
+            if (isConnected != null && isConnected.Value)
             {
                 string? summonerName = loginSession.username;
                 if (!String.IsNullOrEmpty(summonerName))
@@ -296,7 +296,7 @@ namespace Evelynn_Bot.Account_Process
             try
             {
                 var isBanned = await itsInterface.lcuPlugins.CheckBanAsync();
-                if (isBanned.isPermaBan.Value)
+                if (isBanned.isPermaBan != null && isBanned.isPermaBan.Value)
                 {
                     // Account has perma banned!
                     itsInterface.logger.Log(true, ("Account Banned"));

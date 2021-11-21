@@ -18,7 +18,7 @@ using Evelynn_Bot.League_API;
 using Evelynn_Bot.League_API.GameData;
 using Evelynn_Bot.TEST_AREA;
 using EvelynnLCU.API_Models;
-using FastBitmapLib;
+//using FastBitmapLib;
 using Newtonsoft.Json;
 
 namespace Evelynn_Bot.GameAI
@@ -556,6 +556,8 @@ namespace Evelynn_Bot.GameAI
 
         private double gameTime = 99999.0;
 
+        private int gameNotReadyCount = 0;
+
         private bool canUpgradeAbility;
 
         private bool isTutorialAndMF;
@@ -596,23 +598,19 @@ namespace Evelynn_Bot.GameAI
         {
             return new Point(point_7.X + scrX, point_7.Y + scrY);
         }
-        public Point PointAl(bool is43)
+        public Point PointAl()
         {
             Size size = Screen.PrimaryScreen.Bounds.Size;
-            int num = 800;
-            int num2 = 600;
-            if (is43)
-            {
-                num = 400;
-                num2 = 300;
-            }
-            return new Point((size.Width != num) ? ((size.Width - num) / 2) : 0, (size.Height != num2) ? ((size.Height - num2) / 2) : 0);
+            return new Point((size.Width != 400) ? ((size.Width - 400) / 2) : 0, (size.Height != 300) ? ((size.Height - 300) / 2) : 0);
         }
-        public Bitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY)
+        public DirectBitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY)
         {
             Rectangle rectangle = new Rectangle(screenX, screenY, rectangleX, rectangleY);
-            Bitmap bitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppArgb);
-            Graphics.FromImage(bitmap).CopyFromScreen(screenX, screenY, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
+            //Bitmap bitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppArgb);
+            DirectBitmap bitmap = new DirectBitmap(rectangle.Width, rectangle.Height);
+            Graphics graphics = Graphics.FromImage(bitmap.Bitmap);
+            graphics.CopyFromScreen(screenX, screenY, 0, 0, rectangle.Size, CopyPixelOperation.SourceCopy);
+            graphics.Dispose();
             return bitmap;
         }
         public double abs(double a)
@@ -646,43 +644,39 @@ namespace Evelynn_Bot.GameAI
             }
             return n;
         }
-
-        public void HepsiniTarat(Bitmap bmp, List<RGBClass.PointerClass> rgbLists)
+        public void HepsiniTarat(DirectBitmap bmp, List<RGBClass.PointerClass> rgbLists)
         {
-            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
+            foreach (RGBClass.PointerClass pClass in rgbLists.ToList())
             {
                 pClass.tmpB = 0;
-            });
+            }
 
-            rgbLists.ToList().ForEach(delegate (RGBClass.PointerClass pClass)
+            foreach (RGBClass.PointerClass pClass in rgbLists.ToList())
             {
                 pClass.pointerList = new List<Point>();
-            });
+            }
 
-            //var bitmapData = new FastBitmap(bmp);
-            //bitmapData.Lock();
 
-            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Size.Width, bmp.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr scan = bitmapData.Scan0;
-            int num = bitmapData.Stride * bmp.Height;
+            //BitmapData bitmapData = bmp.Bitmap.LockBits(new Rectangle(0, 0, bmp.Bitmap.Size.Width, bmp.Bitmap.Size.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            FastBitmap fBitmap = new FastBitmap(bmp.Bitmap);
+            BitmapData bitmapData = fBitmap._bitmapData;
+
+
+            int num = bitmapData.Stride * bmp.Height; 
             byte[] array = new byte[num];
             byte[] byte_2 = new byte[num / 3];
             byte[] byte_1 = new byte[num / 3];
             byte[] byte_0 = new byte[num / 3];
-            Marshal.Copy(scan, array, 0, num);
+            Marshal.Copy(bitmapData.Scan0, array, 0, num);
             int int_ = 0;
-            int stride = bitmapData.Stride;
-
-
             for (int i = 0; i < bmp.Height; i++)
             {
                 for (int i2 = 0; i2 < bmp.Width; i2++)
                 {
-                    
-                    byte_0[int_] = array[i * stride + i2 * 3];
-                    byte_1[int_] = array[i * stride + i2 * 3 + 1];
-                    byte_2[int_] = array[i * stride + i2 * 3 + 2];
-                    rgbLists.ForEach(delegate (RGBClass.PointerClass pClass)
+                    byte_0[int_] = array[i * bitmapData.Stride + i2 * 3];
+                    byte_1[int_] = array[i * bitmapData.Stride + i2 * 3 + 1];
+                    byte_2[int_] = array[i * bitmapData.Stride + i2 * 3 + 2];
+                    foreach (RGBClass.PointerClass pClass in rgbLists)
                     {
                         ////TODO: Huge CPU - Fix!
                         if (abs(pClass.rgbLists[pClass.tmpB].B - byte_0[int_]) <= 5 && abs(pClass.rgbLists[pClass.tmpB].G - byte_1[int_]) <= 5 && abs(pClass.rgbLists[pClass.tmpB].R - byte_2[int_]) <= 5)
@@ -698,14 +692,13 @@ namespace Evelynn_Bot.GameAI
                             pClass.pointerList.Add(new Point(i2, i));
                             pClass.tmpB = 0;
                         }
-                    });
-                    int num2 = int_;
-                    int_ = num2 + 1;
+                    }
+
+                    int_ += 1;
                 }
             }
-
+            fBitmap.Dispose();
             bmp.Dispose();
-            Dispose(true);
         }
         public double Hesap1(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3)
         {
@@ -911,7 +904,6 @@ namespace Evelynn_Bot.GameAI
             KodTarat(GEnum8.CONTROL);
             TusuAyarla(GEnum8.END);
             TusBas(GEnum8.CONTROL);
-            Dispose(true);
         }
 
         public double PointerMath(Point mapPoint, Point towerPoint)
@@ -1013,12 +1005,10 @@ namespace Evelynn_Bot.GameAI
                 TusuAyarla(GEnum8.KEY_P);
                 Thread.Sleep(8000);
                 dateTime_0 = DateTime.Now;
-                Dispose(true);
             }
             else
             {
                 TusuAyarla(GEnum8.KEY_P);
-                Dispose(true);
                 Thread.Sleep(8000);
             }
         }
@@ -1047,7 +1037,6 @@ namespace Evelynn_Bot.GameAI
                 TusuAyarla(GEnum8.KEY_P);
                 Thread.Sleep(8000);
                 dateTime_0 = DateTime.Now;
-                Dispose(true);
             }
             else
             {
@@ -1073,16 +1062,13 @@ namespace Evelynn_Bot.GameAI
                 TusuAyarla(GEnum8.KEY_P);
                 Thread.Sleep(8000);
                 dateTime_0 = DateTime.Now;
-                Dispose(true);
             }
         }
-
-        private bool flaggo;
-
-        public void YeniAI_1(object Interface)
+        
+        public void YeniAI_1(Interface itsInterface)
         {
             bugfixCount = 0;
-            Interface itsInterface = (Interface)Interface;
+            //Interface itsInterface = (Interface)Interface;
             itsInterface.clientKiller.KillRiotUx();
             Point point = new Point(400, 300);
             while (!isGameEnd)
@@ -1098,7 +1084,7 @@ namespace Evelynn_Bot.GameAI
                         }
                     }
 
-                    Bitmap bitmap_;
+                    DirectBitmap bitmap_;
                     try
                     {
                         bitmap_ = BitmapAl(scrX, scrY, point.X, point.Y);
@@ -1245,15 +1231,6 @@ namespace Evelynn_Bot.GameAI
                     //Console.WriteLine(point2);
                     /////////////
 
-
-                    bool debug;
-                    debug = false;
-                    while (debug)
-                    {
-                        Thread.Sleep(5000);
-                    }
-                    
-
                     if (point2.X != -1 || flag)
                     {
                         if (itsInterface.queueId != 2000 || !isTutorialAndMF) // Tutorial 1 değil ya da Miss Fortune ile 1 kill almadıysa
@@ -1371,13 +1348,11 @@ namespace Evelynn_Bot.GameAI
                                     
                                     if (point_.X == -1) // EnemyMinion yoksa
                                     {
-                                        itsInterface.clientKiller.ActivateGame();
                                         EkraniAyarla(TowerHesapla(double_));
                                         TusuAyarla(GEnum8.KEY_A);
                                     }
                                     else
                                     {
-                                        itsInterface.clientKiller.ActivateGame();
                                         EkraniAyarla(AnaPointAl(point_));
                                         TusuAyarla(GEnum8.KEY_A);
                                         isItemHasBought = 0;
@@ -1548,7 +1523,6 @@ namespace Evelynn_Bot.GameAI
                         TusuAyarla(GEnum8.KEY_P);
                         Thread.Sleep(3000);
                     }
-                    Dispose(true);
                     end_IL_0035:;
                 }
 
@@ -1557,17 +1531,17 @@ namespace Evelynn_Bot.GameAI
                     Console.WriteLine($"HATA: {ex2}");
                     goto IL_0964;
                 }
-                Dispose(true);
                 continue;
             IL_0964:
                 Thread.Sleep(random_0.Next(400, 800));
-                Dispose(true);
             }
 
-            Dispose(true);
             itsInterface.logger.Log(true, "Game is Done!");
             Thread.Sleep(3000);
             itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+            GC.Collect();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
         public void StartNewGameAI(Interface itsInterface)
         {
@@ -1575,11 +1549,11 @@ namespace Evelynn_Bot.GameAI
             {
                 isGameEnd = false;
                 List<Thread> list = new List<Thread>();
-                Thread thread = new Thread(YeniAI_1); // Oyun AI
-                thread.Start(itsInterface);
+                Thread thread = new Thread(() => YeniAI_1(itsInterface)); // Oyun AI
+                thread.Start();
                 list.Add(thread);
-                Thread thread2 = new Thread(GetInGameStats);
-                thread2.Start(itsInterface);
+                Thread thread2 = new Thread(() => GetInGameStats(itsInterface)); // In Game Stats API
+                thread2.Start();
                 list.Add(thread2);
                 Thread thread3 = new Thread(AraliEndGonder);
                 thread3.Start();
@@ -1590,6 +1564,8 @@ namespace Evelynn_Bot.GameAI
                     item.Join();
                 }
 
+                GC.Collect();
+                GC.SuppressFinalize(this); //GameAI classini tamamen Dispose ediyoruz \\ Finalizer //
                 Dispose(true);
             }
             catch (Exception ex)
@@ -1597,23 +1573,35 @@ namespace Evelynn_Bot.GameAI
                 Console.WriteLine($"HATA: {ex}");
             }
         }
-        public void GetInGameStats(object Interface)
-        {
-            Interface itsInterface = (Interface)Interface;
 
+        public async void WaitUntilGameStart(Interface itsInterface)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            while (!itsInterface.lcuPlugins.IsGameApiReady() || await itsInterface.lcuPlugins.GetGameTime() <= 2.0)
+            {
+                if (stopwatch.Elapsed.TotalSeconds > (double)600f)
+                {
+                    if (gameNotReadyCount++ > 3)
+                    {
+                        itsInterface.clientKiller.RestartAndExit(itsInterface);
+                    }
+                    break;
+                }
+                Thread.Sleep(2000);
+            }
+            gameNotReadyCount = 0;
+        }
+
+        public void GetInGameStats(Interface itsInterface)
+        {
             while (!isGameEnd)
             {
                 try
                 {
                     CurrentPlayerStats(itsInterface);
-
-                    string tutoChampName = "Miss Fortune";
-                    string cGame_championName = itsInterface.player.CurrentGame_ChampName;
                     
-                    if (cGame_championName == null)
-                    {
-                        cGame_championName = tutoChampName;
-                    }
+                    // Will return the CurrentGame's champion name If it's not null, else will return Miss Fortune
+                    string cGame_championName = itsInterface.player.CurrentGame_ChampName ?? "Miss Fortune";
 
                     try
                     {
@@ -1621,22 +1609,28 @@ namespace Evelynn_Bot.GameAI
                         canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
                         gameTime = inGameData.GameData.GameTime.Value;
 
-                        if (Process.GetProcessesByName("League of Legends").Length == 1)
+                        int count = 0;
+                        foreach (var details in inGameData.Events.EventsEvents)
                         {
-                            isGameEnd = false;
+                            if (details.EventName == "GameEnd") count++;
                         }
-                        else
-                        {
-                            isGameEnd = inGameData.Events.EventsEvents.Count((Event details) => details.EventName == "GameEnd") > 0 || gameTime > 3600.0;
-                        }
+
+                        isGameEnd = Process.GetProcessesByName("League of Legends").Length != 1 && (count > 0 || gameTime > 3600.0);
+
 
                         if (itsInterface.queueId != 2000)
                         {
-                            summonerItemCount = inGameData.AllPlayers.FirstOrDefault((AllPlayer liveData) =>
+                            AllPlayer first = null;
+                            foreach (var liveData in inGameData.AllPlayers)
                             {
-                                return liveData.ChampionName == cGame_championName;
+                                if (liveData.ChampionName == cGame_championName)
+                                {
+                                    first = liveData;
+                                    break;
+                                }
+                            }
 
-                            }).Items.Length;
+                            summonerItemCount = first.Items.Length;
                         }
 
                         prevHealthPercentage = healthPercentage;
@@ -1644,23 +1638,23 @@ namespace Evelynn_Bot.GameAI
 
                         if (!pickedTutoChamp && itsInterface.queueId == 2000)
                         {
-                            isTutorialAndMF = inGameData.AllPlayers
-                                .FirstOrDefault((AllPlayer liveData) =>
-                                {
+                            AllPlayer first = null;
+                            foreach (var player in inGameData.AllPlayers)
+                            {
+                                if (player.ChampionName != cGame_championName) continue;
+                                first = player;
+                                break;
+                            }
 
-                                    return liveData.ChampionName == cGame_championName;
+                            AllPlayer first1 = null;
+                            foreach (var player in inGameData.AllPlayers)
+                            {
+                                if (player.ChampionName != cGame_championName) continue;
+                                first1 = player;
+                                break;
+                            }
 
-
-                                }).Scores
-                                .Kills == 1 && inGameData.AllPlayers
-
-                                .FirstOrDefault((AllPlayer liveData) =>
-                                {
-
-                                    return liveData.ChampionName == cGame_championName;
-
-                                })
-                                .ChampionName == "Miss Fortune";
+                            isTutorialAndMF = first1.Scores.Kills == 1 && first.ChampionName == "Miss Fortune";
                         }
 
                         foreach (Event item in inGameData.Events.EventsEvents)
@@ -1705,14 +1699,12 @@ namespace Evelynn_Bot.GameAI
                 //Restart atmadan ise League process (oyun) kapanamıyor.
                 if (DateTime.Now.Subtract(dateTime_1).TotalMinutes > 90.0)
                 {
-                    itsInterface.logger.Log(false,"Overtime playing");
+                    itsInterface.logger.Log(false, "Overtime playing");
                     Restart(itsInterface);
                 }
 
-                Dispose(true);
                 Thread.Sleep(random_0.Next(400, 800));
             }
-            Dispose(true);
         }
         public void AraliEndGonder()
         {
@@ -1778,7 +1770,7 @@ namespace Evelynn_Bot.GameAI
                 new RGBClass.SetRGB(44, 89, 119)
             }, "AllyMinion"));
 
-            #region TODO CHANGE TUTO
+            #region Tutorial
 
             if (itsInterface.queueId == 2000) // EĞER OYUN TUTORİAL 1 İSE MİNYON RENGİ DEĞİŞİYOR
             {
@@ -1847,8 +1839,8 @@ namespace Evelynn_Bot.GameAI
                     isGameEnd = false;
                     dateTime_1 = DateTime.Now;
 
-                    scrX = PointAl(true).X;
-                    scrY = PointAl(true).Y;
+                    scrX = PointAl().X;
+                    scrY = PointAl().Y;
 
                     point_5 = new Point(352, 294);
                     point_6 = new Point(405, 241);
@@ -1868,6 +1860,9 @@ namespace Evelynn_Bot.GameAI
                     Thread.Sleep(5000);
                     EndBas();
                     RGBHazirla(itsInterface);
+                    WIN32.CloseDialogBoxes(); // Close Error Dialog Boxes
+                    itsInterface.clientKiller.ActivateGame(); // Bring Game To Front
+                    WaitUntilGameStart(itsInterface); // Wait Until the game loads
                     StartNewGameAI(itsInterface);
                 }
                 else
@@ -1978,24 +1973,26 @@ namespace Evelynn_Bot.GameAI
                 throw;
             }
         }
-        public void CurrentPlayerStats(Interface itsInterface)
+        public async void CurrentPlayerStats(Interface itsInterface)
         {
             try
             {
-                var liveData = itsInterface.lcuPlugins.GetLiveGameData();
-                itsInterface.player.MaxHealth = liveData.Result.ActivePlayer.ChampionStats.MaxHealth.Value;
-                itsInterface.player.CurrentHealth = liveData.Result.ActivePlayer.ChampionStats.CurrentHealth.Value;
-                itsInterface.player.CurrentGold = liveData.Result.ActivePlayer.CurrentGold.Value;
-                itsInterface.player.Level = Convert.ToInt32(liveData.Result.ActivePlayer.Level.Value);
-                itsInterface.player.Level_Q = liveData.Result.ActivePlayer.Abilities.Q.AbilityLevel.Value;
-                itsInterface.player.Level_W = liveData.Result.ActivePlayer.Abilities.W.AbilityLevel.Value;
-                itsInterface.player.Level_E = liveData.Result.ActivePlayer.Abilities.E.AbilityLevel.Value;
-                itsInterface.player.Level_R = liveData.Result.ActivePlayer.Abilities.R.AbilityLevel.Value;
-                itsInterface.player.Data = liveData.Result;
+                var activePlayerData = await itsInterface.lcuPlugins.GetActivePlayerData();
+                itsInterface.player.Data = await itsInterface.lcuPlugins.GetLiveGameData();
+                gameTime = await itsInterface.lcuPlugins.GetGameTime();
+                itsInterface.player.MaxHealth = activePlayerData.ChampionStats.MaxHealth.Value;
+                itsInterface.player.CurrentHealth = activePlayerData.ChampionStats.CurrentHealth.Value;
+                itsInterface.player.CurrentGold = activePlayerData.CurrentGold.Value;
+                itsInterface.player.Level = Convert.ToInt32(activePlayerData.Level.Value);
+                itsInterface.player.Level_Q = activePlayerData.Abilities.Q.AbilityLevel.Value;
+                itsInterface.player.Level_W = activePlayerData.Abilities.W.AbilityLevel.Value;
+                itsInterface.player.Level_E = activePlayerData.Abilities.E.AbilityLevel.Value;
+                itsInterface.player.Level_R = activePlayerData.Abilities.R.AbilityLevel.Value;
                 //Console.WriteLine(itsInterface.player.Level);
             }
             catch (Exception e)
             {
+                itsInterface.logger.ReportLog($"Error: {e.Message} | Source: {e.Source} | ST: {e.StackTrace}");
                 //ignored
             }
         }
@@ -2006,6 +2003,7 @@ namespace Evelynn_Bot.GameAI
             if (disposing)
             {
                 GC.Collect();
+                //GC.SuppressFinalize(this);
             }
         }
 

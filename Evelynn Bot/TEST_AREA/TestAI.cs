@@ -1,4 +1,4 @@
-﻿using FastBitmapLib;
+﻿//using FastBitmapLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,30 +15,30 @@ namespace Evelynn_Bot.TEST_AREA
     public class TestAI
     {
 
-        public static Point GetColorPosition(Color color, Bitmap bitmap)
-        {
+        //public static Point GetColorPosition(Color color, Bitmap bitmap)
+        //{
 
-            int num = color.ToArgb();
-            var CurrentCapture = new FastBitmap(bitmap);
+        //    int num = color.ToArgb();
+        //    var CurrentCapture = new FastBitmap(bitmap);
 
-            using (FastBitmap currentCapture = CurrentCapture)
-            {
-                currentCapture.Lock();
-                for (int i = 0; i < currentCapture.Height; i++)
-                {
-                    for (int j = 0; j < currentCapture.Width; j++)
-                    {
-                        if (num == currentCapture.GetPixelInt(j, i))
-                        {
-                            return new Point(j,i);
-                        }
-                    }
+        //    using (FastBitmap currentCapture = CurrentCapture)
+        //    {
+        //        currentCapture.Lock();
+        //        for (int i = 0; i < currentCapture.Height; i++)
+        //        {
+        //            for (int j = 0; j < currentCapture.Width; j++)
+        //            {
+        //                if (num == currentCapture.GetPixelInt(j, i))
+        //                {
+        //                    return new Point(j,i);
+        //                }
+        //            }
 
-                }
-            }
+        //        }
+        //    }
 
-            return Point.Empty;
-        }
+        //    return Point.Empty;
+        //}
 
         public static Bitmap GetCapture()
         {

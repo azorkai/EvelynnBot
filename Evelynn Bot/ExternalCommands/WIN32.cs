@@ -13,6 +13,24 @@ namespace Evelynn_Bot.ExternalCommands
         private const string LibraryName = "user32";
         #region winuser.h
 
+        public static void CloseDialogBoxes()
+        {
+            IntPtr intPtr = IntPtr.Zero;
+            while ((intPtr = FindWindowEx(IntPtr.Zero, intPtr, "#32770", null)) != IntPtr.Zero)
+            {
+                PostMessage(intPtr, 16, IntPtr.Zero, IntPtr.Zero);
+            }
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern IntPtr PostMessage(IntPtr hwnd, int code, IntPtr param1, IntPtr param2);
+
+        [DllImport("kernel32.dll")]
+        public static extern ErrorModes SetErrorMode(ErrorModes uMode);
+
         [DllImport(LibraryName, ExactSpelling = true)]
         public static extern IntPtr GetForegroundWindow();
 
@@ -66,6 +84,17 @@ namespace Evelynn_Bot.ExternalCommands
             CTRL_CLOSE_EVENT = 2,
             CTRL_LOGOFF_EVENT = 5,
             CTRL_SHUTDOWN_EVENT = 6,
+        }
+
+
+        [Flags]
+        public enum ErrorModes : uint
+        {
+            SYSTEM_DEFAULT = 0U,
+            SEM_FAILCRITICALERRORS = 1U,
+            SEM_NOALIGNMENTFAULTEXCEPT = 4U,
+            SEM_NOGPFAULTERRORBOX = 2U,
+            SEM_NOOPENFILEERRORBOX = 32768U
         }
     }
 }

@@ -275,6 +275,7 @@ namespace Evelynn_Bot.ExternalCommands
             // Read the random line
             string line = musicList.Skip(randomNumber - 1).Take(1).First();
             Program.SetWindowText(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, line);
+            Console.Title = line;
 
             //Check restart command
             if (itsInterface.dashboard.IsRestart && Process.GetProcessesByName("League of Legends").Length == 0) // Dashboard Action Restart

@@ -16,9 +16,10 @@ namespace Evelynn_Bot.GameAI
         double MyPow(double num, double expp);
         double abs(double a);
         Point AnaPointAl(Point point_7);
-        Point PointAl(bool is43);
-        Bitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY);
-        void HepsiniTarat(Bitmap bmp, List<GameAi.RGBClass.PointerClass> rgbLists);
+        Point PointAl();
+        DirectBitmap BitmapAl(int screenX, int screenY, int rectangleX, int rectangleY);
+        void WaitUntilGameStart(Interface itsInterface);
+        void HepsiniTarat(DirectBitmap bmp, List<GameAi.RGBClass.PointerClass> rgbLists);
         double Hesap1(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3);
         double Hesap0(double healthPercentage, double prevHealthPercentage);
         void PosHesapla(double healthPercentage, double prevHealthPercentage, double gameTime, double double_3, double double_4, double double_5, double double_6, double double_7, double double_8);
@@ -39,9 +40,9 @@ namespace Evelynn_Bot.GameAI
         void ItemKullan();
         void EsyaAl(bool bool_4);
         void BaslangicEsyaAl(bool bool_4);
-        void YeniAI_1(object Interface);
+        void YeniAI_1(Interface itsInterface);
         void StartNewGameAI(Interface itsInterface);
-        void GetInGameStats(object Interface);
+        void GetInGameStats(Interface itsInterface);
         void AraliEndGonder();
         void RGBHazirla(Interface itsInterface);
         void YeniAIBaslat(Interface itsInterface);
