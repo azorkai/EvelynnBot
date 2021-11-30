@@ -431,7 +431,7 @@ namespace Evelynn_Bot
                         itsInterface2.lcuPlugins.KillUXAsync();
                         GameAiBool = true;
                         bugTimer.Start();
-
+                        itsInterface2.gameAi.isGameEnd = true;
                         break;
                     case "Matchmaking":
                         state = "Matchmaking";
@@ -453,7 +453,10 @@ namespace Evelynn_Bot
                             _playAgain = false;
                             await itsInterface2.processManager.PlayAgain(itsInterface2);
                         }
-
+                        break;
+                    case "EndOfGame":
+                        await itsInterface2.lcuPlugins.SkipStatsAsync();
+                        itsInterface2.gameAi.isGameEnd = true;
                         break;
                     case "Reconnect":
                         state = "Reconnect";

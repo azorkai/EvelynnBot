@@ -546,7 +546,7 @@ namespace Evelynn_Bot.GameAI
 
         private int isItemHasBought;
 
-        private bool isGameEnd;
+        public bool isGameEnd;
 
         private double healthPercentage = 100.0;
 
@@ -554,7 +554,7 @@ namespace Evelynn_Bot.GameAI
 
         private DateTime dateTime_0 = new DateTime(2000, 1, 1);
 
-        private double gameTime = 99999.0;
+        //private double gameTime = 99999.0;
 
         private int gameNotReadyCount = 0;
 
@@ -1592,7 +1592,7 @@ namespace Evelynn_Bot.GameAI
             gameNotReadyCount = 0;
         }
 
-        public void GetInGameStats(Interface itsInterface)
+        public async void GetInGameStats(Interface itsInterface)
         {
             while (!isGameEnd)
             {
@@ -1605,12 +1605,13 @@ namespace Evelynn_Bot.GameAI
 
                     try
                     {
-                        var inGameData = itsInterface.player.Data;
+                        //var inGameData = itsInterface.player.Data;
+
                         canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
-                        gameTime = inGameData.GameData.GameTime.Value;
+                        double gameTime = await itsInterface.lcuPlugins.GetGameTime();
 
                         int count = 0;
-                        foreach (var details in inGameData.Events.EventsEvents)
+                        foreach (var details in itsInterface.player.Events)
                         {
                             if (details.EventName == "GameEnd") count++;
                         }
@@ -1621,7 +1622,7 @@ namespace Evelynn_Bot.GameAI
                         if (itsInterface.queueId != 2000)
                         {
                             AllPlayer first = null;
-                            foreach (var liveData in inGameData.AllPlayers)
+                            foreach (var liveData in itsInterface.player.AllPlayers)
                             {
                                 if (liveData.ChampionName == cGame_championName)
                                 {
@@ -1639,7 +1640,7 @@ namespace Evelynn_Bot.GameAI
                         if (!pickedTutoChamp && itsInterface.queueId == 2000)
                         {
                             AllPlayer first = null;
-                            foreach (var player in inGameData.AllPlayers)
+                            foreach (var player in itsInterface.player.AllPlayers)
                             {
                                 if (player.ChampionName != cGame_championName) continue;
                                 first = player;
@@ -1647,7 +1648,7 @@ namespace Evelynn_Bot.GameAI
                             }
 
                             AllPlayer first1 = null;
-                            foreach (var player in inGameData.AllPlayers)
+                            foreach (var player in itsInterface.player.AllPlayers)
                             {
                                 if (player.ChampionName != cGame_championName) continue;
                                 first1 = player;
@@ -1657,7 +1658,7 @@ namespace Evelynn_Bot.GameAI
                             isTutorialAndMF = first1.Scores.Kills == 1 && first.ChampionName == "Miss Fortune";
                         }
 
-                        foreach (Event item in inGameData.Events.EventsEvents)
+                        foreach (Event item in itsInterface.player.Events)
                         {
                             if (item.EventName == "Turret_T2_C_05_A")
                             {
@@ -1861,9 +1862,9 @@ namespace Evelynn_Bot.GameAI
                     EndBas();
                     RGBHazirla(itsInterface);
                     WIN32.CloseDialogBoxes(); // Close Error Dialog Boxes
-                    itsInterface.clientKiller.ActivateGame(); // Bring Game To Front
+                    itsInterface.clientKiller.ActivateGame(); // Bring Game To The Front
                     WaitUntilGameStart(itsInterface); // Wait Until the game loads
-                    StartNewGameAI(itsInterface);
+                    StartNewGameAI(itsInterface); // Finally, Start The Game AI
                 }
                 else
                 {
@@ -1978,8 +1979,8 @@ namespace Evelynn_Bot.GameAI
             try
             {
                 var activePlayerData = await itsInterface.lcuPlugins.GetActivePlayerData();
-                itsInterface.player.Data = await itsInterface.lcuPlugins.GetLiveGameData();
-                gameTime = await itsInterface.lcuPlugins.GetGameTime();
+                itsInterface.player.AllPlayers = await itsInterface.lcuPlugins.GetAllPlayersData();
+                itsInterface.player.Events = await itsInterface.lcuPlugins.GetEventsDataAsync();
                 itsInterface.player.MaxHealth = activePlayerData.ChampionStats.MaxHealth.Value;
                 itsInterface.player.CurrentHealth = activePlayerData.ChampionStats.CurrentHealth.Value;
                 itsInterface.player.CurrentGold = activePlayerData.CurrentGold.Value;
