@@ -554,7 +554,7 @@ namespace Evelynn_Bot.GameAI
 
         private DateTime dateTime_0 = new DateTime(2000, 1, 1);
 
-        //private double gameTime = 99999.0;
+        private double gameTime = 99999.0;
 
         private int gameNotReadyCount = 0;
 
@@ -1608,10 +1608,10 @@ namespace Evelynn_Bot.GameAI
                         //var inGameData = itsInterface.player.Data;
 
                         canUpgradeAbility = itsInterface.player.Level_Q + itsInterface.player.Level_W + itsInterface.player.Level_E + itsInterface.player.Level_R != itsInterface.player.Level;
-                        double gameTime = await itsInterface.lcuPlugins.GetGameTime();
+                        gameTime = itsInterface.player.Data.GameData.GameTime.Value;
 
                         int count = 0;
-                        foreach (var details in itsInterface.player.Events)
+                        foreach (var details in itsInterface.player.Data.Events.EventsEvents)
                         {
                             if (details.EventName == "GameEnd") count++;
                         }
@@ -1622,7 +1622,7 @@ namespace Evelynn_Bot.GameAI
                         if (itsInterface.queueId != 2000)
                         {
                             AllPlayer first = null;
-                            foreach (var liveData in itsInterface.player.AllPlayers)
+                            foreach (var liveData in itsInterface.player.Data.AllPlayers)
                             {
                                 if (liveData.ChampionName == cGame_championName)
                                 {
@@ -1640,7 +1640,7 @@ namespace Evelynn_Bot.GameAI
                         if (!pickedTutoChamp && itsInterface.queueId == 2000)
                         {
                             AllPlayer first = null;
-                            foreach (var player in itsInterface.player.AllPlayers)
+                            foreach (var player in itsInterface.player.Data.AllPlayers)
                             {
                                 if (player.ChampionName != cGame_championName) continue;
                                 first = player;
@@ -1648,7 +1648,7 @@ namespace Evelynn_Bot.GameAI
                             }
 
                             AllPlayer first1 = null;
-                            foreach (var player in itsInterface.player.AllPlayers)
+                            foreach (var player in itsInterface.player.Data.AllPlayers)
                             {
                                 if (player.ChampionName != cGame_championName) continue;
                                 first1 = player;
@@ -1658,7 +1658,7 @@ namespace Evelynn_Bot.GameAI
                             isTutorialAndMF = first1.Scores.Kills == 1 && first.ChampionName == "Miss Fortune";
                         }
 
-                        foreach (Event item in itsInterface.player.Events)
+                        foreach (Event item in itsInterface.player.Data.Events.EventsEvents)
                         {
                             if (item.EventName == "Turret_T2_C_05_A")
                             {
@@ -1978,17 +1978,16 @@ namespace Evelynn_Bot.GameAI
         {
             try
             {
-                var activePlayerData = await itsInterface.lcuPlugins.GetActivePlayerData();
-                itsInterface.player.AllPlayers = await itsInterface.lcuPlugins.GetAllPlayersData();
-                itsInterface.player.Events = await itsInterface.lcuPlugins.GetEventsDataAsync();
-                itsInterface.player.MaxHealth = activePlayerData.ChampionStats.MaxHealth.Value;
-                itsInterface.player.CurrentHealth = activePlayerData.ChampionStats.CurrentHealth.Value;
-                itsInterface.player.CurrentGold = activePlayerData.CurrentGold.Value;
-                itsInterface.player.Level = Convert.ToInt32(activePlayerData.Level.Value);
-                itsInterface.player.Level_Q = activePlayerData.Abilities.Q.AbilityLevel.Value;
-                itsInterface.player.Level_W = activePlayerData.Abilities.W.AbilityLevel.Value;
-                itsInterface.player.Level_E = activePlayerData.Abilities.E.AbilityLevel.Value;
-                itsInterface.player.Level_R = activePlayerData.Abilities.R.AbilityLevel.Value;
+                var liveData = await itsInterface.lcuPlugins.GetLiveGameData();
+                itsInterface.player.MaxHealth = liveData.ActivePlayer.ChampionStats.MaxHealth.Value;
+                itsInterface.player.CurrentHealth = liveData.ActivePlayer.ChampionStats.CurrentHealth.Value;
+                itsInterface.player.CurrentGold = liveData.ActivePlayer.CurrentGold.Value;
+                itsInterface.player.Level = Convert.ToInt32(liveData.ActivePlayer.Level.Value);
+                itsInterface.player.Level_Q = liveData.ActivePlayer.Abilities.Q.AbilityLevel.Value;
+                itsInterface.player.Level_W = liveData.ActivePlayer.Abilities.W.AbilityLevel.Value;
+                itsInterface.player.Level_E = liveData.ActivePlayer.Abilities.E.AbilityLevel.Value;
+                itsInterface.player.Level_R = liveData.ActivePlayer.Abilities.R.AbilityLevel.Value;
+                itsInterface.player.Data = liveData;
                 //Console.WriteLine(itsInterface.player.Level);
             }
             catch (Exception e)

@@ -16,9 +16,10 @@ namespace Evelynn_Bot.Entities
         public long Level_W { get; set; }
         public long Level_E { get; set; }
         public long Level_R { get; set; }
-        //public EvelynnLCU.API_Models.InGameData Data { get; set; }
-        public List<EvelynnLCU.API_Models.AllPlayer> AllPlayers { get; set; }
-        public List<EvelynnLCU.API_Models.Event> Events { get; set; }
+        public EvelynnLCU.API_Models.InGameData Data { get; set; }
+        //public List<EvelynnLCU.API_Models.AllPlayer> AllPlayers { get; set; }
+        //public List<EvelynnLCU.API_Models.Event> Events { get; set; }
+        //public List<EvelynnLCU.API_Models.GameData> GameData { get; set; }
         public string CurrentGame_ChampName { get; set; }
 
     }
