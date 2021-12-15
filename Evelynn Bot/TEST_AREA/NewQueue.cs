@@ -84,6 +84,7 @@ namespace Evelynn_Bot
             EventExampleAsync();
             isAlreadyConnected = true;
             CreateLobby(itsInterface);
+            itsInterface.newQueue.StartMatchmaking();
         }
 
         public async void CreateLobby(Interface itsInterface)
@@ -308,6 +309,60 @@ namespace Evelynn_Bot
             Environment.Exit(0);
         }
 
+        public async void StartMatchmaking()
+        {
+            if (Process.GetProcessesByName("LeagueClient").Length == 1)
+            {
+                itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                itsInterface2.lcuPlugins.KillUXAsync();
+                itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
+                var searchState = await itsInterface2.lcuPlugins.GetSearchState();
+                if (searchState.errors.Count <= 0)
+                {
+                    if (searchState.lowPriorityData.penaltyTimeRemaining.Value > 0)
+                    {
+                        double lpqRemaining = searchState.lowPriorityData.penaltyTimeRemaining.Value;
+                        if (lpqRemaining > 0.0)
+                        {
+                            itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
+                            itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
+                            await Task.Delay((int)lpqRemaining * 1000);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
+                    }
+                }
+                else
+                {
+                    double penaltyRemaining = searchState.errors[0].penaltyTimeRemaining.Value;
+                    if (!(penaltyRemaining <= 0.0))
+                    {
+                        itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
+                        itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
+                        await Task.Delay((int)penaltyRemaining * 1000);
+                        return;
+                    }
+                    else
+                    {
+                        itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
+                    }
+                }
+
+                await Task.Delay(2500);
+                GameAiBool = true;
+                bugTimer.Start();
+                itsInterface2.lcuPlugins.PostMatchmakingSearch();
+
+            }
+            else
+            {
+                RestartEverything();
+            }
+        }
+
         private async void OnStateChanged(EventType sender, GameFlow result)
         {
             try
@@ -321,66 +376,16 @@ namespace Evelynn_Bot
                         {
                             itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
                             itsInterface2.newQueue.CreateLobby(itsInterface2);
+                            StartMatchmaking();
                         }
                         else
                         {
                             RestartEverything();
                         }
                         break;
-
                     case "Lobby":
                         state = "Lobby";
-                        if (Process.GetProcessesByName("LeagueClient").Length == 1)
-                        {
-                            itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
-                            itsInterface2.lcuPlugins.KillUXAsync();
-                            itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
-                            var searchState = await itsInterface2.lcuPlugins.GetSearchState();
-                            if (searchState.errors.Count <= 0)
-                            {
-                                if (searchState.lowPriorityData.penaltyTimeRemaining.Value > 0)
-                                {
-                                    double lpqRemaining = searchState.lowPriorityData.penaltyTimeRemaining.Value;
-                                    if (lpqRemaining > 0.0)
-                                    {
-                                        itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
-                                        itsInterface2.logger.Log(true, $"LPQ Detected - Waiting {lpqRemaining * 1000} seconds.");
-                                        await Task.Delay((int)lpqRemaining * 1000);
-                                        return;
-                                    }
-                                }
-                                else
-                                {
-                                    itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
-                                }
-                            }
-                            else
-                            {
-                                double penaltyRemaining = searchState.errors[0].penaltyTimeRemaining.Value;
-                                if (!(penaltyRemaining <= 0.0))
-                                {
-                                    itsInterface2.dashboardHelper.UpdateLPQStatus("true", itsInterface2);
-                                    itsInterface2.logger.Log(true, $"Penalty Detected - Waiting {penaltyRemaining * 1000} seconds.");
-                                    await Task.Delay((int)penaltyRemaining * 1000);
-                                    return;
-                                }
-                                else
-                                {
-                                    itsInterface2.dashboardHelper.UpdateLPQStatus("false", itsInterface2);
-                                }
-                            }
-
-                            await Task.Delay(2500);
-                            GameAiBool = true;
-                            bugTimer.Start();
-                            itsInterface2.lcuPlugins.PostMatchmakingSearch();
-
-                        }
-                        else
-                        {
-                            RestartEverything();
-                        }
-
+                        StartMatchmaking();
                         break;
                     case "ChampSelect":
                         state = "Champ Select [Ignore this message if game is started!]";

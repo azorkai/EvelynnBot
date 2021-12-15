@@ -583,7 +583,7 @@ namespace Evelynn_Bot.ProcessManager
                 }
                 
                 itsInterface.newQueue.CreateLobby(itsInterface);
-
+                itsInterface.newQueue.StartMatchmaking();
                 Dispose(true);
                 return Task.CompletedTask;
             }
