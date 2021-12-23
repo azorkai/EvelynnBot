@@ -236,11 +236,11 @@ namespace Evelynn_Bot.ProcessManager
                             itsInterface.gameAi.YeniAIBaslat(itsInterface);
                         }
 
-                        //if (itsInterface.license.Lol_isEmptyNick == false) // Eğer ! olursa true değeri false, false değeri true döner./
-                        //{
-                        //    Dispose(true);
-                        //    await accountProcess.CheckNewAccount(itsInterface);
-                        //}
+                        if (itsInterface.license.Lol_isEmptyNick == false && itsInterface.license.Lol_isEmptyNick == true) // Eğer ! olursa true değeri false, false değeri true döner./
+                        {
+                            Dispose(true);
+                            await accountProcess.CheckNewAccount(itsInterface);
+                        }
 
                         itsInterface.clientKiller.KillRiotUx();
 
