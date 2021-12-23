@@ -1538,7 +1538,7 @@ namespace Evelynn_Bot.GameAI
 
             itsInterface.logger.Log(true, "Game is Done!");
             Thread.Sleep(3000);
-            itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+            itsInterface.ProcessController.SuspendLeagueUx();
             GC.Collect();
             Dispose(true);
             GC.SuppressFinalize(this);

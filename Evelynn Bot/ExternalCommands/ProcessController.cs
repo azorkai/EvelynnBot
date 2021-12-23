@@ -90,7 +90,7 @@ namespace Evelynn_Bot.ExternalCommands
             }
         }
 
-        public async Task<Task> SuspendLeagueUx(Interface itsInterface)
+        public async Task<Task> SuspendLeagueUx()
         {
             try
             {

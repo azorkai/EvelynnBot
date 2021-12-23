@@ -131,7 +131,6 @@ namespace Evelynn_Bot.ProcessManager
                     if (processExist("RiotClientServices", itsInterface))
                     {
                         if (isFromGame == false) { await accountProcess.LoginAccount(itsInterface); }
-
                         if (!accountProcess.Initialize(itsInterface))
                         {
                             itsInterface.logger.Log(false, "Restarting...");
@@ -199,7 +198,7 @@ namespace Evelynn_Bot.ProcessManager
                         accountProcess.CopyConfig(itsInterface);
                         //InjectConfigPersist(itsInterface);
 
-                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+                        itsInterface.ProcessController.SuspendLeagueUx();
                         await accountProcess.CheckLeagueBan(itsInterface);
                         itsInterface.newQueue.itsInterface2 = itsInterface;
                         itsInterface.newQueue.UxEventAsync();
@@ -245,7 +244,7 @@ namespace Evelynn_Bot.ProcessManager
 
                         itsInterface.clientKiller.KillRiotUx();
 
-                        itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+                        itsInterface.ProcessController.SuspendLeagueUx();
 
                         if (itsInterface.license.Lol_disenchant)
                         {
@@ -524,7 +523,7 @@ namespace Evelynn_Bot.ProcessManager
 
             using (AccountProcess accountProcess = new AccountProcess())
             {
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+                itsInterface.ProcessController.SuspendLeagueUx();
                 itsInterface.logger.Log(true, itsInterface.messages.InfoStartingAgain);
                 //accountProcess.Initialize(itsInterface);
                 await itsInterface.lcuPlugins.RemoveNotificationsAsync();

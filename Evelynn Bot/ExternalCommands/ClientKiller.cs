@@ -154,8 +154,8 @@ namespace Evelynn_Bot.ExternalCommands
             array[0] = (byte)(array[0] | 2u);
             array[0] = (byte)(array[0] & 0xFEu);
 
-            //var randomMac = "00:50:56" + BitConverter.ToString(array).Replace("-", "").ToUpper();
-            var randomMac = "00:0C:29" + BitConverter.ToString(array).Replace("-", "").ToUpper();
+            var randomMac = "00:50:56" + BitConverter.ToString(array).Replace("-", "").ToUpper();
+            //var randomMac = "00:0C:29" + BitConverter.ToString(array).Replace("-", "").ToUpper();
 
             try
             {

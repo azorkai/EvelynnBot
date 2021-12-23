@@ -65,7 +65,7 @@ namespace Evelynn_Bot.Account_Process
                 }
 
                 Thread.Sleep(3000);
-
+                itsInterface.clientKiller.KillRiotUx();
                 itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
@@ -94,7 +94,9 @@ namespace Evelynn_Bot.Account_Process
 
 
                 var loginStatus = await itsInterface.lcuPlugins.Login(itsInterface.license.Lol_username, itsInterface.license.Lol_password);
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+
+                itsInterface.clientKiller.KillRiotUx();
+                itsInterface.ProcessController.SuspendLeagueUx();
                 //try
                 //{
                 //    await itsInterface.lcuPlugins.DeleteSplashScreen();
@@ -135,8 +137,8 @@ namespace Evelynn_Bot.Account_Process
                     await Task.Delay(25000);
                     itsInterface.clientKiller.RestartAndExit(itsInterface);
                 }
-
-                itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+                itsInterface.clientKiller.KillRiotUx();
+                itsInterface.ProcessController.SuspendLeagueUx();
 
                 //BURDA LOOPA GİRİYOR BU ASLAK KOD
                 //try
@@ -183,7 +185,7 @@ namespace Evelynn_Bot.Account_Process
 
                 itsInterface.logger.Log(true, "All done for Riot Client");
 
-                await itsInterface.ProcessController.SuspendLeagueUx(itsInterface);
+                await itsInterface.ProcessController.SuspendLeagueUx();
                 Dispose(true);
                 itsInterface.lcuApi.Close();
                 itsInterface.lcuPlugins = null;

@@ -56,7 +56,7 @@ namespace Evelynn_Bot
 
         public async Task DoTutorials(Interface itsInterface)
         {
-            itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+            itsInterface2.ProcessController.SuspendLeagueUx();
             await Task.Delay(5000);
             itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto { queueId = itsInterface.queueId });
             await Task.Delay(5000);
@@ -91,7 +91,7 @@ namespace Evelynn_Bot
         {
             try
             {
-                itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                itsInterface2.ProcessController.SuspendLeagueUx();
                 await Task.Delay(1000);
                 GameAiBool = true;
                 itsInterface2.lcuPlugins.CreateLobbyAsync(new LolLobbyLobbyChangeGameDto {queueId = 830});
@@ -121,7 +121,7 @@ namespace Evelynn_Bot
         {
             try
             {
-                itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                itsInterface2.ProcessController.SuspendLeagueUx();
                 List<long> pickableChampions = await itsInterface2.lcuPlugins.GetPickableChampions();
                 pickableChampions = Shuffle<long>(pickableChampions);
 
@@ -174,7 +174,7 @@ namespace Evelynn_Bot
                 }
 
                 // Set Spells
-                itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                itsInterface2.ProcessController.SuspendLeagueUx();
                 itsInterface2.lcuPlugins.SetSpellAsync((itsInterface2.summoner.summonerLevel >= 7) ? 4 : 6, 7);
 
             }
@@ -249,7 +249,7 @@ namespace Evelynn_Bot
                 case "ShowMain":
                     state = "show";
                     //await Task.Delay(4000);
-                    itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                    itsInterface2.ProcessController.SuspendLeagueUx();
                     itsInterface2.lcuPlugins.KillUXAsync();
                     break;
                 case "Quit":
@@ -313,7 +313,7 @@ namespace Evelynn_Bot
         {
             if (Process.GetProcessesByName("LeagueClient").Length == 1)
             {
-                itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                itsInterface2.ProcessController.SuspendLeagueUx();
                 itsInterface2.lcuPlugins.KillUXAsync();
                 itsInterface2.dashboardHelper.UpdateLolStatus("In Lobby", itsInterface2);
                 var searchState = await itsInterface2.lcuPlugins.GetSearchState();
@@ -374,7 +374,7 @@ namespace Evelynn_Bot
                         itsInterface2.lcuPlugins.KillUXAsync();
                         if (Process.GetProcessesByName("LeagueClient").Length == 1)
                         {
-                            itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                            itsInterface2.ProcessController.SuspendLeagueUx();
                             itsInterface2.newQueue.CreateLobby(itsInterface2);
                             StartMatchmaking();
                         }
@@ -390,7 +390,7 @@ namespace Evelynn_Bot
                     case "ChampSelect":
                         state = "Champ Select [Ignore this message if game is started!]";
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
-                        itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                        itsInterface2.ProcessController.SuspendLeagueUx();
                         BugTime = 0;
                         await Task.Delay(1500);
                         itsInterface2.lcuPlugins.KillUXAsync();
@@ -419,7 +419,7 @@ namespace Evelynn_Bot
                         state = "Match Found";
                         itsInterface2.dashboardHelper.UpdateLolStatus("In Queue", itsInterface2);
                         itsInterface2.lcuPlugins.KillUXAsync();
-                        itsInterface2.ProcessController.SuspendLeagueUx(itsInterface2);
+                        itsInterface2.ProcessController.SuspendLeagueUx();
                         GameAiBool = true;
                         BugTime = 0;
 
