@@ -66,7 +66,7 @@ namespace Evelynn_Bot.Account_Process
 
                 Thread.Sleep(3000);
                 //itsInterface.clientKiller.KillRiotUx();
-                itsInterface.ProcessController.SuspendRiotUx(itsInterface);
+                //itsInterface.ProcessController.SuspendRiotUx(itsInterface);
                 return itsInterface.Result(true, itsInterface.messages.SuccessStartLeague);
             }
             catch (Exception ex6)
@@ -138,7 +138,9 @@ namespace Evelynn_Bot.Account_Process
                     itsInterface.clientKiller.RestartAndExit(itsInterface);
                 }
                 //itsInterface.clientKiller.KillRiotUx();
-                itsInterface.ProcessController.SuspendLeagueUx();
+                //itsInterface.clientKiller.KillRiotClientUx();
+                //itsInterface.ProcessController.SuspendLeagueUx();
+                //itsInterface.clientKiller.KillRiotClientUx();
 
                 //BURDA LOOPA GİRİYOR BU ASLAK KOD
                 //try
@@ -152,7 +154,8 @@ namespace Evelynn_Bot.Account_Process
                 //}
 
                 await Task.Delay(15000);
-                itsInterface.clientKiller.KillRiotUx();
+                //itsInterface.clientKiller.KillRiotUx();
+                //itsInterface.clientKiller.KillRiotClientUx();
                 try
                 {
                     await itsInterface.lcuPlugins.LeagueProductSelect();

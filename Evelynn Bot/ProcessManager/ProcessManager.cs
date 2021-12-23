@@ -242,7 +242,7 @@ namespace Evelynn_Bot.ProcessManager
                             await accountProcess.CheckNewAccount(itsInterface);
                         }
 
-                        itsInterface.clientKiller.KillRiotUx();
+                        //itsInterface.clientKiller.KillRiotUx();
 
                         itsInterface.ProcessController.SuspendLeagueUx();
 

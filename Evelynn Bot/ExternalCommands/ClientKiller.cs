@@ -59,6 +59,12 @@ namespace Evelynn_Bot.ExternalCommands
             Thread.Sleep(5000);
         }
 
+        public void KillRiotClientUx()
+        {
+            Process[] processesByName = Process.GetProcessesByName("RiotClientUx");
+            foreach (Process process1 in processesByName) { try { WIN32.TerminateProcess(process1.Handle, 1u); } catch { /* ignored */ } }
+        }
+
         public void KillRiotUx()
         {
             Process[] processesByName = Process.GetProcessesByName("RiotClientUx");
