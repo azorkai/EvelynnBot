@@ -1825,16 +1825,16 @@ namespace Evelynn_Bot.GameAI
             itsInterface.clientKiller.KillAllLeague();
             itsInterface.clientKiller.RestartAndExit(itsInterface);
         }
+
+        //Lolün geç başlaması durumunda bir den fazla AI tetikleniyor olabilir, yapıyı kaldırdım. (Test Lazım)
         public void YeniAIBaslat(Interface itsInterface)
         {
             try
             {
                 itsInterface.logger.Log(true, "Starting NEW AI");
 
-                Thread.Sleep(75000);
+                Thread.Sleep(95000);
 
-                if (Process.GetProcessesByName("League of Legends").Length == 1)
-                {
                     itsInterface.logger.Log(true, "League Game has Found");
                     itsInterface.newQueue._playAgain = true;
                     isGameEnd = false;
@@ -1865,106 +1865,105 @@ namespace Evelynn_Bot.GameAI
                     itsInterface.clientKiller.ActivateGame(); // Bring Game To The Front
                     WaitUntilGameStart(itsInterface); // Wait Until the game loads
                     StartNewGameAI(itsInterface); // Finally, Start The Game AI
-                }
-                else
-                {
-                    //TODO: Recursive kaldır.
-                    //Recursive çok var. eğer sistem çalışıyorsa optimize edilcek.
-                    itsInterface.logger.Log(false, "League Game is not found.");
-                    itsInterface.newQueue.GameAiBool = true;
+                
+                //{
+                //    //TODO: Recursive kaldır.
+                //    //Recursive çok var. eğer sistem çalışıyorsa optimize edilcek.
+                //    itsInterface.logger.Log(false, "League Game is not found.");
+                //    itsInterface.newQueue.GameAiBool = true;
 
-                    //Eğer socketten gelen bilgi oyunun başladığına işaret etmiyorsa ama lol yine de açıksa AI başlat.
-                    if (itsInterface.newQueue.state != "Game in Progress")
-                    {
-                        if (itsInterface.newQueue.state != "Game Started")
-                        {
-                            if (Process.GetProcessesByName("League of Legends").Length == 1)
-                            {
-                                itsInterface.logger.Log(true, "API shows that game is not started but League Game is available.");
-                                YeniAIBaslat(itsInterface);
-                            }
-                        }
-                    }
+                //    //Eğer socketten gelen bilgi oyunun başladığına işaret etmiyorsa ama lol yine de açıksa AI başlat.
+                //    if (itsInterface.newQueue.state != "Game in Progress")
+                //    {
+                //        if (itsInterface.newQueue.state != "Game Started")
+                //        {
+                //            if (Process.GetProcessesByName("League of Legends").Length == 1)
+                //            {
+                //                itsInterface.logger.Log(true, "API shows that game is not started but League Game is available.");
+                //                YeniAIBaslat(itsInterface);
+                //            }
+                //        }
+                //    }
 
-                    //Eğer socketten gelen bilgi oyunun başladığı yönünde ise biraz daha delay ekle.
-                    if (itsInterface.newQueue.state == "Game in Progress" || itsInterface.newQueue.state == "Game Started")
-                    {
+                //    //Eğer socketten gelen bilgi oyunun başladığı yönünde ise biraz daha delay ekle.
+                //    if (itsInterface.newQueue.state == "Game in Progress" || itsInterface.newQueue.state == "Game Started")
+                //    {
 
-                        if (Process.GetProcessesByName("League of Legends").Length == 0)
-                        {
-                            itsInterface.logger.Log(true, "Waiting for The League - GameProgress/GameStarted");
+                //        if (Process.GetProcessesByName("League of Legends").Length == 0)
+                //        {
+                //            itsInterface.logger.Log(true, "Waiting for The League - GameProgress/GameStarted");
 
-                            Thread.Sleep(65000);
+                //            Thread.Sleep(65000);
 
-                            if (Process.GetProcessesByName("League of Legends").Length == 1)
-                            {
-                                YeniAIBaslat(itsInterface);
-                            }
-                            else
-                            {
-                                itsInterface.logger.Log(false, "Waited too much, restarting...");
-                                Restart(itsInterface);
-                            }
-                        }
+                //            if (Process.GetProcessesByName("League of Legends").Length == 1)
+                //            {
+                //                YeniAIBaslat(itsInterface);
+                //            }
+                //            else
+                //            {
+                //                itsInterface.logger.Log(false, "Waited too much, restarting...");
+                //                Restart(itsInterface);
+                //            }
+                //        }
 
-                        //TODO: Belirli sayıda buraya gelindiyse yeniden başlat.
-                        else
-                        {
-                            YeniAIBaslat(itsInterface);
-                        }
-                    }
+                //        //TODO: Belirli sayıda buraya gelindiyse yeniden başlat.
+                //        else
+                //        {
+                //            YeniAIBaslat(itsInterface);
+                //        }
+                //    }
 
-                    //Eğer socketten gelen bilgi "Reconnect" ise biraz daha delay ekle
-                    if (itsInterface.newQueue.state == "Reconnect")
-                    {
-                        itsInterface.logger.Log(true, "Reconnect State has found");
+                //    //Eğer socketten gelen bilgi "Reconnect" ise biraz daha delay ekle
+                //    if (itsInterface.newQueue.state == "Reconnect")
+                //    {
+                //        itsInterface.logger.Log(true, "Reconnect State has found");
 
-                        if (Process.GetProcessesByName("League of Legends").Length == 0)
-                        {
-                            itsInterface.logger.Log(true, "Waiting for The League - Reconnect");
+                //        if (Process.GetProcessesByName("League of Legends").Length == 0)
+                //        {
+                //            itsInterface.logger.Log(true, "Waiting for The League - Reconnect");
 
-                            Thread.Sleep(65000);
+                //            Thread.Sleep(65000);
 
-                            if (Process.GetProcessesByName("League of Legends").Length == 1)
-                            {
-                                YeniAIBaslat(itsInterface);
-                            }
-                            else
-                            {
-                                itsInterface.logger.Log(false, "Waited too much, restarting...");
-                                Restart(itsInterface);
-                            }
-                        }
-                        else
-                        {
-                            YeniAIBaslat(itsInterface);
-                        }
-                    }
+                //            if (Process.GetProcessesByName("League of Legends").Length == 1)
+                //            {
+                //                YeniAIBaslat(itsInterface);
+                //            }
+                //            else
+                //            {
+                //                itsInterface.logger.Log(false, "Waited too much, restarting...");
+                //                Restart(itsInterface);
+                //            }
+                //        }
+                //        else
+                //        {
+                //            YeniAIBaslat(itsInterface);
+                //        }
+                //    }
 
-                    if (itsInterface.queueId == 2000 || itsInterface.queueId == 2010 || itsInterface.queueId == 2020)
-                    {
-                        if (Process.GetProcessesByName("League of Legends").Length == 0)
-                        {
-                            itsInterface.logger.Log(true, "Waiting for The League - Tutorial: " + itsInterface.queueId);
+                //    if (itsInterface.queueId == 2000 || itsInterface.queueId == 2010 || itsInterface.queueId == 2020)
+                //    {
+                //        if (Process.GetProcessesByName("League of Legends").Length == 0)
+                //        {
+                //            itsInterface.logger.Log(true, "Waiting for The League - Tutorial: " + itsInterface.queueId);
 
-                            Thread.Sleep(65000);
+                //            Thread.Sleep(65000);
 
-                            if (Process.GetProcessesByName("League of Legends").Length == 1)
-                            {
-                                YeniAIBaslat(itsInterface);
-                            }
-                            else
-                            {
-                                itsInterface.logger.Log(false, "Waited too much, restarting...");
-                                Restart(itsInterface);
-                            }
-                        }
-                        else
-                        {
-                            YeniAIBaslat(itsInterface);
-                        }
-                    }
-                }
+                //            if (Process.GetProcessesByName("League of Legends").Length == 1)
+                //            {
+                //                YeniAIBaslat(itsInterface);
+                //            }
+                //            else
+                //            {
+                //                itsInterface.logger.Log(false, "Waited too much, restarting...");
+                //                Restart(itsInterface);
+                //            }
+                //        }
+                //        else
+                //        {
+                //            YeniAIBaslat(itsInterface);
+                //        }
+                //    }
+                //}
 
 
             }
