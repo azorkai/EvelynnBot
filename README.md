@@ -11,8 +11,14 @@ Evelynn Bot relied on the legacy League of Legends API, which is no longer suppo
 
 ---
 
-## 🖼️ Preview
-![Evelynn Bot Preview](https://media.discordapp.net/attachments/738557139957842010/843176879233957929/Hergunbiz.jpg)
+## 🛠️ Bot Functionality
+
+Evelynn Bot operated by automatically leveling up League of Legends accounts. Here’s how it worked:
+
+- **Automated Gameplay**: Accounts added at level 0 via the web dashboard were queued into matches automatically. Using its AI capabilities, the bot played games until the accounts reached level 30 or any desired level.
+- **Multi-Account Processing**: Depending on system resources, the bot could handle up to 20 accounts simultaneously.
+- **Completely Autonomous**: All processes were fully automated, allowing users to manage and track progress effortlessly through a user-friendly dashboard.
+- **Development Challenges**: While the project aimed to streamline account leveling, it was developed over several years with many flaws, limitations, and amateur-level execution.
 
 ---
 
